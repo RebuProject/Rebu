@@ -8,11 +8,14 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Builder
+@DynamicInsert
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Profile {
@@ -29,8 +32,8 @@ public class Profile {
     private Member member;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Type type = Type.COMMON;
+    @ColumnDefault("'COMMON'")
+    private Type type;
 
     @Column(length = 512)
     private String imageSrc;
@@ -38,15 +41,16 @@ public class Profile {
     @Column(length = 256)
     private String introduction;
 
-    @Column(nullable = false)
-    private LocalDateTime recentTime = LocalDateTime.now();
+    //@ColumnDefault("CURRENT_TIMESTAMP")
+    private LocalDateTime recentTime;
 
-    @Column(length = 12, nullable = false)
+    @Column(length = 16, nullable = false)
     private String phone;
 
-    @Column(nullable = false)
-    private Boolean isPrivate = false;
+    @ColumnDefault("false")
+    private Boolean isPrivate;
 
     @Enumerated(EnumType.STRING)
-    private Status status = Status.NORMAL;
+    @ColumnDefault("'NORMAL'")
+    private Status status;
 }

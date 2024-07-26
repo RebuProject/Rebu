@@ -7,12 +7,18 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Builder
+@DynamicInsert
+@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Member {
@@ -27,10 +33,10 @@ public class Member {
     @Column(length = 256)
     private String password;
 
-    private LocalDateTime birth;
+    private LocalDate birth;
 
     @CreatedDate
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime regDate;
 
     @Enumerated(EnumType.STRING)
@@ -41,6 +47,6 @@ public class Member {
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Status status = Status.NORMAL;
+    @ColumnDefault("'NORMAL'")
+    private Status status;
 }

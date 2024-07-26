@@ -2,17 +2,19 @@ package com.rebu.member.controller.dto;
 
 import com.rebu.common.enums.Gender;
 import com.rebu.member.dto.MemberJoinDto;
+import com.rebu.member.validation.annotation.Email;
 import com.rebu.profile.dto.ProfileGenerateDto;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 public class MemberJoinRequest {
+    @Email
     private String email;
     private String password;
     private String name;
-    private LocalDateTime birth;
+    private LocalDate birth;
     private Gender gender;
     private String nickname;
     private String phone;
