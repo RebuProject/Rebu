@@ -3,6 +3,7 @@ package com.rebu.member.controller.dto;
 import com.rebu.common.enums.Gender;
 import com.rebu.member.dto.MemberJoinDto;
 import com.rebu.member.validation.annotation.Email;
+import com.rebu.member.validation.annotation.Password;
 import com.rebu.profile.dto.ProfileGenerateDto;
 import lombok.Getter;
 
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 public class MemberJoinRequest {
     @Email
     private String email;
+    @Password
     private String password;
     private String name;
     private LocalDate birth;
