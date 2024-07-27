@@ -41,7 +41,6 @@ public class Profile {
     @Column(length = 256)
     private String introduction;
 
-    //@ColumnDefault("CURRENT_TIMESTAMP")
     private LocalDateTime recentTime;
 
     @Column(length = 16, nullable = false)
@@ -53,4 +52,14 @@ public class Profile {
     @Enumerated(EnumType.STRING)
     @ColumnDefault("'NORMAL'")
     private Status status;
+
+    @PrePersist
+    protected void onCreate() {
+        recentTime = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        recentTime = LocalDateTime.now();
+    }
 }
