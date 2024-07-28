@@ -3,8 +3,6 @@ package com.rebu.common.security.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rebu.common.controller.dto.ApiResponse;
 import com.rebu.common.security.dto.CustomUserDetails;
-import com.rebu.common.security.entity.RefreshToken;
-import com.rebu.common.security.repository.RefreshTokenRepository;
 import com.rebu.common.security.service.RefreshTokenService;
 import com.rebu.common.security.util.JWTUtil;
 import com.rebu.member.controller.dto.MemberLoginRequest;
@@ -30,7 +28,6 @@ import org.springframework.util.StreamUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {

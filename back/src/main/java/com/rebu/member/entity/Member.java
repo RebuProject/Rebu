@@ -54,4 +54,8 @@ public class Member {
     @Enumerated(EnumType.STRING)
     @ColumnDefault("'ROLE_NORMAL'")
     private Status status;
+
+    public void changePassword(String newPassword) {
+        password = newPassword;
+    }
 }
