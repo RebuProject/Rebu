@@ -1,20 +1,16 @@
 package com.rebu.storage.test;
 
-import com.rebu.common.util.FileUtils;
 import com.rebu.storage.service.StorageService;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class StorageServiceTest {
 
     @Autowired
@@ -26,63 +22,88 @@ public class StorageServiceTest {
         System.out.println("StorageServiceTest Start");
     }
 
-    @DisplayName("File upload Test")
     @Test
-    public void uploadTest() {
+    @Order(0)
+    @DisplayName("File upload Test")
+    public void uploadTest(){
         //given
-        MultipartFile file = new MockMultipartFile("file", "test.txt", "text/plain", "Hello World".getBytes());
-        String destPath = "/images";
-        String destName = "0";
+        String fileName = "1.txt";
+        byte[] data = "Hello World".getBytes();
+        String directory = "/texts";
 
         //when
-        String result = storageService.uploadFile(file, destPath, destName);
+        String result = storageService.uploadFile(fileName, data, directory);
 
         //then
-        assert(result).equals(destPath+"/"+destName+"."+FileUtils.getExtension(file.getName()));
+        assert(result).equals(directory+"/"+fileName);
     }
 
-    @DisplayName("File upload Test")
     @Test
+    @Order(1)
+    @DisplayName("Files upload Test")
     public void uploadFilesTest() {
         //given
-        List<MultipartFile> files = new ArrayList<>();
-        List<String> destNames = new ArrayList<>();
-        destNames.add("2");
-        destNames.add("3");
-        String destPath = "/images";
+        Map<String, byte[]> fileMap = new HashMap<>();
+        fileMap.put("2.txt", "Hello World".getBytes());
+        fileMap.put("3.txt", "Hello World".getBytes());
+        String directory = "/texts";
 
         //when
-        List<String> result = storageService.uploadFiles(files, destPath, destNames);
+        List<String> result = storageService.uploadFiles(fileMap, directory);
 
         //then
-        for(int i=0; i<files.size(); i++)
-            assert(result.get(i)).equals(destPath+"/"+destNames.get(i)+"."+FileUtils.getExtension(files.get(i).getName()));
+        Set<String> set = new HashSet<>(result);
+        for(String fileName : fileMap.keySet())
+            assertTrue(set.contains(directory+"/"+fileName));
     }
 
-    @DisplayName("File remove Test")
     @Test
+    @Order(2)
+    @DisplayName("File remove Test")
     public void removeFile() {
         //given
-        String destFilePath = "/images/0.png";
+        String fileName = "1.txt";
+        String directory = "/texts";
+        uploadTest();
 
         //when
-        String result = storageService.removeFile(destFilePath);
+        String result = storageService.removeFile(fileName, directory);
 
         //then
-        assert(result).equals(destFilePath);
+        assert(result).equals(directory+"/"+fileName);
     }
 
-    @DisplayName("Files remove Test")
     @Test
+    @Order(3)
+    @DisplayName("Files remove Test")
     public void removeFiles() {
         //given
-        String destDirectoryPath = "/images/0.png";
+        List<String> fileNames = new ArrayList<>();
+        fileNames.add("2.txt");
+        fileNames.add("3.txt");
+        String directory = "/texts";
 
         //when
-        String result = storageService.removeFiles(destDirectoryPath);
+        List<String> result = storageService.removeFiles(fileNames, directory);
 
         //then
-        assert(result).equals(destDirectoryPath);
+        Set<String> set = new HashSet<>(result);
+        for(String fileName : fileNames)
+            assertTrue(set.contains(directory+"/"+fileName));
+    }
+
+    @Test
+    @Order(4)
+    @DisplayName("Directory remove Test")
+    public void removeDirectoryTest() {
+        //given
+        String directory = "/texts";
+
+        //when
+        String result = storageService.removeDirectory(directory);
+
+        //then
+        assert(result).equals(directory);
     }
 
     @DisplayName("StorageServiceTest End")
