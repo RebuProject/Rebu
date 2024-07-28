@@ -1,19 +1,17 @@
 package com.rebu.profile.entity;
 
-import com.rebu.common.enums.Status;
+import com.rebu.member.enums.Status;
 import com.rebu.member.entity.Member;
 import com.rebu.profile.enums.Type;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Getter
 @Builder
 @DynamicInsert
 @AllArgsConstructor
@@ -50,7 +48,7 @@ public class Profile {
     private Boolean isPrivate;
 
     @Enumerated(EnumType.STRING)
-    @ColumnDefault("'NORMAL'")
+    @ColumnDefault("'ROLE_NORMAL'")
     private Status status;
 
     @PrePersist

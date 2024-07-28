@@ -1,6 +1,6 @@
 package com.rebu.member.dto;
 
-import com.rebu.common.enums.Gender;
+import com.rebu.member.enums.Gender;
 import com.rebu.member.entity.Member;
 import lombok.Builder;
 import lombok.Getter;

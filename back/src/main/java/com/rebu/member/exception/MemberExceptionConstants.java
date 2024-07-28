@@ -11,7 +11,10 @@ public enum MemberExceptionConstants implements ExceptionConstants {
     PASSWORD_MISMATCH("0001"),
     NAME_MISMATCH("0002"),
     BIRTH_MISMATCH("0003"),
-    GENDER_MISMATCH("0004");
+    GENDER_MISMATCH("0004"),
+    MEMBER_NOTFOUND("0005"),
+    STATUS_DORMANT("0006"),
+    STATUS_DELETED("0007");
 
     final String code;
 }

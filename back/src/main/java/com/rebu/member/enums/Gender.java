@@ -1,4 +1,4 @@
-package com.rebu.common.enums;
+package com.rebu.member.enums;
 
 public enum Gender {
     MALE, FEMALE

@@ -1,6 +1,6 @@
 package com.rebu.member.controller.dto;
 
-import com.rebu.common.enums.Gender;
+import com.rebu.member.enums.Gender;
 import com.rebu.member.dto.MemberJoinDto;
 import com.rebu.member.validation.annotation.Birth;
 import com.rebu.member.validation.annotation.Email;

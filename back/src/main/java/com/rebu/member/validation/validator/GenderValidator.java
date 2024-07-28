@@ -5,15 +5,15 @@ import com.rebu.member.validation.annotation.Gender;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class GenderValidator implements ConstraintValidator<Gender, com.rebu.common.enums.Gender> {
+public class GenderValidator implements ConstraintValidator<Gender, com.rebu.member.enums.Gender> {
 
     @Override
-    public boolean isValid(com.rebu.common.enums.Gender value, ConstraintValidatorContext constraintValidatorContext) {
+    public boolean isValid(com.rebu.member.enums.Gender value, ConstraintValidatorContext constraintValidatorContext) {
         if (value == null) {
             throw new GenderMismatchException();
         }
 
-        for (com.rebu.common.enums.Gender gender : com.rebu.common.enums.Gender.values()) {
+        for (com.rebu.member.enums.Gender gender : com.rebu.member.enums.Gender.values()) {
             if (gender.equals(value)) {
                 return true;
             }
