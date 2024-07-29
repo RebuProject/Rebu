@@ -4,6 +4,8 @@ import com.rebu.common.security.dto.CustomUserDetails;
 import com.rebu.member.entity.Member;
 import com.rebu.member.exception.MemberNotFoundException;
 import com.rebu.member.repository.MemberRepository;
+import com.rebu.profile.entity.Profile;
+import com.rebu.profile.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,12 +17,14 @@ import org.springframework.stereotype.Service;
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final MemberRepository memberRepository;
+    private final ProfileRepository profileRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(MemberNotFoundException::new);
+        Profile profile = profileRepository.findFirstByEmailOrderByRecentTimeDesc(member.getEmail());
 
-        return new CustomUserDetails(member);
+        return new CustomUserDetails(profile);
     }
 }

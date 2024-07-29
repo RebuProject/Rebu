@@ -4,14 +4,18 @@ import com.rebu.member.entity.Member;
 import com.rebu.member.enums.Gender;
 import com.rebu.member.repository.MemberRepository;
 import com.rebu.member.service.MemberService;
+import com.rebu.profile.entity.Profile;
+import com.rebu.profile.enums.Type;
+import com.rebu.profile.repository.ProfileRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 public class MemberServiceTest {
@@ -22,6 +26,12 @@ public class MemberServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private ProfileRepository profileRepository;
+
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
     @Transactional
     @DisplayName("MemberServiceTest Start")
     @BeforeEach
@@ -29,12 +39,21 @@ public class MemberServiceTest {
         System.out.println("MemberServiceTest Start");
         Member member = Member.builder()
                 .email("rebu@naver.com")
-                .password("abcd1234@")
+                .password(bCryptPasswordEncoder.encode("abcd1234@"))
                 .name("원승현")
                 .gender(Gender.MALE)
                 .build();
 
         memberRepository.save(member);
+
+        Profile profile = Profile.builder()
+                .member(member)
+                .type(Type.COMMON)
+                .phone("010-0000-0000")
+                .nickname("wsh1234")
+                .build();
+
+        profileRepository.save(profile);
     }
 
     @Transactional
@@ -60,20 +79,35 @@ public class MemberServiceTest {
         String newPassword = "qwerty12345@";
 
         // when
-        memberService.changePassword(email, newPassword);
+        memberService.changePassword(email, bCryptPasswordEncoder.encode(newPassword));
 
         // then
         Member member = memberRepository.findByEmail(email).get();
-        assertThat(member.getPassword()).isEqualTo(newPassword);
+        assertThat(bCryptPasswordEncoder.matches(newPassword, member.getPassword())).isTrue();
     }
 
     @Transactional
     @DisplayName("사용자 이메일 찾기")
     @Test
-    public void findEmail() {
+    public void getEmail() {
         // given
         String name = "원승현";
         String phone = "010-0000-0000";
+
+        // when
+        String email = memberService.getEmail(name, phone);
+
+        // then
+        assertThat(email).isEqualTo("rebu@naver.com");
+
+    }
+
+    @Transactional
+    @DisplayName("사용자 회원 탈퇴")
+    @Test
+    public void withdrawMember() {
+        // given
+        String nickname = "wsh1234";
 
         // when
 

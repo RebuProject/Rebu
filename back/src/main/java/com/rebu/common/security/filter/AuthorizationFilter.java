@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rebu.common.controller.dto.ApiResponse;
 import com.rebu.common.security.dto.CustomUserDetails;
 import com.rebu.common.security.util.JWTUtil;
-import com.rebu.member.entity.Member;
 import com.rebu.profile.entity.Profile;
 import com.rebu.profile.repository.ProfileRepository;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -24,7 +23,6 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class AuthorizationFilter extends OncePerRequestFilter {
 
-    private final JWTUtil jwtUtil;
     private final ProfileRepository profileRepository;
 
     @Override
@@ -38,7 +36,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         }
 
         try {
-            jwtUtil.isExpired(accessToken);
+            JWTUtil.isExpired(accessToken);
         } catch (ExpiredJwtException e) {
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
@@ -51,7 +49,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String category = jwtUtil.getCategory(accessToken);
+        String category = JWTUtil.getCategory(accessToken);
 
         if (!category.equals("access")) {
             response.setContentType("application/json");
@@ -65,17 +63,17 @@ public class AuthorizationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String nickname = jwtUtil.getNickname(accessToken);
+        String nickname = JWTUtil.getNickname(accessToken);
 
         Profile profile = profileRepository.findByNickname(nickname);
 
-        Member member = Member.builder()
-                .email(profile.getMember().getEmail())
-                .status(profile.getMember().getStatus())
-                .build();
+//        Member member = Member.builder()
+//                .email(profile.getMember().getEmail())
+//                .status(profile.getMember().getStatus())
+//                .build();
 
 
-        CustomUserDetails customUserDetails = new CustomUserDetails(member);
+        CustomUserDetails customUserDetails = new CustomUserDetails(profile);
 
         Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authToken);

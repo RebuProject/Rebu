@@ -35,13 +35,11 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final ProfileRepository profileRepository;
     private final RefreshTokenService refreshTokenService;
-    private final JWTUtil jwtUtil;
 
-    public AuthenticationFilter(AuthenticationManager authenticationManager, ProfileRepository profileRepository, RefreshTokenService refreshTokenService , JWTUtil jwtUtil) {
+    public AuthenticationFilter(AuthenticationManager authenticationManager, ProfileRepository profileRepository, RefreshTokenService refreshTokenService) {
         this.authenticationManager = authenticationManager;
         this.profileRepository = profileRepository;
         this.refreshTokenService = refreshTokenService;
-        this.jwtUtil = jwtUtil;
         setFilterProcessesUrl("/api/login");
     }
 
@@ -87,8 +85,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         String nickname = profile.getNickname();
         String type = profile.getType().toString();
 
-        String access = jwtUtil.createJWT("access", nickname, type, 600000L);
-        String refresh = jwtUtil.createJWT("refresh", nickname, type, 86400000L);
+        String access = JWTUtil.createJWT("access", nickname, type, 600000L);
+        String refresh = JWTUtil.createJWT("refresh", nickname, type, 86400000L);
 
         refreshTokenService.saveRefreshToken(nickname, refresh, 86400000L);
 

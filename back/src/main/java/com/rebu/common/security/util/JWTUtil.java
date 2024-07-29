@@ -13,29 +13,32 @@ import java.util.Date;
 @Component
 public class JWTUtil {
 
-    private SecretKey secretKey;
+    private JWTUtil() {}
 
-    public JWTUtil(@Value("${spring.jwt.secret}") String secret) {
+    private static SecretKey secretKey;
+
+    @Value("${spring.jwt.secret}")
+    public void setSecret(String secret) {
         secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
 
-    public String getCategory(String token) {
+    public static String getCategory(String token) {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("category", String.class);
     }
 
-    public String getNickname(String token) {
+    public static String getNickname(String token) {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("nickname", String.class);
     }
 
-    public String getType(String token) {
+    public static String getType(String token) {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("type", String.class);
     }
 
-    public Boolean isExpired(String token) {
+    public static Boolean isExpired(String token) {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
-    public String createJWT(String category, String nickname, String type, Long expiredTime) {
+    public static String createJWT(String category, String nickname, String type, Long expiredTime) {
         return Jwts.builder()
                 .claim("category", category)
                 .claim("nickname", nickname)

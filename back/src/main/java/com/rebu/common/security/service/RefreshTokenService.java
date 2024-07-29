@@ -19,7 +19,6 @@ import java.util.Date;
 public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
-    private final JWTUtil jwtUtil;
 
     @Transactional
     public void reissue(HttpServletRequest request, HttpServletResponse response) {
@@ -37,12 +36,12 @@ public class RefreshTokenService {
         }
 
         try {
-            jwtUtil.isExpired(refreshToken);
+            JWTUtil.isExpired(refreshToken);
         } catch (ExpiredJwtException e) {
             throw new RefreshInvalidException();
         }
 
-        String category = jwtUtil.getCategory(refreshToken);
+        String category = JWTUtil.getCategory(refreshToken);
         if (!category.equals("refresh")) {
             throw new RefreshInvalidException();
         }
@@ -52,11 +51,11 @@ public class RefreshTokenService {
             throw new RefreshInvalidException();
         }
 
-        String nickname = jwtUtil.getNickname(refreshToken);
-        String type = jwtUtil.getType(refreshToken);
+        String nickname = JWTUtil.getNickname(refreshToken);
+        String type = JWTUtil.getType(refreshToken);
 
-        String newAccess = jwtUtil.createJWT("access", nickname, type, 600000L);
-        String newRefresh = jwtUtil.createJWT("refresh", nickname, type, 86400000L);
+        String newAccess = JWTUtil.createJWT("access", nickname, type, 600000L);
+        String newRefresh = JWTUtil.createJWT("refresh", nickname, type, 86400000L);
 
         refreshTokenRepository.deleteByRefreshToken(refreshToken);
         saveRefreshToken(nickname, newRefresh, 86400000L);

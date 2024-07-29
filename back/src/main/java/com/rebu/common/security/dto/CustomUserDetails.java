@@ -1,6 +1,6 @@
 package com.rebu.common.security.dto;
 
-import com.rebu.member.entity.Member;
+import com.rebu.profile.entity.Profile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,7 +11,8 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
-    private final Member member;
+    //private final Member member;
+    private final Profile profile;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -20,7 +21,7 @@ public class CustomUserDetails implements UserDetails {
         authorities.add(new GrantedAuthority() {
             @Override
             public String getAuthority() {
-                return member.getStatus().toString();
+                return profile.getMember().getStatus().toString();
             }
         });
         return authorities;
@@ -28,16 +29,24 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return member.getPassword();
+        return profile.getMember().getPassword();
     }
 
     @Override
     public String getUsername() {
-        return member.getEmail();
+        return profile.getMember().getEmail();
     }
 
     public String getEmail() {
-        return member.getEmail();
+        return profile.getMember().getEmail();
+    }
+
+    public String getNickname() {
+        return profile.getNickname();
+    }
+
+    public String getType() {
+        return profile.getType().toString();
     }
 
     @Override

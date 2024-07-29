@@ -2,9 +2,7 @@ package com.rebu.common.config;
 
 import com.rebu.common.security.filter.AuthenticationFilter;
 import com.rebu.common.security.filter.AuthorizationFilter;
-import com.rebu.common.security.repository.RefreshTokenRepository;
 import com.rebu.common.security.service.RefreshTokenService;
-import com.rebu.common.security.util.JWTUtil;
 import com.rebu.profile.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -24,7 +22,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
-    private final JWTUtil jwtUtil;
     private final ProfileRepository profileRepository;
     private final RefreshTokenService refreshTokenService;
 
@@ -52,9 +49,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/refresh").permitAll()
                         .anyRequest().authenticated());
         http
-                .addFilterBefore(new AuthorizationFilter(jwtUtil, profileRepository), AuthenticationFilter.class);
+                .addFilterBefore(new AuthorizationFilter(profileRepository), AuthenticationFilter.class);
         http
-                .addFilterAt(new AuthenticationFilter(authenticationManager(authenticationConfiguration), profileRepository, refreshTokenService, jwtUtil), UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(new AuthenticationFilter(authenticationManager(authenticationConfiguration), profileRepository, refreshTokenService), UsernamePasswordAuthenticationFilter.class);
         http
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
