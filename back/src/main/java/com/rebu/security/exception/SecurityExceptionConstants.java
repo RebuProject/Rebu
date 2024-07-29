@@ -1,4 +1,4 @@
-package com.rebu.common.security.exception;
+package com.rebu.security.exception;
 
 import com.rebu.common.exception.ExceptionConstants;
 import lombok.AllArgsConstructor;

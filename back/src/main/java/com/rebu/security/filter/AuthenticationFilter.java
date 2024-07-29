@@ -1,10 +1,10 @@
-package com.rebu.common.security.filter;
+package com.rebu.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rebu.common.controller.dto.ApiResponse;
-import com.rebu.common.security.dto.CustomUserDetails;
-import com.rebu.common.security.service.RefreshTokenService;
-import com.rebu.common.security.util.JWTUtil;
+import com.rebu.security.dto.CustomUserDetails;
+import com.rebu.security.service.RefreshTokenService;
+import com.rebu.security.util.JWTUtil;
 import com.rebu.member.controller.dto.MemberLoginRequest;
 import com.rebu.member.exception.StatusDeletedException;
 import com.rebu.member.exception.StatusDormantException;

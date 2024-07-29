@@ -1,9 +1,9 @@
-package com.rebu.common.security.filter;
+package com.rebu.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rebu.common.controller.dto.ApiResponse;
-import com.rebu.common.security.dto.CustomUserDetails;
-import com.rebu.common.security.util.JWTUtil;
+import com.rebu.security.dto.CustomUserDetails;
+import com.rebu.security.util.JWTUtil;
 import com.rebu.profile.entity.Profile;
 import com.rebu.profile.repository.ProfileRepository;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -66,12 +66,6 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         String nickname = JWTUtil.getNickname(accessToken);
 
         Profile profile = profileRepository.findByNickname(nickname);
-
-//        Member member = Member.builder()
-//                .email(profile.getMember().getEmail())
-//                .status(profile.getMember().getStatus())
-//                .build();
-
 
         CustomUserDetails customUserDetails = new CustomUserDetails(profile);
 

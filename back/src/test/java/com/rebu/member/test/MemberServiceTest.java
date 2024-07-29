@@ -1,5 +1,6 @@
 package com.rebu.member.test;
 
+import com.rebu.auth.dto.AuthDto;
 import com.rebu.member.entity.Member;
 import com.rebu.member.enums.Gender;
 import com.rebu.member.repository.MemberRepository;
@@ -108,8 +109,15 @@ public class MemberServiceTest {
     public void withdrawMember() {
         // given
         String nickname = "wsh1234";
+        AuthDto authDto = AuthDto.builder()
+                .email("rebu@naver.com")
+                .password(bCryptPasswordEncoder.encode("abcd1234@"))
+                .nickname("wsh1234")
+                .type(Type.COMMON)
+                .build();
 
         // when
+        memberService.withdraw(authDto, nickname);
 
         // then
     }

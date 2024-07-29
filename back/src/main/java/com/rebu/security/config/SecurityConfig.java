@@ -1,8 +1,8 @@
-package com.rebu.common.config;
+package com.rebu.security.config;
 
-import com.rebu.common.security.filter.AuthenticationFilter;
-import com.rebu.common.security.filter.AuthorizationFilter;
-import com.rebu.common.security.service.RefreshTokenService;
+import com.rebu.security.filter.AuthenticationFilter;
+import com.rebu.security.filter.AuthorizationFilter;
+import com.rebu.security.service.RefreshTokenService;
 import com.rebu.profile.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

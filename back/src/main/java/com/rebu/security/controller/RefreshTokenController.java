@@ -1,7 +1,7 @@
-package com.rebu.common.security.controller;
+package com.rebu.security.controller;
 
 import com.rebu.common.controller.dto.ApiResponse;
-import com.rebu.common.security.service.RefreshTokenService;
+import com.rebu.security.service.RefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

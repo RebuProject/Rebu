@@ -1,9 +1,9 @@
-package com.rebu.common.security.service;
+package com.rebu.security.service;
 
-import com.rebu.common.security.entity.RefreshToken;
-import com.rebu.common.security.exception.RefreshInvalidException;
-import com.rebu.common.security.repository.RefreshTokenRepository;
-import com.rebu.common.security.util.JWTUtil;
+import com.rebu.security.entity.RefreshToken;
+import com.rebu.security.exception.RefreshInvalidException;
+import com.rebu.security.repository.RefreshTokenRepository;
+import com.rebu.security.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

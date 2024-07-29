@@ -1,4 +1,4 @@
-package com.rebu.common.security.dto;
+package com.rebu.security.dto;
 
 import com.rebu.profile.entity.Profile;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +11,6 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
-    //private final Member member;
     private final Profile profile;
 
     @Override

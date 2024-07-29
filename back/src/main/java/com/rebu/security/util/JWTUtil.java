@@ -1,4 +1,4 @@
-package com.rebu.common.security.util;
+package com.rebu.security.util;
 
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;

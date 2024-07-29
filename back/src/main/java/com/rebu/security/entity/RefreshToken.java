@@ -1,4 +1,4 @@
-package com.rebu.common.security.entity;
+package com.rebu.security.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

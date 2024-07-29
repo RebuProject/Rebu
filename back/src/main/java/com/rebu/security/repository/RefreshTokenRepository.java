@@ -1,6 +1,6 @@
-package com.rebu.common.security.repository;
+package com.rebu.security.repository;
 
-import com.rebu.common.security.entity.RefreshToken;
+import com.rebu.security.entity.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 

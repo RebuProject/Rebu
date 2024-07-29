@@ -1,6 +1,6 @@
-package com.rebu.common.security.service;
+package com.rebu.security.service;
 
-import com.rebu.common.security.dto.CustomUserDetails;
+import com.rebu.security.dto.CustomUserDetails;
 import com.rebu.member.entity.Member;
 import com.rebu.member.exception.MemberNotFoundException;
 import com.rebu.member.repository.MemberRepository;
