@@ -32,32 +32,9 @@ public class EmailAuthService {
 
     private String setContext(String code) {
         return "<html>" +
-                "<head>" +
-                "<style>" +
-                "body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }" +
-                ".email-container { max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 3px rgba(0,0,0,0.1); }" +
-                ".header { background-color: #4CAF50; padding: 20px; border-top-left-radius: 8px; border-top-right-radius: 8px; text-align: center; color: white; }" +
-                ".header h1 { margin: 0; font-size: 24px; }" +
-                ".content { padding: 20px; text-align: center; }" +
-                ".content p { font-size: 18px; color: #333333; }" +
-                ".content .code { font-size: 24px; font-weight: bold; color: #4CAF50; }" +
-                ".footer { background-color: #f4f4f4; padding: 10px; text-align: center; font-size: 12px; color: #888888; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }" +
-                "</style>" +
-                "</head>" +
                 "<body>" +
-                "<div class='email-container'>" +
-                "<div class='header'>" +
                 "<h1>REBU</h1>" +
-                "</div>" +
-                "<div class='content'>" +
-                "<p>안녕하세요,</p>" +
-                "<p>아래 인증번호를 입력하여 인증을 완료해주세요:</p>" +
-                "<p class='code'>" + code + "</p>" +
-                "</div>" +
-                "<div class='footer'>" +
-                "<p>본 이메일은 발신 전용입니다. 문의사항이 있으시면 지원팀에 연락주세요.</p>" +
-                "</div>" +
-                "</div>" +
+                "<p>인증번호는 <strong>" + code + "</strong> 입니다.</p>" +
                 "</body>" +
                 "</html>";
     }
