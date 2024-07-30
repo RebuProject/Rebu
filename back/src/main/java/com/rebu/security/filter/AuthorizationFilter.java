@@ -2,7 +2,8 @@ package com.rebu.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rebu.common.controller.dto.ApiResponse;
-import com.rebu.security.dto.CustomUserDetails;
+import com.rebu.profile.exception.ProfileNotFoundException;
+import com.rebu.security.dto.AuthProfileInfo;
 import com.rebu.security.util.JWTUtil;
 import com.rebu.profile.entity.Profile;
 import com.rebu.profile.repository.ProfileRepository;
@@ -65,11 +66,12 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 
         String nickname = JWTUtil.getNickname(accessToken);
 
-        Profile profile = profileRepository.findByNickname(nickname);
+        Profile profile = profileRepository.findByNickname(nickname)
+                .orElseThrow(ProfileNotFoundException::new);
 
-        CustomUserDetails customUserDetails = new CustomUserDetails(profile);
+        AuthProfileInfo authProfileInfo = new AuthProfileInfo(profile);
 
-        Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+        Authentication authToken = new UsernamePasswordAuthenticationToken(authProfileInfo, null, authProfileInfo.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
         filterChain.doFilter(request, response);

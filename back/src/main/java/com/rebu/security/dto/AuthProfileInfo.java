@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 @RequiredArgsConstructor
-public class CustomUserDetails implements UserDetails {
+public class AuthProfileInfo implements UserDetails {
 
     private final Profile profile;
 

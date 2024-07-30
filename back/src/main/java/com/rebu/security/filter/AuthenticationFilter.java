@@ -2,7 +2,7 @@ package com.rebu.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rebu.common.controller.dto.ApiResponse;
-import com.rebu.security.dto.CustomUserDetails;
+import com.rebu.security.dto.AuthProfileInfo;
 import com.rebu.security.service.RefreshTokenService;
 import com.rebu.security.util.JWTUtil;
 import com.rebu.member.controller.dto.MemberLoginRequest;
@@ -67,7 +67,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-        CustomUserDetails userDetails = (CustomUserDetails) authResult.getPrincipal();
+        AuthProfileInfo userDetails = (AuthProfileInfo) authResult.getPrincipal();
 
         Collection<? extends GrantedAuthority> authorities = authResult.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();

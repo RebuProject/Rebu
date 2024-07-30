@@ -30,7 +30,7 @@ public class Member {
     private Long id;
 
     @OneToMany(mappedBy = "member")
-    private List<Profile> profiles = new ArrayList<>();
+    private final List<Profile> profiles = new ArrayList<>();
 
     @Column(length = 32, nullable = false, unique = true)
     private String email;

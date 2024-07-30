@@ -1,6 +1,6 @@
 package com.rebu.security.service;
 
-import com.rebu.security.dto.CustomUserDetails;
+import com.rebu.security.dto.AuthProfileInfo;
 import com.rebu.member.entity.Member;
 import com.rebu.member.exception.MemberNotFoundException;
 import com.rebu.member.repository.MemberRepository;
@@ -25,6 +25,6 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(MemberNotFoundException::new);
         Profile profile = profileRepository.findFirstByEmailOrderByRecentTimeDesc(member.getEmail());
 
-        return new CustomUserDetails(profile);
+        return new AuthProfileInfo(profile);
     }
 }

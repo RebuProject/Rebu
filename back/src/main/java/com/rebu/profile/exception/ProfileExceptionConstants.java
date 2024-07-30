@@ -9,7 +9,9 @@ import lombok.Getter;
 public enum ProfileExceptionConstants implements ExceptionConstants {
 
     NICKNAME_MISMATCH("0005"),
-    PHONE_MISMATCH("0006");
+    PHONE_MISMATCH("0006"),
+    PROFILE_NOTFOUND("프로필 낫 파운드"),
+    PROFILE_UNAUTHORIZED("프로필 인가 실패");
 
     final String code;
 }
