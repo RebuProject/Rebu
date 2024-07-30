@@ -1,8 +1,8 @@
 package com.rebu.security.service;
 
+import com.rebu.common.util.RedisUtils;
 import com.rebu.security.entity.RefreshToken;
 import com.rebu.security.exception.RefreshInvalidException;
-import com.rebu.security.repository.RefreshTokenRepository;
 import com.rebu.security.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
@@ -12,13 +12,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
 public class RefreshTokenService {
 
-    private final RefreshTokenRepository refreshTokenRepository;
+    private static final String PREFIX = "Refresh:";
+    private final RedisUtils redisUtils;
 
     @Transactional
     public void reissue(HttpServletRequest request, HttpServletResponse response) {
@@ -46,35 +46,39 @@ public class RefreshTokenService {
             throw new RefreshInvalidException();
         }
 
-        Boolean isExist = refreshTokenRepository.existsByRefreshToken(refreshToken);
+        String nickname = JWTUtil.getNickname(refreshToken);
+
+        boolean isExist = redisUtils.existData(generatePrefixedKey(nickname));
         if (!isExist) {
             throw new RefreshInvalidException();
         }
 
-        String nickname = JWTUtil.getNickname(refreshToken);
         String type = JWTUtil.getType(refreshToken);
 
         String newAccess = JWTUtil.createJWT("access", nickname, type, 600000L);
         String newRefresh = JWTUtil.createJWT("refresh", nickname, type, 86400000L);
 
-        refreshTokenRepository.deleteByRefreshToken(refreshToken);
-        saveRefreshToken(nickname, newRefresh, 86400000L);
+        redisUtils.deleteData(generatePrefixedKey(nickname));
+
+        RefreshToken newRefreshToken = RefreshToken.builder()
+                .nickname(nickname)
+                .refreshToken(newRefresh)
+                .build();
+
+        saveRefreshToken(newRefreshToken, 86400000L);
 
         response.setHeader("access", newAccess);
         response.addCookie(createCookie("refresh", newRefresh));
     }
 
     @Transactional
-    public void saveRefreshToken(String nickname, String refresh, Long expired) {
-        Date date = new Date(System.currentTimeMillis() + expired);
+    public void saveRefreshToken(RefreshToken refreshToken, Long expired) {
 
-        RefreshToken refreshToken = RefreshToken.builder()
-                .nickname(nickname)
-                .refreshToken(refresh)
-                .expiration(date.toString())
-                .build();
+        redisUtils.setDataExpire(generatePrefixedKey(refreshToken.getNickname()), refreshToken.getRefreshToken(), expired);
+    }
 
-        refreshTokenRepository.save(refreshToken);
+    private String generatePrefixedKey(String key) {
+        return PREFIX + key;
     }
 
     private Cookie createCookie(String key, String value) {

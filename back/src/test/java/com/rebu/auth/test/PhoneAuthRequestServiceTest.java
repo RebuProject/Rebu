@@ -1,5 +1,6 @@
 package com.rebu.auth.test;
 
+import com.rebu.auth.controller.dto.PhoneAuthRequest;
 import com.rebu.auth.sevice.PhoneAuthService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -9,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
-public class PhoneAuthServiceTest {
+public class PhoneAuthRequestServiceTest {
     @Autowired
     private PhoneAuthService phoneAuthService;
 
@@ -31,11 +32,10 @@ public class PhoneAuthServiceTest {
     @Test
     public void phoneAuthentication() {
         // given
-        String phone = "010-8591-4442";
-        String code = "CeIJzn";
+        PhoneAuthRequest phoneAuthRequest = new PhoneAuthRequest("010-8591-4442", "abcdef");
 
         // when
-        Boolean flag = phoneAuthService.verifyCode(phone, code);
+        Boolean flag = phoneAuthService.verifyCode(phoneAuthRequest.toDto());
 
         // then
         Assertions.assertThat(flag).isFalse();

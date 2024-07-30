@@ -1,5 +1,7 @@
 package com.rebu.auth.sevice;
 
+import com.rebu.auth.controller.dto.MailAuthRequest;
+import com.rebu.auth.dto.MailAuthDto;
 import com.rebu.auth.exception.MailCodeMismatchException;
 import com.rebu.auth.exception.MailSendException;
 import com.rebu.auth.exception.MailSessionNotFoundException;
@@ -26,6 +28,7 @@ public class MailAuthService {
     private final RedisUtils redisUtils;
     private final ResourceLoader resourceLoader;
     private static final String senderEmail = "w01085914442@gmail.com";
+    private static final String PREFIX = "MailAuth:";
 
     private String createCode() {
         int leftLimit = 48; // number '0'
@@ -68,7 +71,7 @@ public class MailAuthService {
             message.setSubject("REBU 인증번호");
             message.setFrom(senderEmail);
             message.setText(emailContent, "utf-8", "html");
-            redisUtils.setDataExpire(email, authCode, 60 * 5L);
+            redisUtils.setDataExpire(generatePrefixedKey(email), authCode, 60 * 5 * 1000L);
             return message;
         } catch (Exception e) {
             throw new MailSendException();
@@ -76,23 +79,27 @@ public class MailAuthService {
     }
 
     public void sendMail(String toEmail, String purpose) {
-        if (redisUtils.existData(toEmail)) {
-            redisUtils.deleteData(toEmail);
+        if (redisUtils.existData(generatePrefixedKey(toEmail))) {
+            redisUtils.deleteData(generatePrefixedKey(toEmail));
         }
         MimeMessage emailForm = createEmailForm(toEmail, purpose);
         javaMailSender.send(emailForm);
     }
 
-    public Boolean verifyEmailCode(String email, String code) {
-        String issuedCode = redisUtils.getData(email);
+    public Boolean verifyEmailCode(MailAuthDto mailAuthDto) {
+        String issuedCode = redisUtils.getData(generatePrefixedKey(mailAuthDto.getEmail()));
         if (issuedCode == null) {
             throw new MailSessionNotFoundException();
         }
 
-        if (!issuedCode.equals(code)) {
+        if (!issuedCode.equals(mailAuthDto.getVerifyCode())) {
             throw new MailCodeMismatchException();
         }
 
         return true;
+    }
+
+    private String generatePrefixedKey(String key) {
+        return PREFIX + key;
     }
 }

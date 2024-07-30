@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @DynamicInsert
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EqualsAndHashCode(of = "id")
 public class Profile {
 
     @Id

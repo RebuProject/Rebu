@@ -3,6 +3,7 @@ package com.rebu.security.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rebu.common.controller.dto.ApiResponse;
 import com.rebu.security.dto.AuthProfileInfo;
+import com.rebu.security.entity.RefreshToken;
 import com.rebu.security.service.RefreshTokenService;
 import com.rebu.security.util.JWTUtil;
 import com.rebu.member.controller.dto.MemberLoginRequest;
@@ -74,9 +75,9 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         GrantedAuthority auth = iterator.next();
         String status = auth.getAuthority();
 
-        if (status.equals("DORMANT")) {
+        if (status.equals("ROLE_DORMANT")) {
             throw new StatusDormantException();
-        } else if (status.equals("DELETED")) {
+        } else if (status.equals("ROLE_DELETED")) {
             throw new StatusDeletedException();
         }
 
@@ -88,7 +89,12 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         String access = JWTUtil.createJWT("access", nickname, type, 600000L);
         String refresh = JWTUtil.createJWT("refresh", nickname, type, 86400000L);
 
-        refreshTokenService.saveRefreshToken(nickname, refresh, 86400000L);
+        RefreshToken refreshToken = RefreshToken.builder()
+                .nickname(nickname)
+                .refreshToken(refresh)
+                .build();
+
+        refreshTokenService.saveRefreshToken(refreshToken, 86400000L);
 
         response.setHeader("access", access);
         response.addCookie(createCookie("refresh", refresh));

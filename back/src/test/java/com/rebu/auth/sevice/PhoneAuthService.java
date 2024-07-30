@@ -1,5 +1,7 @@
 package com.rebu.auth.sevice;
 
+import com.rebu.auth.controller.dto.PhoneAuthRequest;
+import com.rebu.auth.dto.PhoneAuthDto;
 import com.rebu.auth.exception.PhoneCodeMismatchException;
 import com.rebu.auth.exception.PhoneSessionNotFoundException;
 import com.rebu.common.util.RedisUtils;
@@ -18,6 +20,7 @@ public class PhoneAuthService {
     private final DefaultMessageService messageService;
     private final RedisUtils redisUtils;
 
+    private static final String PREFIX = "PhoneAuth:";
     private static final String senderPhone = "01085914442";
 
     private String createCode() {
@@ -34,29 +37,32 @@ public class PhoneAuthService {
     }
 
     public void sendMessage(String phone) {
-        if (redisUtils.existData(phone)) {
-            redisUtils.deleteData(phone);
+        if (redisUtils.existData(generatePrefixedKey(phone))) {
+            redisUtils.deleteData(generatePrefixedKey(phone));
         }
         String authCode = createCode();
         Message message = new Message();
         message.setFrom(senderPhone);
         message.setTo(phone);
         message.setText(authCode);
-        redisUtils.setDataExpire(phone, authCode, 60 * 5L);
+        redisUtils.setDataExpire(generatePrefixedKey(phone), authCode, 60 * 5 * 1000L);
 
         messageService.sendOne(new SingleMessageSendingRequest(message));
     }
 
-    public Boolean verifyCode(String phone, String code) {
-        String issuedCode = redisUtils.getData(phone);
-        System.out.println(issuedCode);
+    public Boolean verifyCode(PhoneAuthDto phoneAuthDto) {
+        String issuedCode = redisUtils.getData(generatePrefixedKey(phoneAuthDto.getPhone()));
         if (issuedCode == null) {
             throw new PhoneSessionNotFoundException();
         }
 
-        if (!issuedCode.equals(code)) {
+        if (!issuedCode.equals(phoneAuthDto.getVerifyCode())) {
             throw new PhoneCodeMismatchException();
         }
         return true;
+    }
+
+    private String generatePrefixedKey(String key) {
+        return PREFIX + key;
     }
 }

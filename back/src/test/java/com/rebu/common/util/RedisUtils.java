@@ -23,7 +23,7 @@ public class RedisUtils {
 
     public void setDataExpire(String key, String value, long duration) {
         ValueOperations<String, String> ops = template.opsForValue();
-        Duration expireDuration = Duration.ofSeconds(duration);
+        Duration expireDuration = Duration.ofMillis(duration);
         ops.set(key, value, expireDuration);
     }
 
