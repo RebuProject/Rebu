@@ -1,4 +1,4 @@
-/*
+package com.rebu.storage.test;/*
 package com.rebu.storage.test;
 
 import com.rebu.storage.service.StorageService;

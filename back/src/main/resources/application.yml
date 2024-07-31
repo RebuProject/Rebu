@@ -5,11 +5,11 @@ spring:
     include: secret
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-#  sql:
-#    init:
-#      data-locations: classpath:data.sql
-#      encoding: UTF-8
-#      mode: always
+  sql:
+    init:
+      data-locations: classpath:data.sql
+      encoding: UTF-8
+      mode: always
   jpa:
     defer-datasource-initialization: true
     hibernate:
@@ -23,3 +23,11 @@ spring:
     redis:
       host: redis
       port: 6379
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 10MB
+
+feed:
+  cnt_image_max_limit: 5
+  storage_base_url: "/feeds"
