@@ -23,7 +23,7 @@ public class MemberService {
     private final RedisUtils redisUtils;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    private static final String KEY = "signup:";
+    private static final String PURPOSE = "signup:";
 
     @Transactional
     public void join(MemberJoinDto memberJoinDto, ProfileGenerateDto profileGenerateDto) {
@@ -70,9 +70,9 @@ public class MemberService {
     }
 
     private Boolean checkSignupPreAuth(MemberJoinDto memberJoinDto, ProfileGenerateDto profileGenerateDto) {
-        Boolean emailCheck = redisUtils.existData(KEY + "CheckEmail:" + memberJoinDto.getEmail());
-        Boolean phoneAuth = redisUtils.existData(KEY + "PhoneAuth:" + profileGenerateDto.getPhone());
-        Boolean emailAuth = redisUtils.existData(KEY + "EmailAuth:" + memberJoinDto.getEmail());
+        Boolean emailCheck = redisUtils.existData(PURPOSE + "CheckEmail:" + memberJoinDto.getEmail());
+        Boolean phoneAuth = redisUtils.existData(PURPOSE + "PhoneAuth:" + profileGenerateDto.getPhone());
+        Boolean emailAuth = redisUtils.existData(PURPOSE + "EmailAuth:" + memberJoinDto.getEmail());
         // 닉네임 중복 검사
         // 전화번호 중복 검사
         return true;
