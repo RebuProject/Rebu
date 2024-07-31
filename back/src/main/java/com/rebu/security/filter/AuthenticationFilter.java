@@ -2,15 +2,15 @@ package com.rebu.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rebu.common.controller.dto.ApiResponse;
-import com.rebu.security.dto.AuthProfileInfo;
-import com.rebu.security.entity.RefreshToken;
-import com.rebu.security.service.RefreshTokenService;
-import com.rebu.security.util.JWTUtil;
 import com.rebu.member.controller.dto.MemberLoginRequest;
 import com.rebu.member.exception.StatusDeletedException;
 import com.rebu.member.exception.StatusDormantException;
 import com.rebu.profile.entity.Profile;
 import com.rebu.profile.repository.ProfileRepository;
+import com.rebu.security.dto.AuthProfileInfo;
+import com.rebu.security.entity.RefreshToken;
+import com.rebu.security.service.RefreshTokenService;
+import com.rebu.security.util.JWTUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletInputStream;
@@ -98,27 +98,13 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         response.setHeader("access", access);
         response.addCookie(createCookie("refresh", refresh));
-        response.setStatus(HttpStatus.OK.value());
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-
-        ApiResponse<?> apiResponse = new ApiResponse<>("로그인 성공 코드", null);
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonResponse = objectMapper.writeValueAsString(apiResponse);
-        response.getWriter().write(jsonResponse);
+        setResponse(response, "로그인 성공 코드");
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
 
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.setStatus(HttpStatus.OK.value());
-
-        ApiResponse<?> apiResponse = new ApiResponse<>("로그인 에러 코드", null);
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonResponse = objectMapper.writeValueAsString(apiResponse);
-        response.getWriter().write(jsonResponse);
+        setResponse(response, "로그인 에러 코드");
     }
 
     private Cookie createCookie(String key, String value) {
@@ -127,5 +113,16 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         cookie.setHttpOnly(true);
 
         return cookie;
+    }
+
+    private void setResponse(HttpServletResponse response, String code) throws IOException {
+        response.setStatus(HttpStatus.OK.value());
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        ApiResponse<?> apiResponse = new ApiResponse<>(code, null);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonResponse = objectMapper.writeValueAsString(apiResponse);
+        response.getWriter().write(jsonResponse);
     }
 }

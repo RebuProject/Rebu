@@ -1,6 +1,5 @@
 package com.rebu.member.service;
 
-import com.rebu.auth.dto.AuthDto;
 import com.rebu.auth.sevice.PasswordAuthService;
 import com.rebu.member.entity.Member;
 import com.rebu.member.exception.FindEmailFailException;
@@ -49,10 +48,10 @@ public class MemberService {
         return member.getEmail();
     }
 
-    @Transactional
-    public void withdraw(AuthDto authDto, String nickname) {
-        // 비밀번호 인증
-        //authService.passwordAuthenticate();
-
-    }
+//    @Transactional
+//    public void withdraw(AuthDto authDto, String nickname) {
+//        // 비밀번호 인증
+//        //authService.passwordAuthenticate();
+//
+//    }
 }

@@ -10,4 +10,6 @@ public interface ProfileRepository extends JpaRepository<Profile, Long>, Profile
 
     @EntityGraph(attributePaths = {"member"})
     Optional<Profile> findByNickname(String nickname);
+
+    Optional<Profile> findByPhone(String phone);
 }

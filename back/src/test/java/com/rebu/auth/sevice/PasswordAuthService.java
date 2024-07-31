@@ -4,7 +4,6 @@ import com.rebu.auth.dto.AuthDto;
 import com.rebu.auth.dto.PasswordAuthDto;
 import com.rebu.auth.exception.AuthPurposeInvalidException;
 import com.rebu.auth.exception.PasswordAutFailException;
-import com.rebu.member.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,6 @@ public class PasswordAuthService {
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     private final List<String> acceptedPurposes = new ArrayList<>(Arrays.asList("withdrawal", "profile-delete"));
-
 
     @Transactional
     public boolean passwordAuthenticate(AuthDto authDto, PasswordAuthDto passwordAuthDto) {

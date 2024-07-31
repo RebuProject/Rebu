@@ -39,29 +39,13 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         try {
             JWTUtil.isExpired(accessToken);
         } catch (ExpiredJwtException e) {
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.setStatus(HttpStatus.OK.value());
-
-            ApiResponse<?> apiResponse = new ApiResponse<>("Access 토큰 만료 에러 코드", null);
-            ObjectMapper objectMapper = new ObjectMapper();
-            String jsonResponse = objectMapper.writeValueAsString(apiResponse);
-            response.getWriter().write(jsonResponse);
-            return;
+            setResponse(response, "Access 토큰 만료 에러 코드");
         }
 
         String category = JWTUtil.getCategory(accessToken);
 
         if (!category.equals("access")) {
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.setStatus(HttpStatus.OK.value());
-
-            ApiResponse<?> apiResponse = new ApiResponse<>("Access 토큰 카테고리 불일치 에러 코드", null);
-            ObjectMapper objectMapper = new ObjectMapper();
-            String jsonResponse = objectMapper.writeValueAsString(apiResponse);
-            response.getWriter().write(jsonResponse);
-            return;
+            setResponse(response, "Access 토큰 카테고리 불일치 에러 코드");
         }
 
         String nickname = JWTUtil.getNickname(accessToken);
@@ -75,6 +59,17 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
         filterChain.doFilter(request, response);
+    }
+
+    private void setResponse(HttpServletResponse response, String code) throws IOException {
+        response.setStatus(HttpStatus.OK.value());
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        ApiResponse<?> apiResponse = new ApiResponse<>(code, null);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonResponse = objectMapper.writeValueAsString(apiResponse);
+        response.getWriter().write(jsonResponse);
     }
 
 }

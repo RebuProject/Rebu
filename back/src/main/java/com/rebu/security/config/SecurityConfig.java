@@ -1,9 +1,11 @@
 package com.rebu.security.config;
 
+import com.rebu.common.util.RedisUtils;
+import com.rebu.profile.repository.ProfileRepository;
 import com.rebu.security.filter.AuthenticationFilter;
 import com.rebu.security.filter.AuthorizationFilter;
+import com.rebu.security.filter.CustomLogoutFilter;
 import com.rebu.security.service.RefreshTokenService;
-import com.rebu.profile.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +17,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -24,6 +27,7 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final ProfileRepository profileRepository;
     private final RefreshTokenService refreshTokenService;
+    private final RedisUtils redisUtils;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -50,6 +54,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated());
         http
                 .addFilterBefore(new AuthorizationFilter(profileRepository), AuthenticationFilter.class);
+        http
+                .addFilterBefore(new CustomLogoutFilter(redisUtils), LogoutFilter.class);
         http
                 .addFilterAt(new AuthenticationFilter(authenticationManager(authenticationConfiguration), profileRepository, refreshTokenService), UsernamePasswordAuthenticationFilter.class);
         http

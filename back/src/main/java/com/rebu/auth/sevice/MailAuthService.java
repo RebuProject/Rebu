@@ -1,6 +1,7 @@
 package com.rebu.auth.sevice;
 
 import com.rebu.auth.dto.MailAuthDto;
+import com.rebu.auth.dto.MailSendDto;
 import com.rebu.auth.exception.MailCodeMismatchException;
 import com.rebu.auth.exception.MailSendException;
 import com.rebu.auth.exception.MailSessionNotFoundException;
@@ -77,11 +78,12 @@ public class MailAuthService {
         }
     }
 
-    public void sendMail(String toEmail, String purpose) {
-        if (redisUtils.existData(generatePrefixedKey(toEmail))) {
-            redisUtils.deleteData(generatePrefixedKey(toEmail));
+    public void sendMail(MailSendDto mailSendDto) {
+
+        if (redisUtils.existData(generatePrefixedKey(mailSendDto.getEmail()))) {
+            redisUtils.deleteData(generatePrefixedKey(mailSendDto.getEmail()));
         }
-        MimeMessage emailForm = createEmailForm(toEmail, purpose);
+        MimeMessage emailForm = createEmailForm(mailSendDto.getEmail(), mailSendDto.getPurpose());
         javaMailSender.send(emailForm);
     }
 
@@ -94,11 +96,17 @@ public class MailAuthService {
         if (!issuedCode.equals(mailAuthDto.getVerifyCode())) {
             throw new MailCodeMismatchException();
         }
+        redisUtils.deleteData(generatePrefixedKey(mailAuthDto.getEmail()));
 
+        redisUtils.setDataExpire(generateForAuthKey(mailAuthDto), "success", 60 * 15 * 1000L);
         return true;
     }
 
     private String generatePrefixedKey(String key) {
         return PREFIX + key;
+    }
+
+    private String generateForAuthKey(MailAuthDto mailAuthDto) {
+        return mailAuthDto.getPurpose() + ":MailAuth:" + mailAuthDto.getEmail();
     }
 }

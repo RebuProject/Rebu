@@ -14,7 +14,8 @@ public enum MemberExceptionConstants implements ExceptionConstants {
     GENDER_MISMATCH("0004"),
     MEMBER_NOTFOUND("0005"),
     STATUS_DORMANT("0006"),
-    STATUS_DELETED("0007");
+    STATUS_DELETED("0007"),
+    FIND_EMAIL_FAIL("이메일 찾기 실패");
 
     final String code;
 }
