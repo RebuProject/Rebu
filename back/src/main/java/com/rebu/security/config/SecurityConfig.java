@@ -51,6 +51,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/api/login", "/api/members").permitAll()
                         .requestMatchers("/api/refresh").permitAll()
+                        .requestMatchers("/api/auths/email/*", "/api/auths/phone/*", "/api/profiles/check-nickname", "/api/profiles/check-phone", "/api/members/check-email", "/api/members/*/password").permitAll()
                         .anyRequest().authenticated());
         http
                 .addFilterBefore(new AuthorizationFilter(profileRepository), AuthenticationFilter.class);

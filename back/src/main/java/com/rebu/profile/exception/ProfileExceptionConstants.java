@@ -8,10 +8,13 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ProfileExceptionConstants implements ExceptionConstants {
 
-    NICKNAME_MISMATCH("0005"),
-    PHONE_MISMATCH("0006"),
+    NICKNAME_MISMATCH("닉네임 형식 불일치"),
+    PHONE_MISMATCH("폰 형식 불일치"),
     PROFILE_NOTFOUND("프로필 낫 파운드"),
-    PROFILE_UNAUTHORIZED("프로필 인가 실패");
+    PROFILE_UNAUTHORIZED("프로필 인가 실패"),
+    PHONE_DUPLICATE("번호 중복 검사 재실시"),
+    PHONE_NOT_VERIFIED("번호 미인증"),
+    NICKNAME_DUPLICATE("닉네임 중복 검사 재실시");
 
     final String code;
 }

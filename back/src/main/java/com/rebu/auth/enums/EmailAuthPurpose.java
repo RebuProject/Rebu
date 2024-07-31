@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum EmailAuthPurpose {
-    SIGNUP("signup"), CHANGE_PASSWORD("change-password");
+    SIGNUP("signup"), CHANGE_PASSWORD("changePassword");
 
     final String purpose;
 }
