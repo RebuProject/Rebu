@@ -52,6 +52,14 @@ public class Profile {
     @ColumnDefault("'ROLE_NORMAL'")
     private Status status;
 
+    public void changeNickname(String newNickname) {
+        nickname = newNickname;
+    }
+
+    public void changeIntro(String newIntroduction) {
+        introduction = newIntroduction;
+    }
+
     @PrePersist
     protected void onCreate() {
         recentTime = LocalDateTime.now();

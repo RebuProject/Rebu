@@ -25,9 +25,12 @@ public class RefreshTokenService {
         String refreshToken = null;
         Cookie[] cookies = request.getCookies();
 
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("refresh")) {
-                refreshToken = cookie.getValue();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("refresh")) {
+                    refreshToken = cookie.getValue();
+                    break; // 쿠키를 찾았으면 반복 종료
+                }
             }
         }
 

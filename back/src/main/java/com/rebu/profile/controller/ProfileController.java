@@ -1,17 +1,19 @@
 package com.rebu.profile.controller;
 
 import com.rebu.common.controller.dto.ApiResponse;
+import com.rebu.profile.dto.ProfileChangeIntroDto;
+import com.rebu.profile.dto.ProfileChangeNicknameDto;
 import com.rebu.profile.service.ProfileService;
 import com.rebu.profile.validation.annotation.Nickname;
 import com.rebu.profile.validation.annotation.NicknameCheckPurpose;
 import com.rebu.profile.validation.annotation.Phone;
 import com.rebu.profile.validation.annotation.PhoneCheckPurpose;
+import com.rebu.security.dto.AuthProfileInfo;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,6 +32,18 @@ public class ProfileController {
     public ResponseEntity<?> checkPhone(@Phone @RequestParam String phone, @PhoneCheckPurpose @RequestParam String purpose) {
         Boolean isExist = profileService.checkPhoneDuplicated(phone, purpose);
         return ResponseEntity.ok(new ApiResponse<>("전화번호 중복 검사 성공 코드", isExist));
+    }
+
+    @PatchMapping("/{nickname}/nickname")
+    public ResponseEntity<?> updateNickname(@AuthenticationPrincipal AuthProfileInfo authProfileInfo, @Valid @RequestBody ProfileChangeNicknameDto profileChangeNicknameDto) {
+        profileService.changeNickname(authProfileInfo.getNickname(), profileChangeNicknameDto);
+        return ResponseEntity.ok(new ApiResponse<>("닉네임 변경 완료 코드", null));
+    }
+
+    @PatchMapping("/{nickname}/introduction")
+    public ResponseEntity<?> updateIntro(@AuthenticationPrincipal AuthProfileInfo authProfileInfo, @Valid @RequestBody ProfileChangeIntroDto profileChangeIntroDto) {
+        profileService.changeIntro(authProfileInfo.getNickname(), profileChangeIntroDto);
+        return ResponseEntity.ok(new ApiResponse<>("프로필 소개 변경 완료 코드", null));
     }
 
 }

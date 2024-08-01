@@ -2,9 +2,12 @@ package com.rebu.profile.service;
 
 import com.rebu.common.service.RedisService;
 import com.rebu.member.entity.Member;
+import com.rebu.profile.dto.ProfileChangeIntroDto;
+import com.rebu.profile.dto.ProfileChangeNicknameDto;
 import com.rebu.profile.dto.ProfileDto;
 import com.rebu.profile.dto.ProfileGenerateDto;
 import com.rebu.profile.entity.Profile;
+import com.rebu.profile.exception.NicknameDuplicateException;
 import com.rebu.profile.exception.ProfileNotFoundException;
 import com.rebu.profile.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +51,30 @@ public class ProfileService {
         redisService.setDataExpire(purpose + ":PhoneCheck:" + phone, "success", 60 * 15 * 1000L);
         return false;
     }
+
+    @Transactional
+    public void changeNickname(String oldNickname, ProfileChangeNicknameDto profileChangeNicknameDto) {
+
+        if (!checkNicknameDuplicatedState("changeNickname", profileChangeNicknameDto.getNickname())) {
+            throw new NicknameDuplicateException();
+        }
+
+        Profile profile = profileRepository.findByNickname(oldNickname)
+                .orElseThrow(ProfileNotFoundException::new);
+
+        profile.changeNickname(profileChangeNicknameDto.getNickname());
+
+        redisService.deleteData("changeNickname:NicknameCheck:" + profileChangeNicknameDto.getNickname());
+    }
+
+    @Transactional
+    public void changeIntro(String nickname, ProfileChangeIntroDto profileChangeIntroDto) {
+        Profile profile = profileRepository.findByNickname(nickname)
+                .orElseThrow(ProfileNotFoundException::new);
+
+        profile.changeIntro(profileChangeIntroDto.getIntroduction());
+    }
+
 
     public Boolean checkPhoneDuplicatedState(String purpose, String phone) {
         String key = purpose + ":PhoneCheck:" + phone;
