@@ -4,6 +4,7 @@ import com.rebu.common.validation.annotation.NotNull;
 import com.rebu.feed.entity.Feed;
 import com.rebu.feed.validation.annotation.FeedContent;
 import com.rebu.feed.validation.annotation.FeedImages;
+import com.rebu.feed.validation.annotation.Hashtags;
 import com.rebu.profile.entity.Profile;
 import com.rebu.profile.validation.annotation.Nickname;
 import lombok.Builder;
@@ -23,6 +24,8 @@ public class FeedCreateByShopDto {
     private String nickname;
     @FeedContent
     private String content;
+    @Hashtags
+    private List<String> hashtags;
 
     public Feed toEntity(Profile writer) {
         return Feed.builder()

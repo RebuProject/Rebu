@@ -3,6 +3,7 @@ package com.rebu.feed.dto;
 import com.rebu.common.validation.annotation.NotNull;
 import com.rebu.feed.validation.annotation.FeedContent;
 import com.rebu.feed.validation.annotation.FeedImages;
+import com.rebu.feed.validation.annotation.Hashtags;
 import com.rebu.profile.validation.annotation.Nickname;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,4 +22,6 @@ public class FeedModifyDto {
     private List<MultipartFile> images;
     @FeedContent
     private String content;
+    @Hashtags
+    private List<String> hashtags;
 }

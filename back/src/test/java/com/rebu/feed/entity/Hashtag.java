@@ -7,13 +7,16 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class FeedImage {
+@NoArgsConstructor
+public class Hashtag {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne
     @JoinColumn(name = "feed_id")
     private Feed feed;
-    private String src;
+
+    private String tag;
+
 }

@@ -1,6 +1,7 @@
 package com.rebu.feed.validation.annotation;
 
 import com.rebu.feed.validation.validator.FeedRegSelectsValidator;
+import com.rebu.feed.validation.validator.HashtagsValidator;
 import jakarta.validation.Constraint;
 
 import java.lang.annotation.ElementType;
@@ -10,9 +11,9 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = FeedRegSelectsValidator.class)
-public @interface FeedRegSelects {
-    String message() default "피드 등록 선택";
+@Constraint(validatedBy = HashtagsValidator.class)
+public @interface Hashtags {
+    String message() default "해시 태그";
     Class[] groups() default {};
     Class[] payload() default {};
 }

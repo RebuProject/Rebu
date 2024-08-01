@@ -2,13 +2,11 @@ package com.rebu.feed.service;
 
 
 import com.rebu.common.aop.annotation.Authorized;
-import com.rebu.feed.dto.FeedCreateByEmployeeDto;
-import com.rebu.feed.dto.FeedCreateByShopDto;
-import com.rebu.feed.dto.FeedDeleteDto;
-import com.rebu.feed.dto.FeedModifyDto;
+import com.rebu.feed.dto.*;
 import com.rebu.feed.entity.Feed;
 import com.rebu.feed.exception.FeedNotFoundException;
 import com.rebu.feed.repository.FeedRepository;
+import com.rebu.feed.repository.HashtagRepository;
 import com.rebu.profile.employee.entity.EmployeeProfile;
 import com.rebu.profile.employee.repository.EmployeeProfileRepository;
 import com.rebu.profile.entity.Profile;
@@ -20,7 +18,6 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
@@ -30,8 +27,10 @@ public class FeedService {
 
     private final FeedRepository feedRepository;
     private final FeedImageService feedImageService;
+    private final HashtagService hashtagService;
     private final ProfileRepository profileRepository;
     private final EmployeeProfileRepository employeeProfileRepository;
+    private final HashtagRepository hashtagRepository;
 
     @Transactional
     @Authorized(allowed = Type.EMPLOYEE)
@@ -42,6 +41,7 @@ public class FeedService {
         if(regSelects.contains("EMPLOYEE")){
             Feed feed = feedRepository.save(dto.toEntity(profile, profile, Feed.Type.NONE));
             feedImageService.createFeedImages(dto.getImages(), feed);
+            hashtagService.createHashTags(dto.getHashtags(), feed);
         }
 
         if(regSelects.contains("SHOP")){
@@ -51,6 +51,7 @@ public class FeedService {
                 throw new ProfileUnauthorizedException();
             Feed feed = feedRepository.save(dto.toEntity(profile, employeeProfile.getShop(), Feed.Type.NONE));
             feedImageService.createFeedImages(dto.getImages(), feed);
+            hashtagService.createHashTags(dto.getHashtags(), feed);
         }
     }
 
@@ -60,6 +61,7 @@ public class FeedService {
         Profile profile = profileRepository.findByNickname(dto.getNickname()).orElseThrow(ProfileNotFoundException::new);
         Feed feed = feedRepository.save(dto.toEntity(profile));
         feedImageService.createFeedImages(dto.getImages(), feed);
+        hashtagService.createHashTags(dto.getHashtags(), feed);
     }
 
     @Transactional
@@ -70,6 +72,8 @@ public class FeedService {
         checkPermission(profile, feed);
         feedImageService.deleteFeedImages(feed.getId());
         feedImageService.createFeedImages(dto.getImages(), feed);
+        hashtagService.deleteHashTags(feed.getId());
+        hashtagService.createHashTags(dto.getHashtags(), feed);
         feed.changeContent(dto.getContent());
     }
 
@@ -80,6 +84,7 @@ public class FeedService {
         Feed feed = feedRepository.findById(dto.getFeedId()).orElseThrow(FeedNotFoundException::new);
         checkPermission(profile, feed);
         feedImageService.deleteFeedImages(feed.getId());
+        hashtagService.deleteHashTags(feed.getId());
         feedRepository.delete(feed);
     }
 
@@ -93,4 +98,9 @@ public class FeedService {
                 throw new ProfileUnauthorizedException();
         }
     }
+
+    public List<HashtagCountDto> searchHashtagsCount(String keyword) {
+        return hashtagRepository.countHashtagsByPrefix(keyword);
+    }
+
 }

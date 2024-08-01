@@ -41,6 +41,9 @@ public class Feed {
     @OneToMany(mappedBy = "feed", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private final List<FeedImage> feedImages = new ArrayList<>();
 
+    @OneToMany(mappedBy = "feed", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private final List<Hashtag> hashtags = new ArrayList<>();
+
     @CreatedDate
     private LocalDateTime createdAt;
 

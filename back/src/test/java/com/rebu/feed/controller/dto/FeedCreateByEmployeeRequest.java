@@ -5,6 +5,7 @@ import com.rebu.feed.dto.FeedCreateByEmployeeDto;
 import com.rebu.feed.validation.annotation.FeedContent;
 import com.rebu.feed.validation.annotation.FeedImages;
 import com.rebu.feed.validation.annotation.FeedRegSelects;
+import com.rebu.feed.validation.annotation.Hashtags;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +21,8 @@ public class FeedCreateByEmployeeRequest {
     private String content;
     @FeedRegSelects
     private List<String> regSelects;
+    @Hashtags
+    private List<String> hashtags;
 
     public FeedCreateByEmployeeDto toDto(String nickname) {
         return FeedCreateByEmployeeDto.builder()
@@ -27,6 +30,7 @@ public class FeedCreateByEmployeeRequest {
                 .nickname(nickname)
                 .content(this.content)
                 .regSelects(this.regSelects)
+                .hashtags(this.hashtags)
                 .build();
     }
 }

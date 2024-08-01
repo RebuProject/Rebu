@@ -14,7 +14,6 @@ import com.rebu.security.dto.AuthProfileInfo;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -62,4 +61,10 @@ public class FeedController {
                 .build());
         return ResponseEntity.ok().body(new ApiResponse<>("1P02", null));
     }
+
+    @GetMapping("/search-hashtags")
+    public ResponseEntity<?> searchHashtagsCount(@RequestParam(required = true) String keyword) {
+        return ResponseEntity.ok().body(new ApiResponse<>("1P03", feedService.searchHashtagsCount(keyword)));
+    }
+
 }
