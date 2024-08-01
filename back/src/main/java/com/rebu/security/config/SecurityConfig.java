@@ -49,9 +49,9 @@ public class SecurityConfig {
                 .httpBasic((auth) -> auth.disable());
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/api/login", "/api/members").permitAll()
-                        .requestMatchers("/api/refresh").permitAll()
-                        .requestMatchers("/api/auths/email/*", "/api/auths/phone/*", "/api/profiles/check-nickname", "/api/profiles/check-phone", "/api/members/check-email", "/api/members/*/password", "/api/members/find-email").permitAll()
+                        .requestMatchers("/login", "/members").permitAll()
+                        .requestMatchers("/refresh").permitAll()
+                        .requestMatchers("/auths/email/*", "/auths/phone/*", "/profiles/check-nickname", "/profiles/check-phone", "/members/check-email", "/members/*/password", "/members/find-email").permitAll()
                         .anyRequest().authenticated());
         http
                 .addFilterBefore(new AuthorizationFilter(profileRepository), AuthenticationFilter.class);

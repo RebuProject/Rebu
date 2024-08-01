@@ -32,7 +32,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
     private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
-        if (!requestURI.equals("/api/logout")) {
+        if (!requestURI.equals("/auths/logout")) {
             chain.doFilter(request, response);
             return;
         }
