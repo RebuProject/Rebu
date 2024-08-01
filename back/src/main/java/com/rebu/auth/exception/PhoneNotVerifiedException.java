@@ -1,9 +1,9 @@
-package com.rebu.profile.exception;
+package com.rebu.auth.exception;
 
 import com.rebu.common.exception.CustomException;
 
 public class PhoneNotVerifiedException extends CustomException {
     public PhoneNotVerifiedException() {
-        super(ProfileExceptionConstants.PHONE_NOT_VERIFIED);
+        super(AuthExceptionConstants.PHONE_NOT_VERIFIED);
     }
 }

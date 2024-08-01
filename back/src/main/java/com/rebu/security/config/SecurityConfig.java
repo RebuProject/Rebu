@@ -1,6 +1,6 @@
 package com.rebu.security.config;
 
-import com.rebu.common.util.RedisUtils;
+import com.rebu.common.service.RedisService;
 import com.rebu.profile.repository.ProfileRepository;
 import com.rebu.security.filter.AuthenticationFilter;
 import com.rebu.security.filter.AuthorizationFilter;
@@ -27,7 +27,7 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final ProfileRepository profileRepository;
     private final RefreshTokenService refreshTokenService;
-    private final RedisUtils redisUtils;
+    private final RedisService redisService;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -51,12 +51,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/api/login", "/api/members").permitAll()
                         .requestMatchers("/api/refresh").permitAll()
-                        .requestMatchers("/api/auths/email/*", "/api/auths/phone/*", "/api/profiles/check-nickname", "/api/profiles/check-phone", "/api/members/check-email", "/api/members/*/password").permitAll()
+                        .requestMatchers("/api/auths/email/*", "/api/auths/phone/*", "/api/profiles/check-nickname", "/api/profiles/check-phone", "/api/members/check-email", "/api/members/*/password", "/api/members/find-email").permitAll()
                         .anyRequest().authenticated());
         http
                 .addFilterBefore(new AuthorizationFilter(profileRepository), AuthenticationFilter.class);
         http
-                .addFilterBefore(new CustomLogoutFilter(redisUtils), LogoutFilter.class);
+                .addFilterBefore(new CustomLogoutFilter(redisService), LogoutFilter.class);
         http
                 .addFilterAt(new AuthenticationFilter(authenticationManager(authenticationConfiguration), profileRepository, refreshTokenService), UsernamePasswordAuthenticationFilter.class);
         http

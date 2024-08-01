@@ -1,6 +1,6 @@
 package com.rebu.security.service;
 
-import com.rebu.common.util.RedisUtils;
+import com.rebu.common.service.RedisService;
 import com.rebu.security.entity.RefreshToken;
 import com.rebu.security.exception.RefreshInvalidException;
 import com.rebu.security.util.JWTUtil;
@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class RefreshTokenService {
 
     private static final String PREFIX = "Refresh:";
-    private final RedisUtils redisUtils;
+    private final RedisService redisService;
 
     @Transactional
     public void reissue(HttpServletRequest request, HttpServletResponse response) {
@@ -48,7 +48,7 @@ public class RefreshTokenService {
 
         String nickname = JWTUtil.getNickname(refreshToken);
 
-        boolean isExist = redisUtils.existData(generatePrefixedKey(nickname));
+        boolean isExist = redisService.existData(generatePrefixedKey(nickname));
         if (!isExist) {
             throw new RefreshInvalidException();
         }
@@ -58,7 +58,7 @@ public class RefreshTokenService {
         String newAccess = JWTUtil.createJWT("access", nickname, type, 600000L);
         String newRefresh = JWTUtil.createJWT("refresh", nickname, type, 86400000L);
 
-        redisUtils.deleteData(generatePrefixedKey(nickname));
+        redisService.deleteData(generatePrefixedKey(nickname));
 
         RefreshToken newRefreshToken = RefreshToken.builder()
                 .nickname(nickname)
@@ -74,7 +74,7 @@ public class RefreshTokenService {
     @Transactional
     public void saveRefreshToken(RefreshToken refreshToken, Long expired) {
 
-        redisUtils.setDataExpire(generatePrefixedKey(refreshToken.getNickname()), refreshToken.getRefreshToken(), expired);
+        redisService.setDataExpire(generatePrefixedKey(refreshToken.getNickname()), refreshToken.getRefreshToken(), expired);
     }
 
     private String generatePrefixedKey(String key) {

@@ -3,8 +3,6 @@ package com.rebu.security.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rebu.common.controller.dto.ApiResponse;
 import com.rebu.member.controller.dto.MemberLoginRequest;
-import com.rebu.member.exception.StatusDeletedException;
-import com.rebu.member.exception.StatusDormantException;
 import com.rebu.profile.entity.Profile;
 import com.rebu.profile.repository.ProfileRepository;
 import com.rebu.security.dto.AuthProfileInfo;
@@ -76,9 +74,11 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         String status = auth.getAuthority();
 
         if (status.equals("ROLE_DORMANT")) {
-            throw new StatusDormantException();
+            setResponse(response, "휴면 사용자 입니다");
+            return;
         } else if (status.equals("ROLE_DELETED")) {
-            throw new StatusDeletedException();
+            setResponse(response, "탈퇴한 회원입니다.");
+            return;
         }
 
         Profile profile = profileRepository.findFirstByEmailOrderByRecentTimeDesc(userDetails.getEmail());

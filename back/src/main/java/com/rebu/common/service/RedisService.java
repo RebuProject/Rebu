@@ -1,4 +1,4 @@
-package com.rebu.common.util;
+package com.rebu.common.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -9,7 +9,7 @@ import java.time.Duration;
 
 @Service
 @RequiredArgsConstructor
-public class RedisUtils {
+public class RedisService {
     private final StringRedisTemplate template;
 
     public String getData(String key) {

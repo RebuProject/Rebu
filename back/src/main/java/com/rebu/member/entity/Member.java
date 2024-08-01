@@ -58,4 +58,8 @@ public class Member {
     public void changePassword(String newPassword) {
         password = newPassword;
     }
+
+    public void changeStatus(Status newStatus) {
+        status = newStatus;
+    }
 }

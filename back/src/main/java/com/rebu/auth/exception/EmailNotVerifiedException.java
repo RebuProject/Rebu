@@ -1,9 +1,9 @@
-package com.rebu.member.exception;
+package com.rebu.auth.exception;
 
 import com.rebu.common.exception.CustomException;
 
 public class EmailNotVerifiedException extends CustomException {
     public EmailNotVerifiedException() {
-        super(MemberExceptionConstants.EMAIL_NOT_VERIFIED);
+        super(AuthExceptionConstants.EMAIL_NOT_VERIFIED);
     }
 }

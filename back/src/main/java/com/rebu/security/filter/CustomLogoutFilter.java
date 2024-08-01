@@ -2,7 +2,7 @@ package com.rebu.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rebu.common.controller.dto.ApiResponse;
-import com.rebu.common.util.RedisUtils;
+import com.rebu.common.service.RedisService;
 import com.rebu.security.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -23,7 +23,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
     private static final String PREFIX = "Refresh:";
 
-    private final RedisUtils redisUtils;
+    private final RedisService redisService;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -70,13 +70,13 @@ public class CustomLogoutFilter extends GenericFilterBean {
         }
 
         String nickname = JWTUtil.getNickname(refreshToken);
-        boolean isExist = redisUtils.existData(generatePrefixedKey(nickname));
+        boolean isExist = redisService.existData(generatePrefixedKey(nickname));
         if (!isExist) {
             setResponse(response, "리프레시 에러코드");
             return;
         }
 
-        redisUtils.deleteData(generatePrefixedKey(nickname));
+        redisService.deleteData(generatePrefixedKey(nickname));
 
         Cookie cookie = new Cookie("refresh", null);
         cookie.setMaxAge(0);

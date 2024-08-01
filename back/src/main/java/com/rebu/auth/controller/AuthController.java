@@ -28,7 +28,7 @@ public class AuthController {
 
     @PostMapping("/password/verify")
     public ResponseEntity<?> verifyPassword(@AuthenticationPrincipal AuthProfileInfo authDto, @RequestBody PasswordSendDto passwordSendDto) {
-        passwordAuthService.passwordAuthenticate(authDto, passwordSendDto);
+        passwordAuthService.verifyPassword(authDto, passwordSendDto);
         return ResponseEntity.ok(new ApiResponse<>("비밀번호 인증 성공 코드", null));
     }
 
@@ -52,13 +52,14 @@ public class AuthController {
 
     @PostMapping("/phone/verify")
     public ResponseEntity<?> verifyMessage(@Valid @RequestBody PhoneAuthDto phoneAuthDto) {
-        phoneAuthService.verifyCode(phoneAuthDto);
+        phoneAuthService.verifyMessageCode(phoneAuthDto);
         return ResponseEntity.ok(new ApiResponse<>("전화번호 인증 성공 코드", null));
     }
 
     @PostMapping("/license/verify")
-    public ResponseEntity<?> verifyLicenseNum(@RequestBody LicenseNumSendDto licenseNumSendDto) {
+    public ResponseEntity<?> verifyLicenseNum(@Valid @RequestBody LicenseNumSendDto licenseNumSendDto) {
         LicenseNumAuthResult result = licenseNumAuthService.verifyLicenceNum(licenseNumSendDto);
         return ResponseEntity.ok(new ApiResponse<>("사업자 등록번호 인증 성공 코드", result));
     }
+
 }

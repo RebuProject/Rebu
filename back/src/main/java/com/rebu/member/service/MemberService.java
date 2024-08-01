@@ -1,16 +1,29 @@
 package com.rebu.member.service;
 
-import com.rebu.common.util.RedisUtils;
-import com.rebu.member.dto.MemberJoinDto;
+import com.rebu.auth.exception.EmailNotVerifiedException;
+import com.rebu.auth.exception.PasswordNotVerifiedException;
+import com.rebu.auth.exception.PhoneNotVerifiedException;
+import com.rebu.auth.sevice.MailAuthService;
+import com.rebu.auth.sevice.PasswordAuthService;
+import com.rebu.auth.sevice.PhoneAuthService;
+import com.rebu.common.service.RedisService;
 import com.rebu.member.dto.MemberChangePasswordDto;
+import com.rebu.member.dto.MemberJoinDto;
 import com.rebu.member.entity.Member;
-import com.rebu.member.exception.*;
+import com.rebu.member.enums.Status;
+import com.rebu.member.exception.EmailDuplicateException;
+import com.rebu.member.exception.FindEmailFailException;
+import com.rebu.member.exception.MemberNotFoundException;
 import com.rebu.member.repository.MemberRepository;
 import com.rebu.profile.dto.ProfileDto;
 import com.rebu.profile.dto.ProfileGenerateDto;
+import com.rebu.profile.entity.Profile;
+import com.rebu.profile.enums.Type;
 import com.rebu.profile.exception.NicknameDuplicateException;
 import com.rebu.profile.exception.PhoneDuplicateException;
-import com.rebu.profile.exception.PhoneNotVerifiedException;
+import com.rebu.profile.exception.ProfileNotFoundException;
+import com.rebu.profile.exception.ProfileUnauthorizedException;
+import com.rebu.profile.repository.ProfileRepository;
 import com.rebu.profile.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -23,10 +36,13 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final ProfileService profileService;
-    private final RedisUtils redisUtils;
+    private final ProfileRepository profileRepository;
+    private final MailAuthService mailAuthService;
+    private final PhoneAuthService phoneAuthService;
+    private final PasswordAuthService passwordAuthService;
+    private final RedisService redisService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    private static final String PURPOSE = "signup:";
 
     @Transactional
     public void join(MemberJoinDto memberJoinDto, ProfileGenerateDto profileGenerateDto) {
@@ -35,25 +51,26 @@ public class MemberService {
             String encodedPassword = bCryptPasswordEncoder.encode(memberJoinDto.getPassword());
             Member savedMember = memberRepository.save(memberJoinDto.toEntity(encodedPassword));
             profileService.generateProfile(profileGenerateDto, savedMember);
+
+            deleteAuthInfo(memberJoinDto, profileGenerateDto);
         }
-        deleteAuthInfo(memberJoinDto, profileGenerateDto);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Boolean checkEmailDuplicated(String email, String purpose) {
 
        if (memberRepository.findByEmail(email).isPresent()) {
            return true;
        }
-       redisUtils.setDataExpire(purpose + ":MailCheck:" + email, "success", 60 * 15 * 1000L);
+       redisService.setDataExpire(purpose + ":MailCheck:" + email, "success", 60 * 15 * 1000L);
        return false;
     }
 
     @Transactional
     public void changePassword(String email, MemberChangePasswordDto memberChangePasswordDto) {
 
-        if (!redisUtils.existData("changePassword:MailAuth:" +email)) {
-            throw new EmailNotVerifiedException();
+        if (!mailAuthService.checkEmailAuthState("changePassword", email)) {
+             throw new EmailNotVerifiedException();
         }
 
         Member member = memberRepository.findByEmail(email)
@@ -61,11 +78,15 @@ public class MemberService {
 
         member.changePassword(bCryptPasswordEncoder.encode(memberChangePasswordDto.getPassword()));
 
-        redisUtils.deleteData("changePassword:MailAuth:" +email);
+        redisService.deleteData("changePassword:MailAuth:" +email);
     }
 
     @Transactional
-    public String getEmail(String name, String phone) {
+    public String findEmail(String name, String phone) {
+
+        if (!phoneAuthService.checkPhoneAuthState("findEmail", phone)) {
+            throw new PhoneNotVerifiedException();
+        }
 
         ProfileDto profileDto = profileService.getProfileByPhone(phone);
         Member member = memberRepository.findById(profileDto.getMemberId())
@@ -75,33 +96,59 @@ public class MemberService {
             throw new FindEmailFailException();
         }
 
+        redisService.deleteData("findEmail:PhoneAuth:" + phone);
+
         return member.getEmail();
     }
 
-    private Boolean checkSignupPreAuth(MemberJoinDto memberJoinDto, ProfileGenerateDto profileGenerateDto) {
-        boolean emailCheck = redisUtils.existData(PURPOSE + "MailCheck:" + memberJoinDto.getEmail());
-        boolean emailAuth = redisUtils.existData(PURPOSE + "MailAuth:" + memberJoinDto.getEmail());
-        boolean phoneCheck = redisUtils.existData(PURPOSE + "PhoneCheck:" + profileGenerateDto.getPhone());
-        boolean phoneAuth = redisUtils.existData(PURPOSE + "PhoneAuth:" + profileGenerateDto.getPhone());
-        boolean nicknameCheck = redisUtils.existData(PURPOSE + "NicknameCheck:" + profileGenerateDto.getNickname());
+    @Transactional
+    public void withdraw(String nickname) {
+       Profile profile = profileRepository.findByNickname(nickname)
+               .orElseThrow(ProfileNotFoundException::new);
 
-        if (!emailCheck) {
+        if (!profile.getType().equals(Type.COMMON)) {
+            throw new ProfileUnauthorizedException();
+        }
+
+        if (!passwordAuthService.checkPasswordAuthState("withdrawal", nickname)) {
+            throw new PasswordNotVerifiedException();
+        }
+
+        Member member = profile.getMember();
+
+        member.changeStatus(Status.ROLE_DELETED);
+
+        profileRepository.deleteProfileByMemberId(member.getId());
+
+        redisService.deleteData("withdrawal:PasswordAuth:" + nickname);
+    }
+
+    public Boolean checkEmailDuplicatedState(String purpose, String email) {
+        String key = purpose + ":MailCheck:" + email;
+        return redisService.existData(key);
+    }
+
+    private Boolean checkSignupPreAuth(MemberJoinDto memberJoinDto, ProfileGenerateDto profileGenerateDto) {
+
+        String purpose = "signup";
+
+        if (!checkEmailDuplicatedState(purpose, memberJoinDto.getEmail())) {
             throw new EmailDuplicateException();
         }
 
-        if (!emailAuth) {
+        if (!mailAuthService.checkEmailAuthState(purpose, memberJoinDto.getEmail())) {
             throw new EmailNotVerifiedException();
         }
 
-        if (!phoneCheck) {
+        if (!profileService.checkPhoneDuplicatedState(purpose, profileGenerateDto.getPhone())) {
             throw new PhoneDuplicateException();
         }
 
-        if (!phoneAuth) {
+        if (!phoneAuthService.checkPhoneAuthState(purpose, profileGenerateDto.getPhone())) {
             throw new PhoneNotVerifiedException();
         }
 
-        if (!nicknameCheck) {
+        if (!profileService.checkNicknameDuplicatedState(purpose, profileGenerateDto.getNickname())) {
             throw new NicknameDuplicateException();
         }
 
@@ -109,11 +156,12 @@ public class MemberService {
     }
 
     private void deleteAuthInfo(MemberJoinDto memberJoinDto, ProfileGenerateDto profileGenerateDto) {
-        redisUtils.deleteData(PURPOSE + "MailCheck:" + memberJoinDto.getEmail());
-        redisUtils.deleteData(PURPOSE + "MailAuth:" + memberJoinDto.getEmail());
-        redisUtils.deleteData(PURPOSE + "PhoneCheck:" + profileGenerateDto.getPhone());
-        redisUtils.deleteData(PURPOSE + "PhoneAuth:" + profileGenerateDto.getPhone());
-        redisUtils.deleteData(PURPOSE + "NicknameCheck:" + profileGenerateDto.getNickname());
+        String purpose = "signup";
+        redisService.deleteData(purpose + ":MailCheck:" + memberJoinDto.getEmail());
+        redisService.deleteData(purpose + ":MailAuth:" + memberJoinDto.getEmail());
+        redisService.deleteData(purpose + ":PhoneCheck:" + profileGenerateDto.getPhone());
+        redisService.deleteData(purpose + ":PhoneAuth:" + profileGenerateDto.getPhone());
+        redisService.deleteData(purpose + ":NicknameCheck:" + profileGenerateDto.getNickname());
     }
 
 }

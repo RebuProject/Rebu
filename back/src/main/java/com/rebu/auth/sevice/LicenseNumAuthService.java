@@ -3,6 +3,8 @@ package com.rebu.auth.sevice;
 import com.rebu.auth.dto.LicenseNumAuthResult;
 import com.rebu.auth.dto.LicenseNumSendDto;
 import com.rebu.auth.exception.LicenceNumInvalidException;
+import com.rebu.common.service.RedisService;
+import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -12,7 +14,10 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 
 @Service
+@RequiredArgsConstructor
 public class LicenseNumAuthService {
+
+    private final RedisService redisService;
 
     public LicenseNumAuthResult verifyLicenceNum(LicenseNumSendDto licenseNumSendDto) {
         String URL = "https://bizno.net/article/" + licenseNumSendDto.getLicenseNum();
@@ -34,6 +39,8 @@ public class LicenseNumAuthService {
             if (shopName.isEmpty()) {
                 throw new LicenceNumInvalidException();
             }
+
+            redisService.setDataExpire(licenseNumSendDto.getPurpose() + ":LicenseNumAuth:" + licenseNumSendDto.getLicenseNum(), "success", 60 * 10 * 1000L);
 
             return LicenseNumAuthResult.builder()
                     .shopName(shopName)

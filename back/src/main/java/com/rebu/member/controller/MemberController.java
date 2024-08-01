@@ -6,6 +6,9 @@ import com.rebu.member.dto.MemberChangePasswordDto;
 import com.rebu.member.service.MemberService;
 import com.rebu.member.validation.annotation.Email;
 import com.rebu.member.validation.annotation.EmailCheckPurpose;
+import com.rebu.member.validation.annotation.Name;
+import com.rebu.profile.validation.annotation.Nickname;
+import com.rebu.profile.validation.annotation.Phone;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -34,5 +37,17 @@ public class MemberController {
     public ResponseEntity<?> changePassword(@PathVariable String email, @Valid @RequestBody MemberChangePasswordDto memberChangePasswordDto) {
         memberService.changePassword(email, memberChangePasswordDto);
         return ResponseEntity.ok(new ApiResponse<>("비밀번호 변경 성공 코드", null));
+    }
+
+    @GetMapping("/find-email")
+    public ResponseEntity<?> findEmail(@Name @RequestParam String name, @Phone @RequestParam String phone) {
+        String email = memberService.findEmail(name, phone);
+        return ResponseEntity.ok(new ApiResponse<>("이메일 찾기 성공 코드", email));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<?> delete(@Nickname @RequestParam String nickname) {
+        memberService.withdraw(nickname);
+        return ResponseEntity.ok(new ApiResponse<>("회원 탈퇴 성공 코드", null));
     }
 }

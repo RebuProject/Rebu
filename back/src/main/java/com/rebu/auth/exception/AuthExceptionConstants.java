@@ -15,7 +15,10 @@ public enum AuthExceptionConstants implements ExceptionConstants {
     MAIL_CODE_MISMATCH("이메일 인증 코드 불일치"),
     PHONE_CODE_MISMATCH("전화번호 인증 코드 불일치"),
     PHONE_SESSION_NOTFOUND("폰 인증 세션 없음"),
-    LICENCE_NUM_INVALID("사업자 번호 유효하지 않음");
+    LICENCE_NUM_INVALID("사업자 번호 유효하지 않음"),
+    EMAIL_NOT_VERIFIED("이메일 미인증"),
+    PHONE_NOT_VERIFIED("번호 미인증"),
+    PASSWORD_NOT_VERIFIED("비밀번호 미인증");
 
     final String code;
 }

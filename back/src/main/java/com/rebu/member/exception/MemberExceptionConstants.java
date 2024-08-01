@@ -16,8 +16,7 @@ public enum MemberExceptionConstants implements ExceptionConstants {
     STATUS_DORMANT("휴면 계정"),
     STATUS_DELETED("삭제된 계정"),
     FIND_EMAIL_FAIL("이메일 찾기 실패"),
-    EMAIL_DUPLICATE("이메일 중복 검사 재실시"),
-    EMAIL_NOT_VERIFIED("이메일 미인증");
+    EMAIL_DUPLICATE("이메일 중복 검사 재실시");
 
     final String code;
 }

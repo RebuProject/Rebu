@@ -4,7 +4,7 @@ import com.rebu.auth.dto.PhoneAuthDto;
 import com.rebu.auth.dto.PhoneSendDto;
 import com.rebu.auth.exception.PhoneCodeMismatchException;
 import com.rebu.auth.exception.PhoneSessionNotFoundException;
-import com.rebu.common.util.RedisUtils;
+import com.rebu.common.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import net.nurigo.sdk.message.model.Message;
 import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
@@ -18,7 +18,7 @@ import java.util.Random;
 public class PhoneAuthService {
 
     private final DefaultMessageService messageService;
-    private final RedisUtils redisUtils;
+    private final RedisService redisService;
 
     private static final String PREFIX = "PhoneAuth:";
     private static final String senderPhone = "01085914442";
@@ -37,21 +37,21 @@ public class PhoneAuthService {
     }
 
     public void sendMessage(PhoneSendDto phoneSendDto) {
-        if (redisUtils.existData(generatePrefixedKey(phoneSendDto.getPhone()))) {
-            redisUtils.deleteData(generatePrefixedKey(phoneSendDto.getPhone()));
+        if (redisService.existData(generatePrefixedKey(phoneSendDto.getPhone()))) {
+            redisService.deleteData(generatePrefixedKey(phoneSendDto.getPhone()));
         }
         String authCode = createCode();
         Message message = new Message();
         message.setFrom(senderPhone);
         message.setTo(phoneSendDto.getPhone());
         message.setText(authCode);
-        redisUtils.setDataExpire(generatePrefixedKey(phoneSendDto.getPhone()), authCode, 60 * 5 * 1000L);
+        redisService.setDataExpire(generatePrefixedKey(phoneSendDto.getPhone()), authCode, 60 * 5 * 1000L);
 
         messageService.sendOne(new SingleMessageSendingRequest(message));
     }
 
-    public Boolean verifyCode(PhoneAuthDto phoneAuthDto) {
-        String issuedCode = redisUtils.getData(generatePrefixedKey(phoneAuthDto.getPhone()));
+    public Boolean verifyMessageCode(PhoneAuthDto phoneAuthDto) {
+        String issuedCode = redisService.getData(generatePrefixedKey(phoneAuthDto.getPhone()));
         if (issuedCode == null) {
             throw new PhoneSessionNotFoundException();
         }
@@ -59,10 +59,15 @@ public class PhoneAuthService {
         if (!issuedCode.equals(phoneAuthDto.getVerifyCode())) {
             throw new PhoneCodeMismatchException();
         }
-        redisUtils.deleteData(generatePrefixedKey(phoneAuthDto.getPhone()));
+        redisService.deleteData(generatePrefixedKey(phoneAuthDto.getPhone()));
 
-        redisUtils.setDataExpire(generateForAuthKey(phoneAuthDto), "sucess", 60 * 15 * 1000L);
+        redisService.setDataExpire(generateForAuthKey(phoneAuthDto), "sucess", 60 * 15 * 1000L);
         return true;
+    }
+
+    public Boolean checkPhoneAuthState(String purpose, String phone) {
+        String key = purpose + ":PhoneAuth:" + phone;
+        return redisService.existData(key);
     }
 
     private String generatePrefixedKey(String key) {

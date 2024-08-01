@@ -1,6 +1,6 @@
 package com.rebu.profile.service;
 
-import com.rebu.common.util.RedisUtils;
+import com.rebu.common.service.RedisService;
 import com.rebu.member.entity.Member;
 import com.rebu.profile.dto.ProfileDto;
 import com.rebu.profile.dto.ProfileGenerateDto;
@@ -16,14 +16,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProfileService {
 
     private final ProfileRepository profileRepository;
-    private final RedisUtils redisUtils;
+    private final RedisService redisService;
 
     @Transactional
     public void generateProfile(ProfileGenerateDto profileGenerateDto, Member member) {
         profileRepository.save(profileGenerateDto.toEntity(member));
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public ProfileDto getProfileByPhone(String phone) {
         Profile profile = profileRepository.findByPhone(phone)
                 .orElseThrow(ProfileNotFoundException::new);
@@ -31,21 +31,31 @@ public class ProfileService {
         return ProfileDto.from(profile);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Boolean checkNicknameDuplicated(String nickname, String purpose) {
         if (profileRepository.findByNickname(nickname).isPresent()) {
             return true;
         }
-        redisUtils.setDataExpire(purpose + ":NicknameCheck:" + nickname, "success", 60 * 15 * 1000L);
+        redisService.setDataExpire(purpose + ":NicknameCheck:" + nickname, "success", 60 * 15 * 1000L);
         return false;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Boolean checkPhoneDuplicated(String phone, String purpose) {
         if (profileRepository.findByPhone(phone).isPresent()) {
             return true;
         }
-        redisUtils.setDataExpire(purpose + ":PhoneCheck:" + phone, "success", 60 * 15 * 1000L);
+        redisService.setDataExpire(purpose + ":PhoneCheck:" + phone, "success", 60 * 15 * 1000L);
         return false;
+    }
+
+    public Boolean checkPhoneDuplicatedState(String purpose, String phone) {
+        String key = purpose + ":PhoneCheck:" + phone;
+        return redisService.existData(key);
+    }
+
+    public Boolean checkNicknameDuplicatedState(String purpose, String nickname) {
+        String key = purpose + ":NicknameCheck:" + nickname;
+        return redisService.existData(key);
     }
 }
