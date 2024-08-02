@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @DynamicInsert
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Inheritance(strategy = InheritanceType.JOINED)
 @EqualsAndHashCode(of = "id")
 public class Profile {
 
@@ -62,6 +63,10 @@ public class Profile {
 
     public void changeIsPrivate(boolean newIsPrivate) {
         isPrivate = newIsPrivate;
+    }
+
+    public void changePhone(String newPhone) {
+        phone = newPhone;
     }
 
     @PrePersist

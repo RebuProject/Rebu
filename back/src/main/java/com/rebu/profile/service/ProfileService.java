@@ -1,10 +1,13 @@
 package com.rebu.profile.service;
 
+import com.rebu.auth.exception.PhoneNotVerifiedException;
+import com.rebu.auth.sevice.PhoneAuthService;
 import com.rebu.common.service.RedisService;
 import com.rebu.member.entity.Member;
 import com.rebu.profile.dto.*;
 import com.rebu.profile.entity.Profile;
 import com.rebu.profile.exception.NicknameDuplicateException;
+import com.rebu.profile.exception.PhoneDuplicateException;
 import com.rebu.profile.exception.ProfileNotFoundException;
 import com.rebu.profile.repository.ProfileRepository;
 import com.rebu.security.util.JWTUtil;
@@ -20,6 +23,7 @@ public class ProfileService {
 
     private final ProfileRepository profileRepository;
     private final RedisService redisService;
+    private final PhoneAuthService phoneAuthService;
 
     @Transactional
     public void generateProfile(ProfileGenerateDto profileGenerateDto, Member member) {
@@ -83,8 +87,27 @@ public class ProfileService {
         Profile profile = profileRepository.findByNickname(nickname)
                 .orElseThrow(ProfileNotFoundException::new);
 
-        System.out.println(profileChangeIsPrivateDto.isPrivate());
         profile.changeIsPrivate(profileChangeIsPrivateDto.isPrivate());
+    }
+
+    @Transactional
+    public void changePhone(String nickname, ProfileChangePhoneDto profileChangePhoneDto) {
+
+        if (!checkPhoneDuplicatedState("changePhone", profileChangePhoneDto.getPhone())) {
+            throw new PhoneDuplicateException();
+        }
+
+        if (!phoneAuthService.checkPhoneAuthState("changePhone", profileChangePhoneDto.getPhone())) {
+            throw new PhoneNotVerifiedException();
+        }
+
+        Profile profile = profileRepository.findByNickname(nickname)
+                .orElseThrow(ProfileNotFoundException::new);
+
+        profile.changePhone(profileChangePhoneDto.getPhone());
+
+        redisService.deleteData("changePhone:PhoneCheck:" + profileChangePhoneDto.getPhone());
+        redisService.deleteData("changePhone:PhoneAuth:" + profileChangePhoneDto.getPhone());
     }
 
 

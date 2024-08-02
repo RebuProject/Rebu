@@ -4,13 +4,13 @@ import com.rebu.common.controller.dto.ApiResponse;
 import com.rebu.profile.dto.ProfileChangeIntroDto;
 import com.rebu.profile.dto.ProfileChangeIsPrivateDto;
 import com.rebu.profile.dto.ProfileChangeNicknameDto;
+import com.rebu.profile.dto.ProfileChangePhoneDto;
 import com.rebu.profile.service.ProfileService;
 import com.rebu.profile.validation.annotation.Nickname;
 import com.rebu.profile.validation.annotation.NicknameCheckPurpose;
 import com.rebu.profile.validation.annotation.Phone;
 import com.rebu.profile.validation.annotation.PhoneCheckPurpose;
 import com.rebu.security.dto.AuthProfileInfo;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -53,5 +53,16 @@ public class ProfileController {
     public ResponseEntity<?> updateisPrivate(@AuthenticationPrincipal AuthProfileInfo authProfileInfo, @RequestBody ProfileChangeIsPrivateDto profileChangeIsPrivateDto) {
         profileService.changeIsPrivate(authProfileInfo.getNickname(), profileChangeIsPrivateDto);
         return ResponseEntity.ok(new ApiResponse<>("프로필 공개 여부 변경 완료 코드", null));
+    }
+
+    @PatchMapping("/{nickname}/photo")
+    public ResponseEntity<?> updateProfileImg() {
+        return null;
+    }
+
+    @PatchMapping("/{nickname}/phone")
+    public ResponseEntity<?> updatePhone(@AuthenticationPrincipal AuthProfileInfo authProfileInfo, @Valid @RequestBody ProfileChangePhoneDto profileChangePhoneDto) {
+        profileService.changePhone(authProfileInfo.getNickname(), profileChangePhoneDto);
+        return ResponseEntity.ok(new ApiResponse<>("전화번호 변경 완료 코드", null));
     }
 }
