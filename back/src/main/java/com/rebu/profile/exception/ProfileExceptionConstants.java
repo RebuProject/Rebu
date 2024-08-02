@@ -15,7 +15,8 @@ public enum ProfileExceptionConstants implements ExceptionConstants {
     PHONE_DUPLICATE("번호 중복 검사 재실시"),
     NICKNAME_DUPLICATE("닉네임 중복 검사 재실시"),
     LICENSE_NUM_MISMATCH("사업자 등록 번호 형식 불일치"),
-    INTRODUCTION_MISMATCH("프로필 소개 형식 불일치");
+    INTRODUCTION_MISMATCH("프로필 소개 형식 불일치"),
+    PROFILE_IMG_MISMATCH("프로필 이미지 형식 불일치");
 
     final String code;
 }

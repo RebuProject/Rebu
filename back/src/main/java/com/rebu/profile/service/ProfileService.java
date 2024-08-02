@@ -3,6 +3,7 @@ package com.rebu.profile.service;
 import com.rebu.auth.exception.PhoneNotVerifiedException;
 import com.rebu.auth.sevice.PhoneAuthService;
 import com.rebu.common.service.RedisService;
+import com.rebu.common.util.FileUtils;
 import com.rebu.member.entity.Member;
 import com.rebu.profile.dto.*;
 import com.rebu.profile.entity.Profile;
@@ -11,11 +12,16 @@ import com.rebu.profile.exception.PhoneDuplicateException;
 import com.rebu.profile.exception.ProfileNotFoundException;
 import com.rebu.profile.repository.ProfileRepository;
 import com.rebu.security.util.JWTUtil;
+import com.rebu.storage.exception.FileUploadFailException;
+import com.rebu.storage.service.StorageService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +30,7 @@ public class ProfileService {
     private final ProfileRepository profileRepository;
     private final RedisService redisService;
     private final PhoneAuthService phoneAuthService;
+    private final StorageService storageService;
 
     @Transactional
     public void generateProfile(ProfileGenerateDto profileGenerateDto, Member member) {
@@ -108,6 +115,23 @@ public class ProfileService {
 
         redisService.deleteData("changePhone:PhoneCheck:" + profileChangePhoneDto.getPhone());
         redisService.deleteData("changePhone:PhoneAuth:" + profileChangePhoneDto.getPhone());
+    }
+
+    @Transactional
+    public void changePhoto(String nickname, ProfileChangeImgDto profileChangeImgDto) {
+        Profile profile = profileRepository.findByNickname(nickname)
+                .orElseThrow(ProfileNotFoundException::new);
+
+        MultipartFile file = profileChangeImgDto.getProfileImage();
+
+        String extension = FileUtils.getExtension(file.getOriginalFilename());
+
+        try {
+            storageService.uploadFile(profile.getId() + "." + extension , file.getBytes(), "/profiles");
+        } catch (IOException e) {
+            throw new FileUploadFailException();
+        }
+
     }
 
 

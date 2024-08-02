@@ -28,19 +28,22 @@ public class MemberController {
     }
 
     @GetMapping("/check-email")
-    public ResponseEntity<?> checkEmail(@Email @RequestParam String email, @EmailCheckPurpose @RequestParam String purpose) {
+    public ResponseEntity<?> checkEmail(@Email @RequestParam String email,
+                                        @EmailCheckPurpose @RequestParam String purpose) {
         Boolean isExist = memberService.checkEmailDuplicated(email, purpose);
         return ResponseEntity.ok(new ApiResponse<>("이메일 중복 검사 성공", isExist));
     }
 
     @PatchMapping("/{email}/password")
-    public ResponseEntity<?> changePassword(@PathVariable String email, @Valid @RequestBody MemberChangePasswordDto memberChangePasswordDto) {
+    public ResponseEntity<?> changePassword(@PathVariable String email,
+                                            @Valid @RequestBody MemberChangePasswordDto memberChangePasswordDto) {
         memberService.changePassword(email, memberChangePasswordDto);
         return ResponseEntity.ok(new ApiResponse<>("비밀번호 변경 성공 코드", null));
     }
 
     @GetMapping("/find-email")
-    public ResponseEntity<?> findEmail(@Name @RequestParam String name, @Phone @RequestParam String phone) {
+    public ResponseEntity<?> findEmail(@Name @RequestParam String name,
+                                       @Phone @RequestParam String phone) {
         String email = memberService.findEmail(name, phone);
         return ResponseEntity.ok(new ApiResponse<>("이메일 찾기 성공 코드", email));
     }
