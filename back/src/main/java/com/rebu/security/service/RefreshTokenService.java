@@ -29,7 +29,7 @@ public class RefreshTokenService {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals("refresh")) {
                     refreshToken = cookie.getValue();
-                    break; // 쿠키를 찾았으면 반복 종료
+                    break;
                 }
             }
         }
@@ -88,6 +88,7 @@ public class RefreshTokenService {
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(24*60*60);
         cookie.setHttpOnly(true);
+        cookie.setPath("/");
 
         return cookie;
     }

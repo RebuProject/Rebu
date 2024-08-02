@@ -46,7 +46,7 @@ public class Profile {
     private String phone;
 
     @ColumnDefault("false")
-    private Boolean isPrivate;
+    private boolean isPrivate;
 
     @Enumerated(EnumType.STRING)
     @ColumnDefault("'ROLE_NORMAL'")
@@ -58,6 +58,10 @@ public class Profile {
 
     public void changeIntro(String newIntroduction) {
         introduction = newIntroduction;
+    }
+
+    public void changeIsPrivate(boolean newIsPrivate) {
+        isPrivate = newIsPrivate;
     }
 
     @PrePersist

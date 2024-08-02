@@ -49,7 +49,7 @@ public class SecurityConfig {
                 .httpBasic((auth) -> auth.disable());
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/members").permitAll()
+                        .requestMatchers("/auths/login", "/members").permitAll()
                         .requestMatchers("/auths/refresh").permitAll()
                         .requestMatchers("/auths/email/*", "/auths/phone/*", "/profiles/check-nickname", "/profiles/check-phone", "/members/check-email", "/members/*/password", "/members/find-email").permitAll()
                         .anyRequest().authenticated());

@@ -105,7 +105,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
 
         setResponse(response, "로그인 에러 코드");
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     }
 
     private Cookie createCookie(String key, String value) {

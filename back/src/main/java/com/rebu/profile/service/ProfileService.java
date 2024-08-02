@@ -2,14 +2,14 @@ package com.rebu.profile.service;
 
 import com.rebu.common.service.RedisService;
 import com.rebu.member.entity.Member;
-import com.rebu.profile.dto.ProfileChangeIntroDto;
-import com.rebu.profile.dto.ProfileChangeNicknameDto;
-import com.rebu.profile.dto.ProfileDto;
-import com.rebu.profile.dto.ProfileGenerateDto;
+import com.rebu.profile.dto.*;
 import com.rebu.profile.entity.Profile;
 import com.rebu.profile.exception.NicknameDuplicateException;
 import com.rebu.profile.exception.ProfileNotFoundException;
 import com.rebu.profile.repository.ProfileRepository;
+import com.rebu.security.util.JWTUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +53,7 @@ public class ProfileService {
     }
 
     @Transactional
-    public void changeNickname(String oldNickname, ProfileChangeNicknameDto profileChangeNicknameDto) {
+    public void changeNickname(String oldNickname, ProfileChangeNicknameDto profileChangeNicknameDto, HttpServletResponse response) {
 
         if (!checkNicknameDuplicatedState("changeNickname", profileChangeNicknameDto.getNickname())) {
             throw new NicknameDuplicateException();
@@ -65,6 +65,9 @@ public class ProfileService {
         profile.changeNickname(profileChangeNicknameDto.getNickname());
 
         redisService.deleteData("changeNickname:NicknameCheck:" + profileChangeNicknameDto.getNickname());
+        redisService.deleteData("Refresh:" + oldNickname);
+
+        resetToken(profileChangeNicknameDto.getNickname(), profile.getType().toString(), response);
     }
 
     @Transactional
@@ -73,6 +76,15 @@ public class ProfileService {
                 .orElseThrow(ProfileNotFoundException::new);
 
         profile.changeIntro(profileChangeIntroDto.getIntroduction());
+    }
+
+    @Transactional
+    public void changeIsPrivate(String nickname, ProfileChangeIsPrivateDto profileChangeIsPrivateDto) {
+        Profile profile = profileRepository.findByNickname(nickname)
+                .orElseThrow(ProfileNotFoundException::new);
+
+        System.out.println(profileChangeIsPrivateDto.isPrivate());
+        profile.changeIsPrivate(profileChangeIsPrivateDto.isPrivate());
     }
 
 
@@ -84,5 +96,23 @@ public class ProfileService {
     public Boolean checkNicknameDuplicatedState(String purpose, String nickname) {
         String key = purpose + ":NicknameCheck:" + nickname;
         return redisService.existData(key);
+    }
+
+    private void resetToken(String nickname, String type, HttpServletResponse response) {
+        String newAccess = JWTUtil.createJWT("access", nickname, type, 600000L);
+        String newRefresh = JWTUtil.createJWT("refresh", nickname, type, 86400000L);
+
+        redisService.setDataExpire("Refresh:" + nickname, newRefresh, 86400000L);
+        response.setHeader("access", newAccess);
+        response.addCookie(createCookie("refresh", newRefresh));
+    }
+
+    private Cookie createCookie(String key, String value) {
+        Cookie cookie = new Cookie(key, value);
+        cookie.setMaxAge(24*60*60);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+
+        return cookie;
     }
 }
