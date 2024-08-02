@@ -1,7 +1,7 @@
 package com.rebu.auth.sevice;
 
-import com.rebu.auth.dto.LicenseNumAuthResult;
 import com.rebu.auth.dto.LicenseNumSendDto;
+import com.rebu.auth.dto.LicenseNumSendResponse;
 import com.rebu.auth.exception.LicenceNumInvalidException;
 import com.rebu.common.service.RedisService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ public class LicenseNumAuthService {
 
     private final RedisService redisService;
 
-    public LicenseNumAuthResult verifyLicenceNum(LicenseNumSendDto licenseNumSendDto) {
+    public LicenseNumSendResponse verifyLicenceNum(LicenseNumSendDto licenseNumSendDto) {
         String URL = "https://bizno.net/article/" + licenseNumSendDto.getLicenseNum();
         Document doc = null;
 
@@ -42,7 +42,7 @@ public class LicenseNumAuthService {
 
             redisService.setDataExpire(licenseNumSendDto.getPurpose() + ":LicenseNumAuth:" + licenseNumSendDto.getLicenseNum(), "success", 60 * 10 * 1000L);
 
-            return LicenseNumAuthResult.builder()
+            return LicenseNumSendResponse.builder()
                     .shopName(shopName)
                     .phone(phone)
                     .address(address)

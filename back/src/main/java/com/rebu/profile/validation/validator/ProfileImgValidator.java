@@ -11,7 +11,7 @@ public class ProfileImgValidator implements ConstraintValidator<ProfileImg, Mult
     @Override
     public boolean isValid(MultipartFile multipartFile, ConstraintValidatorContext constraintValidatorContext) {
 
-        if (multipartFile.isEmpty()) {
+        if (multipartFile == null || multipartFile.isEmpty()) {
             throw new ProfileImgMismatchException();
         }
 

@@ -46,92 +46,93 @@ public class ProfileService {
     }
 
     @Transactional(readOnly = true)
-    public Boolean checkNicknameDuplicated(String nickname, String purpose) {
-        if (profileRepository.findByNickname(nickname).isPresent()) {
+    public Boolean checkNicknameDuplicated(CheckNicknameDuplDto checkNicknameDuplDto) {
+        if (profileRepository.findByNickname(checkNicknameDuplDto.getNickname()).isPresent()) {
             return true;
         }
-        redisService.setDataExpire(purpose + ":NicknameCheck:" + nickname, "success", 60 * 15 * 1000L);
+        redisService.setDataExpire(checkNicknameDuplDto.getPurpose() + ":NicknameCheck:" + checkNicknameDuplDto.getNickname(), "success", 60 * 15 * 1000L);
         return false;
     }
 
     @Transactional(readOnly = true)
-    public Boolean checkPhoneDuplicated(String phone, String purpose) {
-        if (profileRepository.findByPhone(phone).isPresent()) {
+    public Boolean checkPhoneDuplicated(CheckPhoneDuplDto checkPhoneDuplDto) {
+        if (profileRepository.findByPhone(checkPhoneDuplDto.getPhone()).isPresent()) {
             return true;
         }
-        redisService.setDataExpire(purpose + ":PhoneCheck:" + phone, "success", 60 * 15 * 1000L);
+        redisService.setDataExpire(checkPhoneDuplDto.getPurpose() + ":PhoneCheck:" + checkPhoneDuplDto.getPhone(), "success", 60 * 15 * 1000L);
         return false;
     }
 
     @Transactional
-    public void changeNickname(String oldNickname, ProfileChangeNicknameDto profileChangeNicknameDto, HttpServletResponse response) {
+    public void changeNickname(ChangeNicknameDto changeNicknameDto) {
 
-        if (!checkNicknameDuplicatedState("changeNickname", profileChangeNicknameDto.getNickname())) {
+        if (!checkNicknameDuplicatedState("changeNickname", changeNicknameDto.getNewNickname())) {
             throw new NicknameDuplicateException();
         }
 
-        Profile profile = profileRepository.findByNickname(oldNickname)
+        Profile profile = profileRepository.findByNickname(changeNicknameDto.getOldNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
-        profile.changeNickname(profileChangeNicknameDto.getNickname());
+        profile.changeNickname(changeNicknameDto.getNewNickname());
 
-        redisService.deleteData("changeNickname:NicknameCheck:" + profileChangeNicknameDto.getNickname());
-        redisService.deleteData("Refresh:" + oldNickname);
+        redisService.deleteData("changeNickname:NicknameCheck:" + changeNicknameDto.getNewNickname());
+        redisService.deleteData("Refresh:" + changeNicknameDto.getOldNickname());
 
-        resetToken(profileChangeNicknameDto.getNickname(), profile.getType().toString(), response);
+        resetToken(changeNicknameDto.getNewNickname(), profile.getType().toString(), changeNicknameDto.getResponse());
     }
 
     @Transactional
-    public void changeIntro(String nickname, ProfileChangeIntroDto profileChangeIntroDto) {
-        Profile profile = profileRepository.findByNickname(nickname)
+    public void changeIntro(ChangeIntroDto changeIntroDto) {
+        Profile profile = profileRepository.findByNickname(changeIntroDto.getNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
-        profile.changeIntro(profileChangeIntroDto.getIntroduction());
+        profile.changeIntro(changeIntroDto.getIntroduction());
     }
 
     @Transactional
-    public void changeIsPrivate(String nickname, ProfileChangeIsPrivateDto profileChangeIsPrivateDto) {
-        Profile profile = profileRepository.findByNickname(nickname)
+    public void changeIsPrivate(ChangeIsPrivateDto changeIsPrivateDto) {
+        Profile profile = profileRepository.findByNickname(changeIsPrivateDto.getNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
-        profile.changeIsPrivate(profileChangeIsPrivateDto.isPrivate());
+        profile.changeIsPrivate(changeIsPrivateDto.isVisible());
     }
 
     @Transactional
-    public void changePhone(String nickname, ProfileChangePhoneDto profileChangePhoneDto) {
+    public void changePhone(ChangePhoneDto changePhoneDto) {
 
-        if (!checkPhoneDuplicatedState("changePhone", profileChangePhoneDto.getPhone())) {
+        if (!checkPhoneDuplicatedState("changePhone", changePhoneDto.getPhone())) {
             throw new PhoneDuplicateException();
         }
 
-        if (!phoneAuthService.checkPhoneAuthState("changePhone", profileChangePhoneDto.getPhone())) {
+        if (!phoneAuthService.checkPhoneAuthState("changePhone", changePhoneDto.getPhone())) {
             throw new PhoneNotVerifiedException();
         }
 
-        Profile profile = profileRepository.findByNickname(nickname)
+        Profile profile = profileRepository.findByNickname(changePhoneDto.getNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
-        profile.changePhone(profileChangePhoneDto.getPhone());
+        profile.changePhone(changePhoneDto.getPhone());
 
-        redisService.deleteData("changePhone:PhoneCheck:" + profileChangePhoneDto.getPhone());
-        redisService.deleteData("changePhone:PhoneAuth:" + profileChangePhoneDto.getPhone());
+        redisService.deleteData("changePhone:PhoneCheck:" + changePhoneDto.getPhone());
+        redisService.deleteData("changePhone:PhoneAuth:" + changePhoneDto.getPhone());
     }
 
     @Transactional
-    public void changePhoto(String nickname, ProfileChangeImgDto profileChangeImgDto) {
-        Profile profile = profileRepository.findByNickname(nickname)
+    public void changePhoto(ChangeImgDto changeImgDto) {
+
+        Profile profile = profileRepository.findByNickname(changeImgDto.getNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
-        MultipartFile file = profileChangeImgDto.getProfileImage();
+        MultipartFile file = changeImgDto.getProfileImage();
 
         String extension = FileUtils.getExtension(file.getOriginalFilename());
 
         try {
-            storageService.uploadFile(profile.getId() + "." + extension , file.getBytes(), "/profiles");
+            String path = storageService.uploadFile(profile.getId() + "." + extension , file.getBytes(), "/profiles");
+            profile.changeImg(path);
         } catch (IOException e) {
             throw new FileUploadFailException();
         }
-
     }
 
 

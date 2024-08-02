@@ -69,6 +69,10 @@ public class Profile {
         phone = newPhone;
     }
 
+    public void changeImg(String newImageSrc) {
+        imageSrc = newImageSrc;
+    }
+
     @PrePersist
     protected void onCreate() {
         recentTime = LocalDateTime.now();

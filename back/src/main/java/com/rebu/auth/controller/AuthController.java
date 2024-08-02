@@ -1,5 +1,7 @@
 package com.rebu.auth.controller;
 
+import com.rebu.auth.controller.dto.LicenseNumSendRequest;
+import com.rebu.auth.controller.dto.PasswordSendRequest;
 import com.rebu.auth.dto.*;
 import com.rebu.auth.sevice.LicenseNumAuthService;
 import com.rebu.auth.sevice.MailAuthService;
@@ -27,8 +29,9 @@ public class AuthController {
     private final PasswordAuthService passwordAuthService;
 
     @PostMapping("/password/verify")
-    public ResponseEntity<?> verifyPassword(@AuthenticationPrincipal AuthProfileInfo authDto, @RequestBody PasswordSendDto passwordSendDto) {
-        passwordAuthService.verifyPassword(authDto, passwordSendDto);
+    public ResponseEntity<?> verifyPassword(@AuthenticationPrincipal AuthProfileInfo authDto,
+                                            @RequestBody PasswordSendRequest passwordSendRequest) {
+        passwordAuthService.verifyPassword(passwordSendRequest.toDto(authDto.getNickname(), authDto.getPassword()));
         return ResponseEntity.ok(new ApiResponse<>("비밀번호 인증 성공 코드", null));
     }
 
@@ -57,8 +60,9 @@ public class AuthController {
     }
 
     @PostMapping("/license/verify")
-    public ResponseEntity<?> verifyLicenseNum(@Valid @RequestBody LicenseNumSendDto licenseNumSendDto) {
-        LicenseNumAuthResult result = licenseNumAuthService.verifyLicenceNum(licenseNumSendDto);
+    public ResponseEntity<?> verifyLicenseNum(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
+                                              @Valid @RequestBody LicenseNumSendRequest licenseNumSendRequest) {
+        LicenseNumSendResponse result = licenseNumAuthService.verifyLicenceNum(licenseNumSendRequest.toDto(authProfileInfo.getNickname()));
         return ResponseEntity.ok(new ApiResponse<>("사업자 등록번호 인증 성공 코드", result));
     }
 

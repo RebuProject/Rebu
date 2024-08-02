@@ -1,4 +1,4 @@
-package com.rebu.auth.dto;
+package com.rebu.profile.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PasswordSendDto {
-    private String password;
-    private String receivePassword;
-    private String purpose;
+public class ChangeIsPrivateDto {
     private String nickname;
+    private boolean visible;
 }

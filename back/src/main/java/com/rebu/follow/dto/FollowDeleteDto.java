@@ -1,16 +1,13 @@
-package com.rebu.auth.dto;
+package com.rebu.follow.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LicenseNumSendDto {
+public class FollowDeleteDto {
+    private Long id;
     private String nickname;
-    private String licenseNum;
-    private String purpose;
 }
