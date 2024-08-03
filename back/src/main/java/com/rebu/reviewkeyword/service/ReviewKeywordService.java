@@ -30,22 +30,6 @@ public class ReviewKeywordService {
         return ListUtils.applyFunctionToElements(reviewKeywords, ReviewKeywordDto::from);
     }
 
-    @Transactional
-    public void create(String keyword){
-        reviewKeywordRepository.save(ReviewKeyword.builder().keyword(keyword).build());
-    }
-
-    @Transactional
-    public void update(Long reviewKeywordId, String keyword){
-        ReviewKeyword reviewKeyword = reviewKeywordRepository.findById(reviewKeywordId).orElseThrow(ReviewKeywordNotFoundException::new);
-        reviewKeyword.changeKeyword(keyword);
-    }
-
-    @Transactional
-    public void delete(Long reviewKeywordId){
-        reviewKeywordRepository.deleteById(reviewKeywordId);
-    }
-
     @Transactional(readOnly = true)
     public List<ReviewKeywordCountDto> countByNickname(String nickname) {
         Profile profile = profileRepository.findByNickname(nickname).orElseThrow(ProfileNotFoundException::new);

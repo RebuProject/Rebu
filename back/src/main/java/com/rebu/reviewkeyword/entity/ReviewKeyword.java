@@ -22,9 +22,4 @@ public class ReviewKeyword {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String keyword;
-
-    public void changeKeyword(String keyword) {
-        this.keyword = keyword;
-    }
-
 }

@@ -26,5 +26,4 @@ public class ReviewKeywordController {
     public ResponseEntity<?> countByProfileId(@Nickname @RequestParam(required = true) String nickname){
         return ResponseEntity.ok(new ApiResponse<>("1R01", reviewKeywordService.countByNickname(nickname)));
     }
-
 }
