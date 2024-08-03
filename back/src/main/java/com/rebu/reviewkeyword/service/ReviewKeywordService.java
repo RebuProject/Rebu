@@ -24,12 +24,23 @@ public class ReviewKeywordService {
     private final ReviewKeywordRepository reviewKeywordRepository;
     private final ProfileRepository profileRepository;
 
+    /**
+     * ReviewKeywordService :: readAll method
+     * 등록된 모든 리뷰 키워드를 조회
+     * @return 등록된 모든 리뷰 키워드 리스트
+     */
     @Transactional(readOnly = true)
     public List<ReviewKeywordDto> readAll() {
         List<ReviewKeyword> reviewKeywords = reviewKeywordRepository.findAll();
         return ListUtils.applyFunctionToElements(reviewKeywords, ReviewKeywordDto::from);
     }
 
+    /**
+     * ReviewKeywordService :: countByNickname method
+     * 특정 매장의 누적된 리뷰 키워드 횟수를 집계
+     * @param nickname 매장 닉네임
+     * @return 리뷰 키워드와 누적 횟수 리스트
+     */
     @Transactional(readOnly = true)
     public List<ReviewKeywordCountDto> countByNickname(String nickname) {
         Profile profile = profileRepository.findByNickname(nickname).orElseThrow(ProfileNotFoundException::new);

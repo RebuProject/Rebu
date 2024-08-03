@@ -5,11 +5,10 @@ import jakarta.persistence.*;
 
 @Entity
 public class SelectedReviewKeyword {
-
     @EmbeddedId
     private SelectedReviewKeywordId selectedReviewKeywordId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("reviewId")
     @JoinColumn(name = "review_id")
     private Review review;
