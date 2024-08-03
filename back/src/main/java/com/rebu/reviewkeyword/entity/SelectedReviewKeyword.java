@@ -1,10 +1,21 @@
 package com.rebu.reviewkeyword.entity;
 
-import com.rebu.review.entity.Review;
+import com.rebu.feed.review.entity.Review;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SelectedReviewKeyword {
+
+    public SelectedReviewKeyword(SelectedReviewKeywordId selectedReviewKeywordId) {
+        this.selectedReviewKeywordId = selectedReviewKeywordId;
+    }
+
     @EmbeddedId
     private SelectedReviewKeywordId selectedReviewKeywordId;
 
@@ -17,4 +28,6 @@ public class SelectedReviewKeyword {
     @MapsId("reviewKeywordId")
     @JoinColumn(name = "review_keyword_id")
     private ReviewKeyword reviewKeyword;
+
+
 }
