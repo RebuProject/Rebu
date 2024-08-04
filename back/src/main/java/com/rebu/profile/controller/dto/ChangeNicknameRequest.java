@@ -13,12 +13,12 @@ import lombok.NoArgsConstructor;
 public class ChangeNicknameRequest {
 
     @Nickname
-    private String newNickname;
+    private String nickname;
 
     public ChangeNicknameDto toDto(String oldNickname, HttpServletResponse response) {
         return ChangeNicknameDto.builder()
                 .oldNickname(oldNickname)
-                .newNickname(newNickname)
+                .newNickname(nickname)
                 .response(response)
                 .build();
     }

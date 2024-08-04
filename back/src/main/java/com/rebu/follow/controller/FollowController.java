@@ -29,5 +29,6 @@ public class FollowController {
     public ResponseEntity<?> delete(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
                                     @PathVariable Long followId) {
         followService.delete(new FollowDeleteDto(followId, authProfileInfo.getNickname()));
+        return ResponseEntity.ok(new ApiResponse<>("팔로우 삭제 성공 코드", null));
     }
 }

@@ -1,14 +1,10 @@
 package com.rebu.profile.service;
 
-import com.rebu.auth.exception.PhoneNotVerifiedException;
-import com.rebu.auth.sevice.PhoneAuthService;
 import com.rebu.common.service.RedisService;
 import com.rebu.common.util.FileUtils;
 import com.rebu.member.entity.Member;
 import com.rebu.profile.dto.*;
 import com.rebu.profile.entity.Profile;
-import com.rebu.profile.exception.NicknameDuplicateException;
-import com.rebu.profile.exception.PhoneDuplicateException;
 import com.rebu.profile.exception.ProfileNotFoundException;
 import com.rebu.profile.repository.ProfileRepository;
 import com.rebu.security.util.JWTUtil;
@@ -29,7 +25,6 @@ public class ProfileService {
 
     private final ProfileRepository profileRepository;
     private final RedisService redisService;
-    private final PhoneAuthService phoneAuthService;
     private final StorageService storageService;
 
     @Transactional
@@ -47,35 +42,22 @@ public class ProfileService {
 
     @Transactional(readOnly = true)
     public Boolean checkNicknameDuplicated(CheckNicknameDuplDto checkNicknameDuplDto) {
-        if (profileRepository.findByNickname(checkNicknameDuplDto.getNickname()).isPresent()) {
-            return true;
-        }
-        redisService.setDataExpire(checkNicknameDuplDto.getPurpose() + ":NicknameCheck:" + checkNicknameDuplDto.getNickname(), "success", 60 * 15 * 1000L);
-        return false;
+        return profileRepository.findByNickname(checkNicknameDuplDto.getNickname()).isPresent();
     }
 
     @Transactional(readOnly = true)
     public Boolean checkPhoneDuplicated(CheckPhoneDuplDto checkPhoneDuplDto) {
-        if (profileRepository.findByPhone(checkPhoneDuplDto.getPhone()).isPresent()) {
-            return true;
-        }
-        redisService.setDataExpire(checkPhoneDuplDto.getPurpose() + ":PhoneCheck:" + checkPhoneDuplDto.getPhone(), "success", 60 * 15 * 1000L);
-        return false;
+        return profileRepository.findByPhone(checkPhoneDuplDto.getPhone()).isPresent();
     }
 
     @Transactional
     public void changeNickname(ChangeNicknameDto changeNicknameDto) {
-
-        if (!checkNicknameDuplicatedState("changeNickname", changeNicknameDto.getNewNickname())) {
-            throw new NicknameDuplicateException();
-        }
 
         Profile profile = profileRepository.findByNickname(changeNicknameDto.getOldNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
         profile.changeNickname(changeNicknameDto.getNewNickname());
 
-        redisService.deleteData("changeNickname:NicknameCheck:" + changeNicknameDto.getNewNickname());
         redisService.deleteData("Refresh:" + changeNicknameDto.getOldNickname());
 
         resetToken(changeNicknameDto.getNewNickname(), profile.getType().toString(), changeNicknameDto.getResponse());
@@ -100,21 +82,10 @@ public class ProfileService {
     @Transactional
     public void changePhone(ChangePhoneDto changePhoneDto) {
 
-        if (!checkPhoneDuplicatedState("changePhone", changePhoneDto.getPhone())) {
-            throw new PhoneDuplicateException();
-        }
-
-        if (!phoneAuthService.checkPhoneAuthState("changePhone", changePhoneDto.getPhone())) {
-            throw new PhoneNotVerifiedException();
-        }
-
         Profile profile = profileRepository.findByNickname(changePhoneDto.getNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
         profile.changePhone(changePhoneDto.getPhone());
-
-        redisService.deleteData("changePhone:PhoneCheck:" + changePhoneDto.getPhone());
-        redisService.deleteData("changePhone:PhoneAuth:" + changePhoneDto.getPhone());
     }
 
     @Transactional
@@ -135,16 +106,6 @@ public class ProfileService {
         }
     }
 
-
-    public Boolean checkPhoneDuplicatedState(String purpose, String phone) {
-        String key = purpose + ":PhoneCheck:" + phone;
-        return redisService.existData(key);
-    }
-
-    public Boolean checkNicknameDuplicatedState(String purpose, String nickname) {
-        String key = purpose + ":NicknameCheck:" + nickname;
-        return redisService.existData(key);
-    }
 
     private void resetToken(String nickname, String type, HttpServletResponse response) {
         String newAccess = JWTUtil.createJWT("access", nickname, type, 600000L);

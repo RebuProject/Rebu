@@ -38,7 +38,7 @@ public class FollowService {
         String nickname = follow.getFollower().getNickname();
 
         if (!nickname.equals(followDeleteDto.getNickname())) {
-            // TODO: 로지 작성 및 팔로우 팔로잉 관계 검토
+            throw new FollowNotExistException();
         }
 
         followRepository.delete(follow);

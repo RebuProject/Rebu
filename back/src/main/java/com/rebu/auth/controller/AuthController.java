@@ -9,6 +9,7 @@ import com.rebu.auth.sevice.PasswordAuthService;
 import com.rebu.auth.sevice.PhoneAuthService;
 import com.rebu.common.controller.dto.ApiResponse;
 import com.rebu.security.dto.AuthProfileInfo;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -30,8 +31,10 @@ public class AuthController {
 
     @PostMapping("/password/verify")
     public ResponseEntity<?> verifyPassword(@AuthenticationPrincipal AuthProfileInfo authDto,
-                                            @RequestBody PasswordSendRequest passwordSendRequest) {
+                                            @RequestBody PasswordSendRequest passwordSendRequest,
+                                            HttpSession session) {
         passwordAuthService.verifyPassword(passwordSendRequest.toDto(authDto.getNickname(), authDto.getPassword()));
+        session.setAttribute("AuthPassword:" + passwordSendRequest.getPurpose(), authDto.getNickname());
         return ResponseEntity.ok(new ApiResponse<>("비밀번호 인증 성공 코드", null));
     }
 
@@ -42,8 +45,10 @@ public class AuthController {
     }
 
     @PostMapping("/email/verify")
-    public ResponseEntity<?> verifyMail(@Valid @RequestBody MailAuthDto mailAuthDto) {
+    public ResponseEntity<?> verifyMail(@Valid @RequestBody MailAuthDto mailAuthDto,
+                                        HttpSession session) {
         mailAuthService.verifyEmailCode(mailAuthDto);
+        session.setAttribute("AuthEmail:" + mailAuthDto.getPurpose(), mailAuthDto.getEmail());
         return ResponseEntity.ok(new ApiResponse<>("이메일 인증 성공 코드", null));
     }
 
@@ -54,8 +59,10 @@ public class AuthController {
     }
 
     @PostMapping("/phone/verify")
-    public ResponseEntity<?> verifyMessage(@Valid @RequestBody PhoneAuthDto phoneAuthDto) {
+    public ResponseEntity<?> verifyMessage(@Valid @RequestBody PhoneAuthDto phoneAuthDto,
+                                           HttpSession session) {
         phoneAuthService.verifyMessageCode(phoneAuthDto);
+        session.setAttribute("AuthPhone:" + phoneAuthDto.getPurpose(), phoneAuthDto.getPhone());
         return ResponseEntity.ok(new ApiResponse<>("전화번호 인증 성공 코드", null));
     }
 

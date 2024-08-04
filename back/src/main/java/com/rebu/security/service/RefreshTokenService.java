@@ -20,7 +20,6 @@ public class RefreshTokenService {
     private static final String PREFIX = "Refresh:";
     private final RedisService redisService;
 
-    @Transactional
     public void reissue(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = null;
         Cookie[] cookies = request.getCookies();
@@ -74,7 +73,6 @@ public class RefreshTokenService {
         response.addCookie(createCookie("refresh", newRefresh));
     }
 
-    @Transactional
     public void saveRefreshToken(RefreshToken refreshToken, Long expired) {
 
         redisService.setDataExpire(generatePrefixedKey(refreshToken.getNickname()), refreshToken.getRefreshToken(), expired);
