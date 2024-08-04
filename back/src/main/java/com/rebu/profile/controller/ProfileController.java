@@ -21,6 +21,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/profiles")
@@ -60,7 +62,7 @@ public class ProfileController {
         if (checkNickname == null || !checkNickname.equals(changeNicknameRequest.getNickname())) {
             throw new NicknameDuplicateException();
         }
-        profileService.changeNickname(changeNicknameRequest.toDto(authProfileInfo.getNickname(), response));
+        profileService.changeNickname(changeNicknameRequest.toDto(authProfileInfo.getNickname()), response);
         return ResponseEntity.ok(new ApiResponse<>("닉네임 변경 완료 코드", null));
     }
 
@@ -99,6 +101,18 @@ public class ProfileController {
         }
         profileService.changePhone(changePhoneRequest.toDto(authProfileInfo.getNickname()));
         return ResponseEntity.ok(new ApiResponse<>("전화번호 변경 완료 코드", null));
+    }
+
+    @GetMapping("/{nickname}/followings")
+    public ResponseEntity<?> getFollowings(@PathVariable String nickname) {
+        List<GetFollowingDto> followings = profileService.getFollowings(nickname);
+        return ResponseEntity.ok(new ApiResponse<>("팔로잉 조회 성공 코드", followings));
+    }
+
+    @GetMapping("/{nickname}/followers")
+    public ResponseEntity<?> getFollowers(@PathVariable String nickname) {
+        List<GetFollowerDto> followers = profileService.getFollowers(nickname);
+        return ResponseEntity.ok(new ApiResponse<>("팔로잉 조회 성공 코드", followers));
     }
 
 }

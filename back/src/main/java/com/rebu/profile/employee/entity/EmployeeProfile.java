@@ -4,10 +4,15 @@ import com.rebu.member.enums.Gender;
 import com.rebu.profile.entity.Profile;
 import com.rebu.profile.shop.entity.ShopProfile;
 import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+
 
 @Entity
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SuperBuilder
 public class EmployeeProfile extends Profile {
 
     @ManyToOne

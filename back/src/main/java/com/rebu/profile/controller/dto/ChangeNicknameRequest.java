@@ -15,11 +15,10 @@ public class ChangeNicknameRequest {
     @Nickname
     private String nickname;
 
-    public ChangeNicknameDto toDto(String oldNickname, HttpServletResponse response) {
+    public ChangeNicknameDto toDto(String oldNickname) {
         return ChangeNicknameDto.builder()
                 .oldNickname(oldNickname)
                 .newNickname(nickname)
-                .response(response)
                 .build();
     }
 }

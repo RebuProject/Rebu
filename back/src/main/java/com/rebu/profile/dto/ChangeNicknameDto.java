@@ -13,5 +13,4 @@ import lombok.NoArgsConstructor;
 public class ChangeNicknameDto {
     private String oldNickname;
     private String newNickname;
-    private HttpServletResponse response;
 }

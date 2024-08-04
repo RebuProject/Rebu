@@ -57,7 +57,7 @@ public class RefreshTokenService {
 
         String type = JWTUtil.getType(refreshToken);
 
-        String newAccess = JWTUtil.createJWT("access", nickname, type, 600000L);
+        String newAccess = JWTUtil.createJWT("access", nickname, type, 1800000L);
         String newRefresh = JWTUtil.createJWT("refresh", nickname, type, 86400000L);
 
         redisService.deleteData(generatePrefixedKey(nickname));

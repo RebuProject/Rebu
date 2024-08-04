@@ -1,13 +1,11 @@
 package com.rebu.profile.shop.entity;
 
 import com.rebu.profile.entity.Profile;
+import com.rebu.profile.shop.Category;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
-@DynamicUpdate
 public class ShopProfile extends Profile {
 
     @Column(unique=true, nullable = false)
@@ -25,6 +23,16 @@ public class ShopProfile extends Profile {
     @Column(nullable = false)
     private double lng;
 
-    @ColumnDefault("10")
+    @Column(nullable = false)
+    private Category category;
+
+    @Column(nullable = false)
     private int reservationInterval;
+
+    protected void onCreate() {
+        if (reservationInterval == 0) {
+            reservationInterval = 10;
+        }
+    }
+
 }

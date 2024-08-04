@@ -5,15 +5,13 @@ import com.rebu.member.entity.Member;
 import com.rebu.profile.enums.Type;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.DynamicInsert;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Builder
-@DynamicInsert
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -32,7 +30,7 @@ public class Profile {
     private Member member;
 
     @Enumerated(EnumType.STRING)
-    @ColumnDefault("'COMMON'")
+    @Column(nullable = false)
     private Type type;
 
     @Column(length = 512)
@@ -41,16 +39,16 @@ public class Profile {
     @Column(length = 256)
     private String introduction;
 
+    @Column(nullable = false)
     private LocalDateTime recentTime;
 
     @Column(length = 16, nullable = false)
     private String phone;
 
-    @ColumnDefault("false")
+    @Column(nullable = false)
     private boolean isPrivate;
 
     @Enumerated(EnumType.STRING)
-    @ColumnDefault("'ROLE_NORMAL'")
     private Status status;
 
     public void changeNickname(String newNickname) {
@@ -76,6 +74,11 @@ public class Profile {
     @PrePersist
     protected void onCreate() {
         recentTime = LocalDateTime.now();
+        status = Status.ROLE_NORMAL;
+        isPrivate = false;
+        if (type == null) {
+            type = Type.COMMON;
+        }
     }
 
     @PreUpdate

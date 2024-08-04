@@ -27,6 +27,7 @@ spring:
     multipart:
       max-file-size: 50MB
       max-request-size: 10MB
+      enabled: true
 
 feed:
   cnt_image_max_limit: 5

@@ -1,6 +1,5 @@
 package com.rebu.reviewkeyword.entity;
 
-import com.rebu.review.entity.Review;
 import jakarta.persistence.*;
 import lombok.Getter;
 
