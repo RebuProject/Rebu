@@ -1,4 +1,4 @@
-package com.rebu.feed.dto;
+package com.rebu.reviewkeyword.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class HashtagCountDto {
-    private String hashtag;
-    private Long cnt;
+public class ReviewKeywordCountDto {
+    private String keyword;
+    private Long count;
 }
