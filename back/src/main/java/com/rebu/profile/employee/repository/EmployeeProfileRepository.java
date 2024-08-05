@@ -12,4 +12,6 @@ public interface EmployeeProfileRepository extends JpaRepository<EmployeeProfile
 
     @Query("select e from EmployeeProfile e where e.member.id = :memberId and e.status <> 'ROLE_DELETED'")
     Optional<EmployeeProfile> findEmployeeProfileByMemberId(Long memberId);
+
+    Optional<EmployeeProfile> findByNickname(String nickname);
 }

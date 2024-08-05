@@ -5,9 +5,12 @@ import com.rebu.member.entity.Member;
 import com.rebu.member.exception.MemberNotFoundException;
 import com.rebu.member.repository.MemberRepository;
 import com.rebu.profile.dto.ChangeImgDto;
+import com.rebu.profile.employee.dto.ChangeWorkingIntroDto;
 import com.rebu.profile.employee.dto.GenerateEmployeeProfileDto;
+import com.rebu.profile.employee.entity.EmployeeProfile;
 import com.rebu.profile.employee.repository.EmployeeProfileRepository;
 import com.rebu.profile.enums.Type;
+import com.rebu.profile.exception.ProfileNotFoundException;
 import com.rebu.profile.service.ProfileService;
 import com.rebu.security.util.JWTUtil;
 import jakarta.servlet.http.Cookie;
@@ -39,6 +42,14 @@ public class EmployeeProfileService {
         redisService.deleteData("Refresh:" + generateEmployeeProfileDto.getNowNickname());
 
         resetToken(generateEmployeeProfileDto.getNickname(), Type.EMPLOYEE.toString(), response);
+    }
+
+    @Transactional
+    public void updateWorkingIntro(ChangeWorkingIntroDto changeWorkingIntroDto) {
+        EmployeeProfile employeeProfile = employeeProfileRepository.findByNickname(changeWorkingIntroDto.getNickname())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        employeeProfile.changeWorkingIntroduction(changeWorkingIntroDto.getWorkingIntroduction());
     }
 
     private void resetToken(String nickname, String type, HttpServletResponse response) {

@@ -31,4 +31,8 @@ public class EmployeeProfile extends Profile {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Gender gender;
+
+    public void changeWorkingIntroduction(String newIntroduction) {
+        workingIntroduction = newIntroduction;
+    }
 }
