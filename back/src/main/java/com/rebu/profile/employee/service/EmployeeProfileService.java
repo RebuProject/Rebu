@@ -6,6 +6,7 @@ import com.rebu.member.exception.MemberNotFoundException;
 import com.rebu.member.repository.MemberRepository;
 import com.rebu.profile.dto.ChangeImgDto;
 import com.rebu.profile.employee.dto.ChangeWorkingIntroDto;
+import com.rebu.profile.employee.dto.ChangeWorkingNameDto;
 import com.rebu.profile.employee.dto.GenerateEmployeeProfileDto;
 import com.rebu.profile.employee.entity.EmployeeProfile;
 import com.rebu.profile.employee.repository.EmployeeProfileRepository;
@@ -50,6 +51,14 @@ public class EmployeeProfileService {
                 .orElseThrow(ProfileNotFoundException::new);
 
         employeeProfile.changeWorkingIntroduction(changeWorkingIntroDto.getWorkingIntroduction());
+    }
+
+    @Transactional
+    public void updateWorkingName(ChangeWorkingNameDto changeWorkingNameDto) {
+        EmployeeProfile employeeProfile = employeeProfileRepository.findByNickname(changeWorkingNameDto.getNickname())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        employeeProfile.changeWorkingName(changeWorkingNameDto.getWorkingName());
     }
 
     private void resetToken(String nickname, String type, HttpServletResponse response) {

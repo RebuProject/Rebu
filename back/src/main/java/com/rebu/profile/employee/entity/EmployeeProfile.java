@@ -32,7 +32,11 @@ public class EmployeeProfile extends Profile {
     @Column(nullable = false)
     private Gender gender;
 
-    public void changeWorkingIntroduction(String newIntroduction) {
-        workingIntroduction = newIntroduction;
+    public void changeWorkingIntroduction(String newWorkingIntroduction) {
+        workingIntroduction = newWorkingIntroduction;
+    }
+
+    public void changeWorkingName(String newWorkingName) {
+        workingName = newWorkingName;
     }
 }

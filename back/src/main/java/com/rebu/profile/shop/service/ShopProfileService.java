@@ -6,8 +6,12 @@ import com.rebu.member.exception.MemberNotFoundException;
 import com.rebu.member.repository.MemberRepository;
 import com.rebu.profile.dto.ChangeImgDto;
 import com.rebu.profile.enums.Type;
+import com.rebu.profile.exception.ProfileNotFoundException;
 import com.rebu.profile.service.ProfileService;
+import com.rebu.profile.shop.dto.ChangeAddressDto;
+import com.rebu.profile.shop.dto.ChangeShopNameDto;
 import com.rebu.profile.shop.dto.GenerateShopProfileDto;
+import com.rebu.profile.shop.entity.ShopProfile;
 import com.rebu.profile.shop.repository.ShopProfileRepository;
 import com.rebu.security.util.JWTUtil;
 import jakarta.servlet.http.Cookie;
@@ -40,6 +44,22 @@ public class ShopProfileService {
         redisService.deleteData("Refresh:" + generateShopProfileDto.getNowNickname());
 
         resetToken(generateShopProfileDto.getNickname(), Type.SHOP.toString(), response);
+    }
+
+    @Transactional
+    public void updateAddress(ChangeAddressDto changeAddressDto) {
+        ShopProfile shopProfile = shopProfileRepository.findByNickname(changeAddressDto.getNickname())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        shopProfile.changeAddress(changeAddressDto.getAddress());
+    }
+
+    @Transactional
+    public void updateShopName(ChangeShopNameDto changeShopNameDto) {
+        ShopProfile shopProfile = shopProfileRepository.findByNickname(changeShopNameDto.getNickname())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        shopProfile.changeShopName(changeShopNameDto.getName());
     }
 
     private void resetToken(String nickname, String type, HttpServletResponse response) {

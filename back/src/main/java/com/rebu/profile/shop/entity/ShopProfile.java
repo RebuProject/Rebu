@@ -42,6 +42,14 @@ public class ShopProfile extends Profile {
     @Column(nullable = false)
     private int reservationInterval;
 
+    public void changeAddress(String newAddress) {
+        address = newAddress;
+    }
+
+    public void changeShopName(String newName) {
+        name = newName;
+    }
+
     @Override
     protected void onCreate() {
         super.onCreate();

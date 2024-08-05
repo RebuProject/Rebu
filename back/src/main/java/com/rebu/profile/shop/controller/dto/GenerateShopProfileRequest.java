@@ -1,6 +1,5 @@
 package com.rebu.profile.shop.controller.dto;
 
-import com.rebu.member.validation.annotation.Name;
 import com.rebu.profile.shop.Category;
 import com.rebu.profile.shop.dto.GenerateShopProfileDto;
 import com.rebu.profile.validation.annotation.LicenseNum;
@@ -21,7 +20,7 @@ public class GenerateShopProfileRequest {
     private MultipartFile imgFile;
     @Nickname
     private String nickname;
-    @Name
+
     private String name;
     @LicenseNum
     private String licenseNum;

@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface ShopProfileRepository extends JpaRepository<ShopProfile, Long> {
     @Query("select s from ShopProfile s where s.member.id = :memberId and s.status <> 'ROLE_DELETED'")
     Optional<ShopProfile> findShopProfileByMemberId(Long memberId);
+
+    Optional<ShopProfile> findByNickname(String nickname);
 }
