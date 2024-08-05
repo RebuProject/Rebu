@@ -28,6 +28,7 @@ public class GenerateEmployeeProfileDto {
                 .nickname(nickname)
                 .type(Type.EMPLOYEE)
                 .phone(phone)
+                .introduction(introduction)
                 .workingName(workingName)
                 .gender(member.getGender())
                 .build();

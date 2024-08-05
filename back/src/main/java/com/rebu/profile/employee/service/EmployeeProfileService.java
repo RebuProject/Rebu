@@ -6,7 +6,6 @@ import com.rebu.member.exception.MemberNotFoundException;
 import com.rebu.member.repository.MemberRepository;
 import com.rebu.profile.dto.ChangeImgDto;
 import com.rebu.profile.employee.dto.GenerateEmployeeProfileDto;
-import com.rebu.profile.employee.exception.AlreadyExistEmployeeProfileException;
 import com.rebu.profile.employee.repository.EmployeeProfileRepository;
 import com.rebu.profile.enums.Type;
 import com.rebu.profile.service.ProfileService;
@@ -27,13 +26,9 @@ public class EmployeeProfileService {
     private final RedisService redisService;
 
     @Transactional
-    public void generateEmployeeProfile(GenerateEmployeeProfileDto generateEmployeeProfileDto, HttpServletResponse response) {
+    public void generateProfile(GenerateEmployeeProfileDto generateEmployeeProfileDto, HttpServletResponse response) {
         Member member = memberRepository.findByEmail(generateEmployeeProfileDto.getEmail())
                 .orElseThrow(MemberNotFoundException::new);
-
-        if (employeeProfileRepository.findEmployeeProfileByMemberId(member.getId()).isPresent()) {
-            throw new AlreadyExistEmployeeProfileException();
-        }
 
         employeeProfileRepository.save(generateEmployeeProfileDto.toEntity(member));
 

@@ -27,7 +27,7 @@ public class EmployeeProfileController {
         if (nickname == null || !nickname.equals(generateEmployeeProfileRequest.getNickname())) {
             throw new NicknameDuplicateException();
         }
-        employeeProfileService.generateEmployeeProfile(generateEmployeeProfileRequest.toDto(authProfileInfo.getEmail(), authProfileInfo.getNickname()), response);
+        employeeProfileService.generateProfile(generateEmployeeProfileRequest.toDto(authProfileInfo.getEmail(), authProfileInfo.getNickname()), response);
         return ResponseEntity.ok(new ApiResponse<>("직원 프로필 생성 완료 코드", null));
     }
 }

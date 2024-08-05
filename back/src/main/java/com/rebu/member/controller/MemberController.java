@@ -3,6 +3,7 @@ package com.rebu.member.controller;
 import com.rebu.auth.exception.EmailNotVerifiedException;
 import com.rebu.auth.exception.PasswordNotVerifiedException;
 import com.rebu.auth.exception.PhoneNotVerifiedException;
+import com.rebu.common.aop.annotation.Authorized;
 import com.rebu.common.controller.dto.ApiResponse;
 import com.rebu.member.controller.dto.MemberJoinRequest;
 import com.rebu.member.controller.dto.ChangePasswordRequest;
@@ -11,6 +12,7 @@ import com.rebu.member.service.MemberService;
 import com.rebu.member.validation.annotation.Email;
 import com.rebu.member.validation.annotation.EmailCheckPurpose;
 import com.rebu.member.validation.annotation.Name;
+import com.rebu.profile.enums.Type;
 import com.rebu.profile.validation.annotation.Nickname;
 import com.rebu.profile.validation.annotation.Phone;
 import jakarta.servlet.http.HttpSession;
@@ -66,6 +68,7 @@ public class MemberController {
         return ResponseEntity.ok(new ApiResponse<>("이메일 찾기 성공 코드", email));
     }
 
+    @Authorized(allowed = Type.COMMON)
     @DeleteMapping
     public ResponseEntity<?> delete(@Nickname @RequestParam String nickname,
                                     @SessionAttribute(name = "AuthPassword:withdrawal", required = false) String authPassword) {

@@ -68,8 +68,10 @@ public class AuthController {
 
     @PostMapping("/license/verify")
     public ResponseEntity<?> verifyLicenseNum(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
-                                              @Valid @RequestBody LicenseNumSendRequest licenseNumSendRequest) {
+                                              @Valid @RequestBody LicenseNumSendRequest licenseNumSendRequest,
+                                              HttpSession session) {
         LicenseNumSendResponse result = licenseNumAuthService.verifyLicenceNum(licenseNumSendRequest.toDto(authProfileInfo.getNickname()));
+        session.setAttribute("AuthLicenseNum:" + licenseNumSendRequest.getPurpose(), licenseNumSendRequest.getLicenseNum());
         return ResponseEntity.ok(new ApiResponse<>("사업자 등록번호 인증 성공 코드", result));
     }
 

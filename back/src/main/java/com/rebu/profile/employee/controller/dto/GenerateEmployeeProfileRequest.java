@@ -5,17 +5,17 @@ import com.rebu.profile.employee.validation.annotation.WorkingName;
 import com.rebu.profile.validation.annotation.Introduction;
 import com.rebu.profile.validation.annotation.Nickname;
 import com.rebu.profile.validation.annotation.Phone;
+import com.rebu.profile.validation.annotation.ProfileImg;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @AllArgsConstructor
 @Builder
 public class GenerateEmployeeProfileRequest {
-
+    @ProfileImg
     private MultipartFile imgFile;
     @Nickname
     private String nickname;

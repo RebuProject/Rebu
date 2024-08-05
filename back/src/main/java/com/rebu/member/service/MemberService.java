@@ -14,11 +14,9 @@ import com.rebu.member.repository.MemberRepository;
 import com.rebu.profile.dto.ProfileDto;
 import com.rebu.profile.dto.ProfileGenerateDto;
 import com.rebu.profile.entity.Profile;
-import com.rebu.profile.enums.Type;
 import com.rebu.profile.exception.NicknameDuplicateException;
 import com.rebu.profile.exception.PhoneDuplicateException;
 import com.rebu.profile.exception.ProfileNotFoundException;
-import com.rebu.profile.exception.ProfileUnauthorizedException;
 import com.rebu.profile.repository.ProfileRepository;
 import com.rebu.profile.service.ProfileService;
 import jakarta.servlet.http.HttpSession;
@@ -79,10 +77,6 @@ public class MemberService {
     public void withdraw(String nickname) {
        Profile profile = profileRepository.findByNickname(nickname)
                .orElseThrow(ProfileNotFoundException::new);
-
-        if (!profile.getType().equals(Type.COMMON)) {
-            throw new ProfileUnauthorizedException();
-        }
 
         Member member = profile.getMember();
 

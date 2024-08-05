@@ -4,12 +4,21 @@ import com.rebu.profile.entity.Profile;
 import com.rebu.profile.shop.Category;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Entity
+@Getter
+@SuperBuilder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class ShopProfile extends Profile {
 
     @Column(unique=true, nullable = false)
-    private String LicenseNum;
+    private String licenseNum;
 
     @Column(length = 32, nullable = false)
     private String name;
