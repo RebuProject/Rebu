@@ -4,12 +4,16 @@ import com.rebu.common.controller.dto.ApiResponse;
 import com.rebu.follow.controller.dto.FollowRequest;
 import com.rebu.follow.dto.FollowDeleteDto;
 import com.rebu.follow.service.FollowService;
+import com.rebu.profile.dto.GetFollowerDto;
+import com.rebu.profile.dto.GetFollowingDto;
 import com.rebu.security.dto.AuthProfileInfo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,5 +34,17 @@ public class FollowController {
                                     @PathVariable Long followId) {
         followService.delete(new FollowDeleteDto(followId, authProfileInfo.getNickname()));
         return ResponseEntity.ok(new ApiResponse<>("팔로우 삭제 성공 코드", null));
+    }
+
+    @GetMapping("/{nickname}/followings")
+    public ResponseEntity<?> getFollowings(@PathVariable String nickname) {
+        List<GetFollowingDto> followings = followService.getFollowings(nickname);
+        return ResponseEntity.ok(new ApiResponse<>("팔로잉 조회 성공 코드", followings));
+    }
+
+    @GetMapping("/{nickname}/followers")
+    public ResponseEntity<?> getFollowers(@PathVariable String nickname) {
+        List<GetFollowerDto> followers = followService.getFollowers(nickname);
+        return ResponseEntity.ok(new ApiResponse<>("팔로잉 조회 성공 코드", followers));
     }
 }

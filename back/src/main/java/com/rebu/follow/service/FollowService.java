@@ -5,12 +5,16 @@ import com.rebu.follow.dto.FollowDto;
 import com.rebu.follow.entity.Follow;
 import com.rebu.follow.exception.FollowNotExistException;
 import com.rebu.follow.repository.FollowRepository;
+import com.rebu.profile.dto.GetFollowerDto;
+import com.rebu.profile.dto.GetFollowingDto;
 import com.rebu.profile.entity.Profile;
 import com.rebu.profile.exception.ProfileNotFoundException;
 import com.rebu.profile.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -42,5 +46,26 @@ public class FollowService {
         }
 
         followRepository.delete(follow);
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<GetFollowingDto> getFollowings(String nickname) {
+        Profile profile = profileRepository.findByNickname(nickname)
+                .orElseThrow(ProfileNotFoundException::new);
+
+        List<Follow> followings = followRepository.findByFollowerId(profile.getId());
+
+        return followings.stream().map(GetFollowingDto::from).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<GetFollowerDto> getFollowers(String nickname) {
+        Profile profile = profileRepository.findByNickname(nickname)
+                .orElseThrow(ProfileNotFoundException::new);
+
+        List<Follow> followers = followRepository.findByFollowingId(profile.getId());
+
+        return followers.stream().map(GetFollowerDto::from).toList();
     }
 }
