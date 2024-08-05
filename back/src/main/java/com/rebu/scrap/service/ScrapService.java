@@ -10,6 +10,7 @@ import com.rebu.scrap.entity.Scrap;
 import com.rebu.scrap.exception.ScrapExistException;
 import com.rebu.scrap.exception.ScrapNotExistException;
 import com.rebu.scrap.repository.ScrapRepository;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ public class ScrapService {
     private final ProfileRepository profileRepository;
     private final FeedRepository feedRepository;
 
+    @Transactional
     public boolean create(ScrapCreateDto dto) {
         Profile profile = profileRepository.findByNickname(dto.getRequestUserNickname()).orElseThrow(ProfileNotFoundException::new);
         Feed feed = feedRepository.findById(dto.getFeedId()).orElseThrow(ProfileNotFoundException::new);
@@ -30,6 +32,7 @@ public class ScrapService {
         return true;
     }
 
+    @Transactional
     public boolean delete(Long scrapId, String userNickname) {
         Profile profile = profileRepository.findByNickname(userNickname).orElseThrow(ProfileNotFoundException::new);
         Feed feed = feedRepository.findById(scrapId).orElseThrow(ProfileNotFoundException::new);
