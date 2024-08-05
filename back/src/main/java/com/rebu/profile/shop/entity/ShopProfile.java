@@ -4,11 +4,14 @@ import com.rebu.profile.entity.Profile;
 import com.rebu.profile.shop.Category;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+
 
 @Entity
 @Getter
@@ -32,13 +35,16 @@ public class ShopProfile extends Profile {
     @Column(nullable = false)
     private double lng;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Category category;
 
     @Column(nullable = false)
     private int reservationInterval;
 
+    @Override
     protected void onCreate() {
+        super.onCreate();
         if (reservationInterval == 0) {
             reservationInterval = 10;
         }

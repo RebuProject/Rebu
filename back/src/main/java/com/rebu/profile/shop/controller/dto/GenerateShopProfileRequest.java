@@ -37,6 +37,7 @@ public class GenerateShopProfileRequest {
         return GenerateShopProfileDto.builder()
                 .imgFile(imgFile)
                 .nickname(nickname)
+                .name(name)
                 .licenseNum(licenseNum)
                 .address(address)
                 .phone(phone)
