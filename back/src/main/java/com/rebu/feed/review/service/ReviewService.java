@@ -26,14 +26,17 @@ import com.rebu.profile.shop.entity.ShopProfile;
 import com.rebu.reservation.entity.Reservation;
 import com.rebu.reservation.exception.ReservationNotFoundException;
 import com.rebu.reservation.repository.ReservationRepository;
+import com.rebu.reviewkeyword.entity.ReviewKeyword;
 import com.rebu.reviewkeyword.entity.SelectedReviewKeyword;
 import com.rebu.reviewkeyword.entity.SelectedReviewKeywordId;
+import com.rebu.reviewkeyword.repository.ReviewKeywordRepository;
 import com.rebu.reviewkeyword.repository.SelectedReviewKeywordRepository;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -46,8 +49,13 @@ public class ReviewService {
     private final ReservationRepository reservationRepository;
     private final FeedImageService feedImageService;
     private final SelectedReviewKeywordRepository selectedReviewKeywordRepository;
+    private final ReviewKeywordRepository reviewKeywordRepository;
 
-
+    /**
+     * ReviewService :: create method
+     * 리뷰 정보를 받아 리뷰를 작성
+     * @param dto 작성할 피드 정보
+     */
     @Transactional
     @Authorized(allowed = {Type.COMMON})
     public void create(@Valid ReviewCreateDto dto) {
@@ -60,15 +68,15 @@ public class ReviewService {
         EmployeeProfile employee = reservation.getEmployeeProfile();
         ShopProfile shop = reservation.getShopProfile();
         Review review = reviewRepository.save(dto.toEntity(profile, employee, shop, reservation));
-        List<SelectedReviewKeyword> selectedReviewKeywords = generateSelectedReviewKeyword(review.getId(), dto.getReviewKeywordIds());
+        List<SelectedReviewKeyword> selectedReviewKeywords = generateSelectedReviewKeyword(dto.getReviewKeywordIds(), review);
         selectedReviewKeywordRepository.saveAll(selectedReviewKeywords);
         feedImageService.createFeedImages(dto.getImages(), review);
         hashtagService.createHashTags(dto.getHashtags(), review);
     }
 
     /**
-     * FeedService :: modify method
-     * 피드 정보를 받아 특정 피드를 수정
+     * ReviewService :: modify method
+     * 수정할 리뷰 정보를 받아 리뷰를 수정
      * @param dto 수정할 피드 정보
      */
     @Transactional
@@ -81,7 +89,7 @@ public class ReviewService {
             throw new ProfileUnauthorizedException();
 
         selectedReviewKeywordRepository.deleteByReviewId(review.getId());
-        List<SelectedReviewKeyword> selectedReviewKeywords = generateSelectedReviewKeyword(review.getId(), dto.getReviewKeywordIds());
+        List<SelectedReviewKeyword> selectedReviewKeywords = generateSelectedReviewKeyword(dto.getReviewKeywordIds(), review);
         selectedReviewKeywordRepository.saveAll(selectedReviewKeywords);
         feedImageService.deleteFeedImages(review.getId());
         feedImageService.createFeedImages(dto.getImages(), review);
@@ -93,9 +101,9 @@ public class ReviewService {
     }
 
     /**
-     * FeedService :: delete method
-     * 특정 피드를 삭제
-     * @param dto 삭제할 피드 정보
+     * ReviewService :: delete method
+     * 특정 리뷰를 삭제
+     * @param dto 삭제할 리뷰 정보
      */
     @Transactional
     @Authorized(allowed = {Type.COMMON})
@@ -112,7 +120,15 @@ public class ReviewService {
         reviewRepository.delete(review);
     }
 
-    private List<SelectedReviewKeyword> generateSelectedReviewKeyword(Long feedId, List<Long> reviewKeywordIds) {
-        return ListUtils.applyFunctionToElements(reviewKeywordIds, (element) ->  new SelectedReviewKeyword(new SelectedReviewKeywordId(feedId, element)));
+    private List<SelectedReviewKeyword> generateSelectedReviewKeyword(List<Long> reviewKeywordIds, Review review) {
+        List<SelectedReviewKeyword> result = new ArrayList<>();
+        List<ReviewKeyword> reviewKeywords = reviewKeywordRepository.findAllById(reviewKeywordIds);
+        for (ReviewKeyword reviewKeyword : reviewKeywords) {
+            result.add(SelectedReviewKeyword.builder()
+                    .selectedReviewKeywordId(new SelectedReviewKeywordId(review.getId(), reviewKeyword.getId()))
+                    .review(review)
+                    .reviewKeyword(reviewKeyword).build());
+        }
+        return result;
     }
 }

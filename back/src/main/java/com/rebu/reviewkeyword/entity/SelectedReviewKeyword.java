@@ -12,10 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SelectedReviewKeyword {
 
-    public SelectedReviewKeyword(SelectedReviewKeywordId selectedReviewKeywordId) {
-        this.selectedReviewKeywordId = selectedReviewKeywordId;
-    }
-
     @EmbeddedId
     private SelectedReviewKeywordId selectedReviewKeywordId;
 

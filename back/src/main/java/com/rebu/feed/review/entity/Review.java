@@ -20,11 +20,11 @@ public class Review extends Feed {
     @JoinColumn(name = "reservation_id")
     private Reservation reservation;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id")
     private EmployeeProfile employeeProfile;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id")
     private ShopProfile shopProfile;
 
