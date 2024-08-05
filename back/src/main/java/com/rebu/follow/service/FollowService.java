@@ -2,12 +2,16 @@ package com.rebu.follow.service;
 
 import com.rebu.follow.dto.FollowDeleteDto;
 import com.rebu.follow.dto.FollowDto;
+import com.rebu.follow.dto.GetFollowersTargetDto;
+import com.rebu.follow.dto.GetFollowingsTargetDto;
 import com.rebu.follow.entity.Follow;
 import com.rebu.follow.exception.FollowNotExistException;
 import com.rebu.follow.repository.FollowRepository;
-import com.rebu.profile.dto.GetFollowerDto;
-import com.rebu.profile.dto.GetFollowingDto;
+import com.rebu.member.enums.Status;
+import com.rebu.follow.dto.GetFollowerDto;
+import com.rebu.follow.dto.GetFollowingDto;
 import com.rebu.profile.entity.Profile;
+import com.rebu.profile.exception.ProfileCantAccessException;
 import com.rebu.profile.exception.ProfileNotFoundException;
 import com.rebu.profile.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +35,10 @@ public class FollowService {
         Profile sender = profileRepository.findByNickname(followDto.getSender())
                 .orElseThrow(ProfileNotFoundException::new);
 
+        if (receiver.getId().equals(sender.getId()) || receiver.getStatus() == Status.ROLE_DELETED) {
+            throw new ProfileCantAccessException();
+        }
+
         followRepository.save(followDto.toEntity(sender, receiver));
     }
 
@@ -50,9 +58,19 @@ public class FollowService {
 
 
     @Transactional(readOnly = true)
-    public List<GetFollowingDto> getFollowings(String nickname) {
-        Profile profile = profileRepository.findByNickname(nickname)
+    public List<GetFollowingDto> getFollowings(GetFollowingsTargetDto getFollowingsTargetDto) {
+        Profile profile = profileRepository.findByNickname(getFollowingsTargetDto.getTargetNickname())
                 .orElseThrow(ProfileNotFoundException::new);
+
+        if (!getFollowingsTargetDto.getNickname().equals(getFollowingsTargetDto.getTargetNickname())) {
+            if (profile.isPrivate()) {
+                throw new ProfileCantAccessException();
+            }
+        }
+
+        if (profile.getStatus() == Status.ROLE_DELETED) {
+            throw new ProfileCantAccessException();
+        }
 
         List<Follow> followings = followRepository.findByFollowerId(profile.getId());
 
@@ -60,9 +78,19 @@ public class FollowService {
     }
 
     @Transactional(readOnly = true)
-    public List<GetFollowerDto> getFollowers(String nickname) {
-        Profile profile = profileRepository.findByNickname(nickname)
+    public List<GetFollowerDto> getFollowers(GetFollowersTargetDto getFollowersTargetDto) {
+        Profile profile = profileRepository.findByNickname(getFollowersTargetDto.getTargetNickname())
                 .orElseThrow(ProfileNotFoundException::new);
+
+        if (!getFollowersTargetDto.getNickname().equals(getFollowersTargetDto.getTargetNickname())) {
+            if (profile.isPrivate()) {
+                throw new ProfileCantAccessException();
+            }
+        }
+
+        if (profile.getStatus() == Status.ROLE_DELETED) {
+            throw new ProfileCantAccessException();
+        }
 
         List<Follow> followers = followRepository.findByFollowingId(profile.getId());
 

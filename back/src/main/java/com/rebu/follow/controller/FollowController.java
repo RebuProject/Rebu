@@ -3,9 +3,11 @@ package com.rebu.follow.controller;
 import com.rebu.common.controller.dto.ApiResponse;
 import com.rebu.follow.controller.dto.FollowRequest;
 import com.rebu.follow.dto.FollowDeleteDto;
+import com.rebu.follow.dto.GetFollowersTargetDto;
+import com.rebu.follow.dto.GetFollowingsTargetDto;
 import com.rebu.follow.service.FollowService;
-import com.rebu.profile.dto.GetFollowerDto;
-import com.rebu.profile.dto.GetFollowingDto;
+import com.rebu.follow.dto.GetFollowerDto;
+import com.rebu.follow.dto.GetFollowingDto;
 import com.rebu.security.dto.AuthProfileInfo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,14 +39,16 @@ public class FollowController {
     }
 
     @GetMapping("/{nickname}/followings")
-    public ResponseEntity<?> getFollowings(@PathVariable String nickname) {
-        List<GetFollowingDto> followings = followService.getFollowings(nickname);
+    public ResponseEntity<?> getFollowings(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
+                                           @PathVariable String nickname) {
+        List<GetFollowingDto> followings = followService.getFollowings(new GetFollowingsTargetDto(authProfileInfo.getNickname(), nickname));
         return ResponseEntity.ok(new ApiResponse<>("팔로잉 조회 성공 코드", followings));
     }
 
     @GetMapping("/{nickname}/followers")
-    public ResponseEntity<?> getFollowers(@PathVariable String nickname) {
-        List<GetFollowerDto> followers = followService.getFollowers(nickname);
+    public ResponseEntity<?> getFollowers(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
+                                          @PathVariable String nickname) {
+        List<GetFollowerDto> followers = followService.getFollowers(new GetFollowersTargetDto(authProfileInfo.getNickname(), nickname));
         return ResponseEntity.ok(new ApiResponse<>("팔로잉 조회 성공 코드", followers));
     }
 }
