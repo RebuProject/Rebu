@@ -1,12 +1,16 @@
 package com.rebu.reviewkeyword.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.Objects;
 
 @Getter
 @Embeddable
+@NoArgsConstructor
+@AllArgsConstructor
 public class SelectedReviewKeywordId {
     @Column(name = "review_id")
     private Long reviewId;
