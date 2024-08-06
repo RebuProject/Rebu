@@ -32,9 +32,9 @@ public class ShopProfileController {
             throw new NicknameDuplicateException();
         }
 
-        if (licenseNum == null || !licenseNum.equals(generateShopProfileRequest.getLicenseNum())) {
-            throw new LicenseNumNotVerifiedException();
-        }
+//        if (licenseNum == null || !licenseNum.equals(generateShopProfileRequest.getLicenseNum())) {
+//            throw new LicenseNumNotVerifiedException();
+//        }
         shopProfileService.generateProfile(generateShopProfileRequest.toDto(authProfileInfo.getNickname(), authProfileInfo.getEmail()), response);
         return ResponseEntity.ok(new ApiResponse<>("매장 프로필 생성 완료 코드", null));
     }
