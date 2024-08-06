@@ -103,4 +103,19 @@ public class ProfileController {
         return ResponseEntity.ok(new ApiResponse<>("전화번호 변경 완료 코드", null));
     }
 
+    @DeleteMapping("/{nickname}")
+    public ResponseEntity<?> deleteProfile(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
+                                           @PathVariable String nickname) {
+        profileService.deleteProfile();
+        return ResponseEntity.ok(new ApiResponse<>("프로필 삭제 성공 코드", null));
+    }
+
+    @GetMapping("/switch-profile")
+    public ResponseEntity<?> switchProfile(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
+                                           @Nickname @RequestParam String nickname,
+                                           HttpServletResponse response) {
+        profileService.switchProfile(new SwitchProfileDto(authProfileInfo.getNickname(), nickname), response);
+        return ResponseEntity.ok(new ApiResponse<>("프로필 전환 성공 코드", null));
+    }
+
 }

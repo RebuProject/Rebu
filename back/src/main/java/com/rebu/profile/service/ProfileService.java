@@ -7,6 +7,7 @@ import com.rebu.follow.repository.FollowRepository;
 import com.rebu.member.entity.Member;
 import com.rebu.profile.dto.*;
 import com.rebu.profile.entity.Profile;
+import com.rebu.profile.exception.MemberNotMatchException;
 import com.rebu.profile.exception.ProfileNotFoundException;
 import com.rebu.profile.repository.ProfileRepository;
 import com.rebu.security.util.JWTUtil;
@@ -110,6 +111,27 @@ public class ProfileService {
         }
     }
 
+    @Transactional
+    public void deleteProfile() {
+
+    }
+
+    @Transactional
+    public void switchProfile(SwitchProfileDto switchProfileDto, HttpServletResponse response) {
+        Profile nowProfile = profileRepository.findByNickname(switchProfileDto.getNowNickname())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        Profile targetProfile = profileRepository.findByNickname(switchProfileDto.getNickname())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        if (nowProfile.getMember() != targetProfile.getMember()) {
+            throw new MemberNotMatchException();
+        }
+
+        redisService.deleteData("Refresh:" + nowProfile.getNickname());
+
+        resetToken(targetProfile.getNickname(), targetProfile.getType().toString(), response);
+    }
 
     private void resetToken(String nickname, String type, HttpServletResponse response) {
         String newAccess = JWTUtil.createJWT("access", nickname, type, 1800000L);
