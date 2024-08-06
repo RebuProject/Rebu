@@ -10,9 +10,9 @@ import com.rebu.scrap.entity.Scrap;
 import com.rebu.scrap.exception.ScrapExistException;
 import com.rebu.scrap.exception.ScrapNotExistException;
 import com.rebu.scrap.repository.ScrapRepository;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
