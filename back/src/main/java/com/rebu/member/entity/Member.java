@@ -3,11 +3,10 @@ package com.rebu.member.entity;
 import com.rebu.member.enums.Gender;
 import com.rebu.member.enums.Status;
 import com.rebu.profile.entity.Profile;
-import com.rebu.profile.enums.Type;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -20,6 +19,8 @@ import java.util.List;
 @Entity
 @Getter
 @Builder
+@SQLDelete(sql = "UPDATE member SET status = 'ROLE_DELETED' WHERE id = ?")
+@SQLRestriction("status != 'ROLE_DELETED'")
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -61,9 +62,5 @@ public class Member {
 
     public void changePassword(String newPassword) {
         password = newPassword;
-    }
-
-    public void changeStatus(Status newStatus) {
-        status = newStatus;
     }
 }
