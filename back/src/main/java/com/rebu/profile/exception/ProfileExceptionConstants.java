@@ -17,7 +17,8 @@ public enum ProfileExceptionConstants implements ExceptionConstants {
     LICENSE_NUM_MISMATCH("사업자 등록 번호 형식 불일치"),
     INTRODUCTION_MISMATCH("프로필 소개 형식 불일치"),
     PROFILE_IMG_MISMATCH("프로필 이미지 형식 불일치"),
-    PROFILE_TYPE_MISMATCH("프로필 타입 불일치");
+    PROFILE_TYPE_MISMATCH("프로필 타입 불일치"),
+    PROFILE_CANT_ACCESS("접근 불가능한 프로필");
 
     final String code;
 }
