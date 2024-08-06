@@ -68,10 +68,6 @@ public class FollowService {
             }
         }
 
-        if (profile.getStatus() == Status.ROLE_DELETED) {
-            throw new ProfileCantAccessException();
-        }
-
         List<Follow> followings = followRepository.findByFollowerId(profile.getId());
 
         return followings.stream().map(GetFollowingDto::from).toList();
@@ -86,10 +82,6 @@ public class FollowService {
             if (profile.isPrivate()) {
                 throw new ProfileCantAccessException();
             }
-        }
-
-        if (profile.getStatus() == Status.ROLE_DELETED) {
-            throw new ProfileCantAccessException();
         }
 
         List<Follow> followers = followRepository.findByFollowingId(profile.getId());
