@@ -21,7 +21,7 @@ public class WorkingInfoController {
     private final WorkingInfoService workingInfoService;
 
     @PutMapping
-    @Authorized(allowed = {Type.SHOP})
+    @Authorized(allowed = {Type.SHOP, Type.EMPLOYEE})
     public ResponseEntity<?> update(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
         @Valid @RequestBody WorkingInfoUpdateRequest workingInfoUpdateRequest) {
         String requestUserNickname =  authProfileInfo.getNickname();
