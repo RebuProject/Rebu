@@ -2,12 +2,15 @@ package com.rebu.profile.service;
 
 import com.rebu.common.service.RedisService;
 import com.rebu.common.util.FileUtils;
+import com.rebu.feed.review.repository.ReviewRepository;
+import com.rebu.follow.repository.FollowRepository;
 import com.rebu.member.entity.Member;
 import com.rebu.profile.dto.*;
 import com.rebu.profile.entity.Profile;
 import com.rebu.profile.exception.MemberNotMatchException;
 import com.rebu.profile.exception.ProfileNotFoundException;
 import com.rebu.profile.repository.ProfileRepository;
+import com.rebu.scrap.repository.ScrapRepository;
 import com.rebu.security.util.JWTUtil;
 import com.rebu.storage.exception.FileUploadFailException;
 import com.rebu.storage.service.StorageService;
@@ -27,6 +30,9 @@ public class ProfileService {
     private final ProfileRepository profileRepository;
     private final RedisService redisService;
     private final StorageService storageService;
+    private final FollowRepository followRepository;
+    private final ReviewRepository reviewRepository;
+    private final ScrapRepository scrapRepository;
 
     @Transactional
     public void generateProfile(ProfileGenerateDto profileGenerateDto, Member member) {
@@ -137,6 +143,20 @@ public class ProfileService {
         redisService.deleteData("Refresh:" + nowProfile.getNickname());
 
         resetToken(targetProfile.getNickname(), targetProfile.getType().toString(), response);
+    }
+
+    @Transactional(readOnly = true)
+    public GetProfileResponse getProfile(GetProfileDto getProfileDto) {
+        Profile profile = profileRepository.findByNickname(getProfileDto.getTargetNickname())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        int followingCnt = followRepository.findByFollowerId(profile.getId()).size();
+        int followerCnt = followRepository.findByFollowingId(profile.getId()).size();
+
+        int reviewCnt = reviewRepository.findAllByWriterId(profile.getId()).size();
+        int scrapCnt = scrapRepository.findAllByProfileId(profile.getId()).size();
+
+        // int favoriteCnt =
     }
 
     private void resetToken(String nickname, String type, HttpServletResponse response) {

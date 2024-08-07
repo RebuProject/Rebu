@@ -24,8 +24,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/profiles")
@@ -124,6 +122,13 @@ public class ProfileController {
                                            HttpServletResponse response) {
         profileService.switchProfile(new SwitchProfileDto(authProfileInfo.getNickname(), nickname), response);
         return ResponseEntity.ok(new ApiResponse<>("프로필 전환 성공 코드", null));
+    }
+
+    @GetMapping("/{nickname}")
+    public ResponseEntity<?> getProfile(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
+                                        @PathVariable String nickname) {
+        GetProfileResponse result = profileService.getProfile(new GetProfileDto(authProfileInfo.getNickname(), nickname));
+        return ResponseEntity.ok(new ApiResponse<>("일반 프로필 조회 성공 코드", result));
     }
 
 }
