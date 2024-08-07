@@ -23,11 +23,15 @@ import com.rebu.reservation.exception.ReservationNotFoundException;
 import com.rebu.reservation.exception.ReservationStatusMismatchException;
 import com.rebu.reservation.exception.ReservationStatusNotChangeableException;
 import com.rebu.reservation.repository.ReservationRepository;
+import com.rebu.workingInfo.entity.WorkingInfo;
+import com.rebu.workingInfo.repository.WorkingInfoRepository;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -39,7 +43,9 @@ public class ReservationService {
     private final EmployeeProfileRepository employeeProfileRepository;
     private final MenuRepository menuRepository;
     private final ReservationRepository reservationRepository;
+    private final WorkingInfoRepository workingInfoRepository;
 
+    @Transactional
     @Authorized(allowed = {Type.COMMON})
     public void create(@Valid ReservationCreateDto dto){
         Profile profile = profileRepository.findByNickname(dto.getNickname()).orElseThrow(ProfileNotFoundException::new);
@@ -47,19 +53,34 @@ public class ReservationService {
         EmployeeProfile employee = employeeProfileRepository.findByNickname(dto.getShopNickname()).orElseThrow(ProfileNotFoundException::new);
         if(!shop.equals(employee.getShop()))
             throw new EmployeeProfileNotIncludeException();
+
         Menu menu = menuRepository.findById(dto.getMenuId()).orElseThrow(MenuNotFoundException::new);
-        Integer timeTaken = menu.getTimeTaken();
-        List<Reservation> list = reservationRepository.findByEmployeeProfileAndStartDateTimeBetween(employee, dto.getStartDateTime().minusMinutes(timeTaken), dto.getStartDateTime().plusMinutes(timeTaken));
-        if(!list.isEmpty())
-            throw new ReservationNotAcceptableException();
+
+        LocalDateTime startDateTime = dto.getStartDateTime();
+        LocalDateTime endDateTime = startDateTime.plusMinutes(menu.getTimeTaken());
+
+        LocalTime startTime = startDateTime.toLocalTime();
+        LocalTime endTime = endDateTime.toLocalTime();
+        int day = startDateTime.getDayOfWeek().getValue()-1;
+
+        List<WorkingInfo> shopWorkingInfos = workingInfoRepository.findByProfileId(shop.getId());
+        checkCreateReservationWorkingInfos(shopWorkingInfos, startTime, endTime, day);
+        List<WorkingInfo> employeeWorkingInfos = workingInfoRepository.findByProfileId(employee.getId());
+        checkCreateReservationWorkingInfos(employeeWorkingInfos, startTime, endTime, day);
+
+        List<Absence> shopAbsences = absenceRepository.findByProfileIdAndDate(shop.getId(), startDateTime.toLocalDate());
+        checkCreateReservationAbsences(shopAbsences, startDateTime, endDateTime);
+        List<Absence> employeeAbsences = absenceRepository.findByProfileIdAndDate(employee.getId(), startDateTime.toLocalDate());
+        checkCreateReservationAbsences(employeeAbsences, startDateTime, endDateTime);
+
+        List<Reservation> reservations = reservationRepository.findByProfileIdAndDate(employee.getId(), startDateTime.toLocalDate());
+        checkCreateReservationExistReservation(reservations, startTime, endTime);
 
         Reservation reservation = dto.toEntity(profile, shop, employee, menu);
-        // TODO. 직원 매장 부재 제약 조건
-        // TODO. 직원 매장 영업 제약 조건
-
         reservationRepository.save(reservation);
     }
 
+    @Transactional
     @Authorized(allowed = {Type.EMPLOYEE})
     public void modifyReservationStatus(@Valid ReservationStatusModifyDto dto) {
         EmployeeProfile employee = employeeProfileRepository.findByNickname(dto.getNickname()).orElseThrow(ProfileNotFoundException::new);
@@ -76,6 +97,7 @@ public class ReservationService {
         reservation.changeReservationStatus(dto.getReservationStatus());
     }
 
+    @Transactional
     @Authorized(allowed = {Type.COMMON})
     public void deleteReservationStatus(@Valid ReservationStatusDeleteDto dto) {
         Reservation reservation = reservationRepository.findById(dto.getReservationId()).orElseThrow(ReservationNotFoundException::new);
@@ -107,4 +129,35 @@ public class ReservationService {
         if(reservation.getStartDateTime().isBefore(LocalDateTime.now()))
             throw new ReservationStatusNotChangeableException();
     }
+
+    private void checkCreateReservationWorkingInfos(List<WorkingInfo> workingInfos, LocalTime startTime, LocalTime endTime, int day){
+        for(WorkingInfo workingInfo : workingInfos){
+            if(day == workingInfo.getId().getDay().ordinal()){
+                if(workingInfo.isHoliday())
+                    throw new ReservationNotAcceptableException();
+                if(startTime.isBefore(workingInfo.getOpenAt())||endTime.isAfter(workingInfo.getCloseAt()))
+                    throw new ReservationNotAcceptableException();
+                break;
+            }
+        }
+    }
+
+    private void checkCreateReservationAbsences(List<Absence> absences, LocalDateTime startDateTime, LocalDateTime endDateTime){
+        for(Absences absence : absences){
+            LocalDateTime s = absence.getStartDate();
+            LocalDateTime e = absence.getEndDate();
+            if(!startDateTime.isAfter(e) && !endDateTime.isBefore(s))
+                throw new ReservationNotAcceptableException();
+        }
+    }
+
+    private void checkCreateReservationExistReservation(List<Reservation> reservations, LocalTime startTime, LocalTime endTime){
+        for(Reservation reservation : reservations){
+            LocalTime s = reservation.getStartDateTime().toLocalTime();
+            LocalTime e = reservation.getStartDateTime().toLocalTime().plusMinutes(reservation.getMenu().getTimeTaken());
+            if(!startTime.isAfter(e) && !endTime.isBefore(s))
+                throw new ReservationNotAcceptableException();
+        }
+    }
+
 }
