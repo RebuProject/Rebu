@@ -130,7 +130,7 @@ public class ProfileService {
         Profile targetProfile = profileRepository.findByNickname(switchProfileDto.getNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
-        if (nowProfile.getMember() != targetProfile.getMember()) {
+        if (!nowProfile.getMember().equals(targetProfile.getMember())) {
             throw new MemberNotMatchException();
         }
 
