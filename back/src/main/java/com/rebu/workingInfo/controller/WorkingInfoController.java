@@ -23,9 +23,9 @@ public class WorkingInfoController {
     @PutMapping
     @Authorized(allowed = {Type.SHOP})
     public ResponseEntity<?> update(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
-        @Valid @RequestBody WorkingInfoUpdateRequest workingInfoUpdqteRequest) {
+        @Valid @RequestBody WorkingInfoUpdateRequest workingInfoUpdateRequest) {
         String requestUserNickname =  authProfileInfo.getNickname();
-        workingInfoService.update(workingInfoUpdqteRequest.toDto(requestUserNickname));
+        workingInfoService.update(workingInfoUpdateRequest.toDto(requestUserNickname));
         return new ResponseEntity<>(new ApiResponse<>("1K01",null), HttpStatus.OK);
     }
 }
