@@ -2,6 +2,7 @@ package com.rebu.workingInfo.controller.dto;
 
 import com.rebu.workingInfo.dto.WorkingInfoUpdateDto;
 import com.rebu.workingInfo.validation.annotation.Day;
+import com.rebu.workingInfo.validation.annotation.IsHoliday;
 import com.rebu.workingInfo.validation.annotation.Time;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,11 +13,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class WorkingInfoUpdqteRequest {
+public class WorkingInfoUpdateRequest {
     @Day
     private String day;
 
-    private  boolean isHoliday;
+    @IsHoliday
+    private  Boolean isHoliday;
 
     @Time
     private  String openAt;
