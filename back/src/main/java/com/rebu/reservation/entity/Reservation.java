@@ -45,28 +45,16 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private ReservationStatus reservationStatus;
 
-    @Enumerated(EnumType.STRING)
-    private ReviewStatus reviewStatus;
-
     @PrePersist
     protected void onCreate() {
         reservationStatus = ReservationStatus.RECEIVED;
-        reviewStatus = ReviewStatus.WAITED;
     }
 
     public enum ReservationStatus {
         RECEIVED, DONE, ACCEPTED, REFUSED, CANCLED, NOSHOW
     }
 
-    public enum ReviewStatus {
-        WAITED, UNWRITTEN, WRITTEN, CLOSED
-    }
-
     public void changeReservationStatus(ReservationStatus reservationStatus) {
         this.reservationStatus = reservationStatus;
-    }
-
-    public void changeReviewStatus(ReviewStatus reviewStatus) {
-        this.reviewStatus = reviewStatus;
     }
 }

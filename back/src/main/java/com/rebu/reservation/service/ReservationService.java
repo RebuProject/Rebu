@@ -55,7 +55,7 @@ public class ReservationService {
 
         Reservation reservation = dto.toEntity(profile, shop, employee, menu);
         // TODO. 직원 매장 부재 제약 조건
-        // TODO. 직원 매장 운영 제약 조건
+        // TODO. 직원 매장 영업 제약 조건
 
         reservationRepository.save(reservation);
     }
