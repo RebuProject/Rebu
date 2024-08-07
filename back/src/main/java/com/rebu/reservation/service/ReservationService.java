@@ -1,5 +1,7 @@
 package com.rebu.reservation.service;
 
+import com.rebu.absence.entity.Absence;
+import com.rebu.absence.repository.AbsenceRepository;
 import com.rebu.common.aop.annotation.Authorized;
 import com.rebu.menu.entity.Menu;
 import com.rebu.menu.exception.MenuNotFoundException;
@@ -44,6 +46,7 @@ public class ReservationService {
     private final MenuRepository menuRepository;
     private final ReservationRepository reservationRepository;
     private final WorkingInfoRepository workingInfoRepository;
+    private final AbsenceRepository absenceRepository;
 
     @Transactional
     @Authorized(allowed = {Type.COMMON})
@@ -143,7 +146,7 @@ public class ReservationService {
     }
 
     private void checkCreateReservationAbsences(List<Absence> absences, LocalDateTime startDateTime, LocalDateTime endDateTime){
-        for(Absences absence : absences){
+        for(Absence absence : absences){
             LocalDateTime s = absence.getStartDate();
             LocalDateTime e = absence.getEndDate();
             if(!startDateTime.isAfter(e) && !endDateTime.isBefore(s))
