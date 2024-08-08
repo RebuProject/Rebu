@@ -1,15 +1,11 @@
 package com.rebu.follow.service;
 
-import com.rebu.follow.dto.FollowDeleteDto;
-import com.rebu.follow.dto.FollowDto;
-import com.rebu.follow.dto.GetFollowersTargetDto;
-import com.rebu.follow.dto.GetFollowingsTargetDto;
+import com.rebu.follow.dto.*;
 import com.rebu.follow.entity.Follow;
+import com.rebu.follow.exception.AlreadyFollowingException;
 import com.rebu.follow.exception.FollowNotExistException;
 import com.rebu.follow.repository.FollowRepository;
 import com.rebu.member.enums.Status;
-import com.rebu.follow.dto.GetFollowerDto;
-import com.rebu.follow.dto.GetFollowingDto;
 import com.rebu.profile.entity.Profile;
 import com.rebu.profile.exception.ProfileCantAccessException;
 import com.rebu.profile.exception.ProfileNotFoundException;
@@ -39,6 +35,10 @@ public class FollowService {
             throw new ProfileCantAccessException();
         }
 
+        if (followRepository.findByFollowerIdAndFollowingId(sender.getId(), receiver.getId()).isPresent()) {
+            throw new AlreadyFollowingException();
+        }
+
         followRepository.save(followDto.toEntity(sender, receiver));
     }
 
@@ -58,7 +58,7 @@ public class FollowService {
 
 
     @Transactional(readOnly = true)
-    public List<GetFollowingDto> getFollowings(GetFollowingsTargetDto getFollowingsTargetDto) {
+    public List<GetFollowingResponse> getFollowings(GetFollowingsTargetDto getFollowingsTargetDto) {
         Profile profile = profileRepository.findByNickname(getFollowingsTargetDto.getTargetNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
@@ -70,11 +70,11 @@ public class FollowService {
 
         List<Follow> followings = followRepository.findByFollowerId(profile.getId());
 
-        return followings.stream().map(GetFollowingDto::from).toList();
+        return followings.stream().map(GetFollowingResponse::from).toList();
     }
 
     @Transactional(readOnly = true)
-    public List<GetFollowerDto> getFollowers(GetFollowersTargetDto getFollowersTargetDto) {
+    public List<GetFollowerResponse> getFollowers(GetFollowersTargetDto getFollowersTargetDto) {
         Profile profile = profileRepository.findByNickname(getFollowersTargetDto.getTargetNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
@@ -86,6 +86,6 @@ public class FollowService {
 
         List<Follow> followers = followRepository.findByFollowingId(profile.getId());
 
-        return followers.stream().map(GetFollowerDto::from).toList();
+        return followers.stream().map(GetFollowerResponse::from).toList();
     }
 }
