@@ -6,11 +6,14 @@ import com.rebu.profile.enums.Type;
 import com.rebu.security.dto.AuthProfileInfo;
 import com.rebu.shop_favorite.controller.dto.AddFavoriteRequest;
 import com.rebu.shop_favorite.dto.DeleteFavoriteDto;
+import com.rebu.shop_favorite.dto.GetShopFavoriteResponse;
 import com.rebu.shop_favorite.service.ShopFavoriteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,4 +38,9 @@ public class ShopFavoriteController {
         return ResponseEntity.ok(new ApiResponse<>("매장 즐겨찾기 삭제", null));
     }
 
+    @GetMapping("/{nickname}")
+    public ResponseEntity<?> getFavorite(@PathVariable String nickname) {
+        List<GetShopFavoriteResponse> result = shopFavoriteService.getShopFavorites(nickname);
+        return ResponseEntity.ok(new ApiResponse<>("매장 즐겨찾기 조회 성공 코드", result));
+    }
 }
