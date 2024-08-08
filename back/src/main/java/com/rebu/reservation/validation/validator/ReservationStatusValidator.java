@@ -10,7 +10,6 @@ public class ReservationStatusValidator implements ConstraintValidator<Reservati
 
     @Override
     public boolean isValid(Reservation.ReservationStatus reservationStatus, ConstraintValidatorContext constraintValidatorContext) {
-
         if(reservationStatus == null)
             throw new ReservationStatusMismatchException();
 

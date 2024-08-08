@@ -13,7 +13,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
        SELECT r
        FROM Reservation r join fetch r.menu
-       WHERE r.id = :profileId AND DATE(r.startDateTime) = :date
+       WHERE r.employeeProfile.id = :profileId AND DATE(r.startDateTime) = :date
        """)
     List<Reservation> findByProfileIdAndDate(Long profileId, LocalDate date);
 

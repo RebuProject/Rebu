@@ -53,9 +53,12 @@ public class ReservationService {
     public void create(@Valid ReservationCreateDto dto){
         Profile profile = profileRepository.findByNickname(dto.getNickname()).orElseThrow(ProfileNotFoundException::new);
         ShopProfile shop = shopProfileRepository.findByNickname(dto.getShopNickname()).orElseThrow(ProfileNotFoundException::new);
-        EmployeeProfile employee = employeeProfileRepository.findByNickname(dto.getShopNickname()).orElseThrow(ProfileNotFoundException::new);
+        EmployeeProfile employee = employeeProfileRepository.findByNickname(dto.getEmployeeNickname()).orElseThrow(ProfileNotFoundException::new);
+
         if(!shop.equals(employee.getShop()))
             throw new EmployeeProfileNotIncludeException();
+        if(dto.getStartDateTime().getMinute() % shop.getReservationInterval() != 0)
+            throw new ReservationNotAcceptableException();
 
         Menu menu = menuRepository.findById(dto.getMenuId()).orElseThrow(MenuNotFoundException::new);
 
@@ -73,6 +76,7 @@ public class ReservationService {
 
         List<Absence> shopAbsences = absenceRepository.findByProfileIdAndDate(shop.getId(), startDateTime.toLocalDate());
         checkCreateReservationAbsences(shopAbsences, startDateTime, endDateTime);
+
         List<Absence> employeeAbsences = absenceRepository.findByProfileIdAndDate(employee.getId(), startDateTime.toLocalDate());
         checkCreateReservationAbsences(employeeAbsences, startDateTime, endDateTime);
 
@@ -113,23 +117,26 @@ public class ReservationService {
     }
 
     private void checkModifyReservationStatusToAccepted(Reservation reservation) {
+
         if(!(reservation.getReservationStatus() == Reservation.ReservationStatus.RECEIVED))
             throw new ReservationStatusNotChangeableException();
-        if(!reservation.getStartDateTime().isBefore(LocalDateTime.now()))
+
+        if(reservation.getStartDateTime().isBefore(LocalDateTime.now()))
             throw new ReservationStatusNotChangeableException();
+
     }
 
     private void checkModifyReservationStatusToRefused(Reservation reservation) {
         if(!(reservation.getReservationStatus() == Reservation.ReservationStatus.RECEIVED))
             throw new ReservationStatusNotChangeableException();
-        if(!reservation.getStartDateTime().isBefore(LocalDateTime.now()))
+        if(reservation.getStartDateTime().isBefore(LocalDateTime.now()))
             throw new ReservationStatusNotChangeableException();
     }
 
     private void checkModifyReservationStatusToNoshow(Reservation reservation) {
         if(!(reservation.getReservationStatus() == Reservation.ReservationStatus.ACCEPTED))
             throw new ReservationStatusNotChangeableException();
-        if(reservation.getStartDateTime().isBefore(LocalDateTime.now()))
+        if(!reservation.getStartDateTime().isBefore(LocalDateTime.now()))
             throw new ReservationStatusNotChangeableException();
     }
 
@@ -146,10 +153,11 @@ public class ReservationService {
     }
 
     private void checkCreateReservationAbsences(List<Absence> absences, LocalDateTime startDateTime, LocalDateTime endDateTime){
+        System.out.println(absences.size());
         for(Absence absence : absences){
             LocalDateTime s = absence.getStartDate();
             LocalDateTime e = absence.getEndDate();
-            if(!startDateTime.isAfter(e) && !endDateTime.isBefore(s))
+            if(!(startDateTime.isAfter(e) || startDateTime.equals(e)) && !(endDateTime.isBefore(s) || endDateTime.equals(s)))
                 throw new ReservationNotAcceptableException();
         }
     }
@@ -157,10 +165,9 @@ public class ReservationService {
     private void checkCreateReservationExistReservation(List<Reservation> reservations, LocalTime startTime, LocalTime endTime){
         for(Reservation reservation : reservations){
             LocalTime s = reservation.getStartDateTime().toLocalTime();
-            LocalTime e = reservation.getStartDateTime().toLocalTime().plusMinutes(reservation.getMenu().getTimeTaken());
-            if(!startTime.isAfter(e) && !endTime.isBefore(s))
+            LocalTime e = s.plusMinutes(reservation.getMenu().getTimeTaken());
+            if(!(startTime.isAfter(e) || startTime.equals(e)) && !(endTime.isBefore(s) || endTime.equals(s)))
                 throw new ReservationNotAcceptableException();
         }
     }
-
 }

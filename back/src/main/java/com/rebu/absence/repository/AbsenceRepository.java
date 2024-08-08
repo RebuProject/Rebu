@@ -21,7 +21,7 @@ public interface AbsenceRepository extends JpaRepository<Absence, Long> {
     @Query("""
             SELECT a
             FROM Absence a
-            WHERE a.id = :profileId AND DATE(:date) between DATE(a.startDate) AND DATE(a.endDate)
+            WHERE a.profile.id = :profileId AND :date BETWEEN DATE(a.startDate) AND DATE(a.endDate)
             """)
     List<Absence> findByProfileIdAndDate(Long profileId, LocalDate date);
 }

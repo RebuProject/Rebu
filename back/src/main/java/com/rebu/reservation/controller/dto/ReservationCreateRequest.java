@@ -6,10 +6,12 @@ import com.rebu.reservation.dto.ReservationCreateDto;
 import com.rebu.reservation.validation.annotation.ReservationRequest;
 import com.rebu.reservation.validation.annotation.StartDateTime;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReservationCreateRequest {
