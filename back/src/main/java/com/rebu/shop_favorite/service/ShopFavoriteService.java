@@ -7,11 +7,14 @@ import com.rebu.profile.shop.entity.ShopProfile;
 import com.rebu.profile.shop.repository.ShopProfileRepository;
 import com.rebu.shop_favorite.dto.AddFavoriteDto;
 import com.rebu.shop_favorite.dto.DeleteFavoriteDto;
+import com.rebu.shop_favorite.dto.GetFavoriteDto;
 import com.rebu.shop_favorite.entity.ShopFavoriteId;
 import com.rebu.shop_favorite.repository.ShopFavoriteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -46,5 +49,10 @@ public class ShopFavoriteService {
                 .build();
 
         shopFavoriteRepository.deleteById(shopFavoriteId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<GetFavoriteDto> getFavorite() {
+
     }
 }

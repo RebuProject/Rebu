@@ -35,4 +35,9 @@ public class ShopFavoriteController {
         return ResponseEntity.ok(new ApiResponse<>("매장 즐겨찾기 삭제", null));
     }
 
+    @GetMapping("/{nickname}")
+    public ResponseEntity<?> getFavorites(@PathVariable String nickname) {
+        shopFavoriteService.getFavorite()
+    }
+
 }
