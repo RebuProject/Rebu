@@ -1,25 +1,35 @@
 package com.rebu.profile.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class GetProfileResponse {
     private String imageSrc;
-    private int followersCount;
-    private int followingCount;
+    private Long followersCnt;
+    private Long followingCnt;
     private String nickname;
     private String introduction;
-    private int reviewCnt;
-    private int scrapCnt;
-    private int favoritesCnt;
+    private Long reviewCnt;
+    private Long scrapCnt;
+    private Long favoritesCnt;
     private boolean isPrivate;
     private Relation relation;
+
+    public GetProfileResponse(String imageSrc, Long followersCnt, Long followingCnt, String nickname, String introduction, Long reviewCnt, Long scrapCnt, Long favoritesCnt, boolean isPrivate) {
+        this.imageSrc = imageSrc;
+        this.followersCnt = followersCnt;
+        this.followingCnt = followingCnt;
+        this.nickname = nickname;
+        this.introduction = introduction;
+        this.reviewCnt = reviewCnt;
+        this.scrapCnt = scrapCnt;
+        this.favoritesCnt = favoritesCnt;
+        this.isPrivate = isPrivate;
+    }
 
     public enum Relation {
         OWN, FOLLOWING, NONE

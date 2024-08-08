@@ -2,7 +2,6 @@ package com.rebu.profile.service;
 
 import com.rebu.common.service.RedisService;
 import com.rebu.common.util.FileUtils;
-import com.rebu.feed.review.repository.ReviewRepository;
 import com.rebu.follow.repository.FollowRepository;
 import com.rebu.member.entity.Member;
 import com.rebu.profile.dto.*;
@@ -10,7 +9,6 @@ import com.rebu.profile.entity.Profile;
 import com.rebu.profile.exception.MemberNotMatchException;
 import com.rebu.profile.exception.ProfileNotFoundException;
 import com.rebu.profile.repository.ProfileRepository;
-import com.rebu.scrap.repository.ScrapRepository;
 import com.rebu.security.util.JWTUtil;
 import com.rebu.storage.exception.FileUploadFailException;
 import com.rebu.storage.service.StorageService;
@@ -22,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -31,8 +30,6 @@ public class ProfileService {
     private final RedisService redisService;
     private final StorageService storageService;
     private final FollowRepository followRepository;
-    private final ReviewRepository reviewRepository;
-    private final ScrapRepository scrapRepository;
 
     @Transactional
     public void generateProfile(ProfileGenerateDto profileGenerateDto, Member member) {
@@ -114,7 +111,7 @@ public class ProfileService {
     }
 
     @Transactional
-    public void deleteProfile(String nickname, HttpServletResponse response) {
+    public String deleteProfile(String nickname, HttpServletResponse response) {
         Profile targetProfile = profileRepository.findByNickname(nickname)
                 .orElseThrow(ProfileNotFoundException::new);
 
@@ -126,10 +123,11 @@ public class ProfileService {
 
         resetToken(profileToSwitch.getNickname(), profileToSwitch.getType().toString(), response);
 
+        return profileToSwitch.getType().toString();
     }
 
     @Transactional(readOnly = true)
-    public void switchProfile(SwitchProfileDto switchProfileDto, HttpServletResponse response) {
+    public String switchProfile(SwitchProfileDto switchProfileDto, HttpServletResponse response) {
         Profile nowProfile = profileRepository.findByNickname(switchProfileDto.getNowNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
@@ -143,20 +141,34 @@ public class ProfileService {
         redisService.deleteData("Refresh:" + nowProfile.getNickname());
 
         resetToken(targetProfile.getNickname(), targetProfile.getType().toString(), response);
+
+        return targetProfile.getType().toString();
     }
 
     @Transactional(readOnly = true)
     public GetProfileResponse getProfile(GetProfileDto getProfileDto) {
-        Profile profile = profileRepository.findByNickname(getProfileDto.getTargetNickname())
+        Profile targetProfile = profileRepository.findByNickname(getProfileDto.getTargetNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
-        int followingCnt = followRepository.findByFollowerId(profile.getId()).size();
-        int followerCnt = followRepository.findByFollowingId(profile.getId()).size();
+        Profile profile = profileRepository.findByNickname(getProfileDto.getNickname())
+                .orElseThrow(ProfileNotFoundException::new);
 
-        int reviewCnt = reviewRepository.findAllByWriterId(profile.getId()).size();
-        int scrapCnt = scrapRepository.findAllByProfileId(profile.getId()).size();
+        GetProfileResponse getProfileResponse = profileRepository.getCommonProfileByProfileId(targetProfile.getId())
+                .orElseThrow(ProfileNotFoundException::new);
 
-        // int favoriteCnt =
+        if (getProfileDto.getNickname().equals(getProfileDto.getTargetNickname())) {
+            getProfileResponse.setRelation(GetProfileResponse.Relation.OWN);
+        } else if (followRepository.findByFollowerIdAndFollowingId(profile.getId(), targetProfile.getId()).isPresent()) {
+            getProfileResponse.setRelation(GetProfileResponse.Relation.FOLLOWING);
+        }
+        return getProfileResponse;
+    }
+
+    @Transactional(readOnly = true)
+    public List<SearchProfileResponse> searchProfile(String keyword) {
+        List<Profile> profiles = profileRepository.searchProfileByKeyword(keyword);
+
+        return profiles.stream().map(SearchProfileResponse::from).toList();
     }
 
     private void resetToken(String nickname, String type, HttpServletResponse response) {

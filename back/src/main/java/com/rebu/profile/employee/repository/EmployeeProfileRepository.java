@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface EmployeeProfileRepository extends JpaRepository<EmployeeProfile, Long> {
     List<EmployeeProfile> findByShopId(Long shopId);
 
-    @Query("select e from EmployeeProfile e where e.member.id = :memberId and e.status <> 'ROLE_DELETED'")
+    @Query("SELECT e FROM EmployeeProfile e WHERE e.member.id = :memberId AND e.status <> 'ROLE_DELETED'")
     Optional<EmployeeProfile> findEmployeeProfileByMemberId(Long memberId);
 
     Optional<EmployeeProfile> findByNickname(String nickname);
