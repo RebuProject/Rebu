@@ -1,7 +1,7 @@
 package com.rebu.profile.shop.entity;
 
 import com.rebu.profile.entity.Profile;
-import com.rebu.profile.shop.Category;
+import com.rebu.profile.shop.enums.Category;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -47,6 +47,10 @@ public class ShopProfile extends Profile {
 
     public void changeShopName(String newName) {
         name = newName;
+    }
+
+    public void changeReservationInterval(int newReservationInterval) {
+        reservationInterval = newReservationInterval;
     }
 
     @Override

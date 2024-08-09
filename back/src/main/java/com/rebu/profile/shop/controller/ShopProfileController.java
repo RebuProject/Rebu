@@ -1,10 +1,13 @@
 package com.rebu.profile.shop.controller;
 
+import com.rebu.common.aop.annotation.Authorized;
 import com.rebu.common.controller.dto.ApiResponse;
+import com.rebu.profile.enums.Type;
 import com.rebu.profile.exception.NicknameDuplicateException;
 import com.rebu.profile.shop.controller.dto.ChangeAddressRequest;
 import com.rebu.profile.shop.controller.dto.ChangeShopNameRequest;
 import com.rebu.profile.shop.controller.dto.GenerateShopProfileRequest;
+import com.rebu.profile.shop.controller.dto.UpdateReservationIntervalRequest;
 import com.rebu.profile.shop.exception.LicenseNumNotVerifiedException;
 import com.rebu.profile.shop.service.ShopProfileService;
 import com.rebu.security.dto.AuthProfileInfo;
@@ -39,6 +42,7 @@ public class ShopProfileController {
         return ResponseEntity.ok(new ApiResponse<>("매장 프로필 생성 완료 코드", null));
     }
 
+    @Authorized(allowed = {Type.SHOP})
     @PatchMapping("/{nickname}/address")
     public ResponseEntity<?> updateAddress(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
                                            @Valid @RequestBody ChangeAddressRequest changeAddressRequest) {
@@ -46,10 +50,24 @@ public class ShopProfileController {
         return ResponseEntity.ok(new ApiResponse<>("매장 주소 수정 완료 코드", null));
     }
 
+    @Authorized(allowed = {Type.SHOP})
     @PatchMapping("/{nickname}/name")
     public ResponseEntity<?> updateShopName(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
                                             @RequestBody ChangeShopNameRequest changeShopNameRequest) {
         shopProfileService.updateShopName(changeShopNameRequest.toDto(authProfileInfo.getNickname()));
         return ResponseEntity.ok(new ApiResponse<>("매장 이름 수정 완료 코드", null));
+    }
+
+    @Authorized(allowed = {Type.SHOP})
+    @PatchMapping("/{nickname}/reservation-interval")
+    public ResponseEntity<?> updateReservationInterval(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
+                                                       @RequestBody UpdateReservationIntervalRequest updateReservationIntervalRequest) {
+        shopProfileService.updateReservationInterval(updateReservationIntervalRequest.toDto(authProfileInfo.getNickname()));
+        return ResponseEntity.ok(new ApiResponse<>("매장 예약 단위 수정 성공 코드", null));
+    }
+
+    @GetMapping("/{nickname}/employees")
+    public ResponseEntity<?> getShopEmployees() {
+
     }
 }

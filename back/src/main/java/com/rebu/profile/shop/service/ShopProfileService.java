@@ -8,10 +8,7 @@ import com.rebu.profile.dto.ChangeImgDto;
 import com.rebu.profile.enums.Type;
 import com.rebu.profile.exception.ProfileNotFoundException;
 import com.rebu.profile.service.ProfileService;
-import com.rebu.profile.shop.dto.ChangeAddressDto;
-import com.rebu.profile.shop.dto.ChangeShopNameDto;
-import com.rebu.profile.shop.dto.ConvertAddressDto;
-import com.rebu.profile.shop.dto.GenerateShopProfileDto;
+import com.rebu.profile.shop.dto.*;
 import com.rebu.profile.shop.entity.ShopProfile;
 import com.rebu.profile.shop.repository.ShopProfileRepository;
 import com.rebu.security.util.JWTUtil;
@@ -68,6 +65,14 @@ public class ShopProfileService {
                 .orElseThrow(ProfileNotFoundException::new);
 
         shopProfile.changeShopName(changeShopNameDto.getName());
+    }
+
+    @Transactional
+    public void updateReservationInterval(UpdateReservationIntervalDto updateReservationIntervalDto) {
+        ShopProfile shopProfile = shopProfileRepository.findByNickname(updateReservationIntervalDto.getNickname())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        shopProfile.changeReservationInterval(updateReservationIntervalDto.getReservationInterval());
     }
 
     private void resetToken(String nickname, String type, HttpServletResponse response) {
