@@ -160,7 +160,10 @@ public class ProfileService {
             getProfileResponse.setRelation(GetProfileResponse.Relation.OWN);
         } else if (followRepository.findByFollowerIdAndFollowingId(profile.getId(), targetProfile.getId()).isPresent()) {
             getProfileResponse.setRelation(GetProfileResponse.Relation.FOLLOWING);
+        } else {
+            getProfileResponse.setRelation(GetProfileResponse.Relation.NONE);
         }
+
         return getProfileResponse;
     }
 

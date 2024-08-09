@@ -5,6 +5,7 @@ import com.rebu.profile.employee.controller.dto.ChangeWorkingIntroRequest;
 import com.rebu.profile.employee.controller.dto.ChangeWorkingNameRequest;
 import com.rebu.profile.employee.controller.dto.GenerateEmployeeProfileRequest;
 import com.rebu.profile.employee.dto.GetEmployeeProfileDto;
+import com.rebu.profile.employee.dto.GetEmployeeProfileResponse;
 import com.rebu.profile.employee.service.EmployeeProfileService;
 import com.rebu.profile.exception.NicknameDuplicateException;
 import com.rebu.security.dto.AuthProfileInfo;
@@ -51,6 +52,7 @@ public class EmployeeProfileController {
     @GetMapping("/{nickname}")
     public ResponseEntity<?> getEmployeeProfile(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
                                                 @PathVariable String nickname) {
-        employeeProfileService.getEmployeeProfile(new GetEmployeeProfileDto(authProfileInfo.getNickname(), nickname));
+        GetEmployeeProfileResponse result = employeeProfileService.getEmployeeProfile(new GetEmployeeProfileDto(authProfileInfo.getNickname(), nickname));
+        return ResponseEntity.ok(new ApiResponse<>("직원 프로필 조회 완료 코드", result));
     }
 }

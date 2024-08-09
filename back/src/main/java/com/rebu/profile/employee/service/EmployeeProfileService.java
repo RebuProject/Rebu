@@ -1,6 +1,7 @@
 package com.rebu.profile.employee.service;
 
 import com.rebu.common.service.RedisService;
+import com.rebu.follow.repository.FollowRepository;
 import com.rebu.member.entity.Member;
 import com.rebu.member.exception.MemberNotFoundException;
 import com.rebu.member.repository.MemberRepository;
@@ -28,6 +29,7 @@ public class EmployeeProfileService {
     private final EmployeeProfileRepository employeeProfileRepository;
     private final ProfileRepository profileRepository;
     private final ProfileService profileService;
+    private final FollowRepository followRepository;
     private final MemberRepository memberRepository;
     private final RedisService redisService;
     private final WorkingInfoService workingInfoService;
@@ -74,7 +76,18 @@ public class EmployeeProfileService {
         Profile profile = profileRepository.findByNickname(getEmployeeProfileDto.getNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
-        GetEmployeeProfileResponse getEmployeeProfileResponse = employeeProfileRepository.
+        GetEmployeeProfileResponse getEmployeeProfileResponse = employeeProfileRepository.getEmployeeProfileByEmployeeProfileId(targetProfile.getId())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        if (targetProfile.getNickname().equals(getEmployeeProfileDto.getNickname())) {
+            getEmployeeProfileResponse.setRelation(GetEmployeeProfileResponse.Relation.OWN);
+        } else if (followRepository.findByFollowerIdAndFollowingId(profile.getId(), targetProfile.getId()).isPresent()) {
+            getEmployeeProfileResponse.setRelation(GetEmployeeProfileResponse.Relation.FOLLOWING);
+        } else {
+            getEmployeeProfileResponse.setRelation(GetEmployeeProfileResponse.Relation.NONE);
+        }
+
+        return getEmployeeProfileResponse;
     }
 
     private void resetToken(String nickname, String type, HttpServletResponse response) {

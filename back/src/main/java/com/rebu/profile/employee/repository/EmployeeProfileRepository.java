@@ -11,18 +11,32 @@ import java.util.Optional;
 public interface EmployeeProfileRepository extends JpaRepository<EmployeeProfile, Long> {
     List<EmployeeProfile> findByShopId(Long shopId);
 
-    @Query("select e from EmployeeProfile e where e.member.id = :memberId and e.status <> 'ROLE_DELETED'")
+    @Query("SELECT e FROM EmployeeProfile e WHERE e.member.id = :memberId AND e.status <> 'ROLE_DELETED'")
     Optional<EmployeeProfile> findEmployeeProfileByMemberId(Long memberId);
 
     Optional<EmployeeProfile> findByNickname(String nickname);
 
     @Query("""
         SELECT new com.rebu.profile.employee.dto.GetEmployeeProfileResponse(
-            
+            e.imageSrc,
+            e.nickname,
+            e.introduction,
+            e.isPrivate,
+            e.workingName,
+            COUNT(fr.id),
+            COUNT(fi.id),
+            COUNT(fe.id),
+            COUNT(rv.id),
+            COUNT(sc.id)
         )
         FROM EmployeeProfile e
-        JOIN Follow f ON f.follower.id = e.id
-        JOIN 
+        LEFT JOIN Follow fr ON fr.follower.id = e.id
+        LEFT JOIN Follow fi ON fi.following.id = e.id
+        LEFT JOIN Review rv ON rv.employeeProfile.id = e.id
+        LEFT JOIN Feed fe ON fe.writer.id = e.id
+        LEFT JOIN Scrap sc ON sc.profile.id = e.id
+        WHERE e.id = :employeeProfileId
+        GROUP BY e.id
     """)
-    Optional<GetEmployeeProfileResponse> getEmployeeProfileByEmployeeProfileId(Long EmployeeProfileId);
+    Optional<GetEmployeeProfileResponse> getEmployeeProfileByEmployeeProfileId(Long employeeProfileId);
 }
