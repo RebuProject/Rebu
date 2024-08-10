@@ -4,10 +4,7 @@ import com.rebu.common.aop.annotation.Authorized;
 import com.rebu.common.controller.dto.ApiResponse;
 import com.rebu.profile.enums.Type;
 import com.rebu.profile.exception.NicknameDuplicateException;
-import com.rebu.profile.shop.controller.dto.ChangeAddressRequest;
-import com.rebu.profile.shop.controller.dto.ChangeShopNameRequest;
-import com.rebu.profile.shop.controller.dto.GenerateShopProfileRequest;
-import com.rebu.profile.shop.controller.dto.UpdateReservationIntervalRequest;
+import com.rebu.profile.shop.controller.dto.*;
 import com.rebu.profile.shop.dto.GetShopEmployeeDto;
 import com.rebu.profile.shop.dto.GetShopEmployeeResponse;
 import com.rebu.profile.shop.dto.GetShopProfileDto;
@@ -85,4 +82,13 @@ public class ShopProfileController {
         GetShopProfileResponse result = shopProfileService.getShopProfile(new GetShopProfileDto(authProfileInfo.getNickname(), nickname));
         return ResponseEntity.ok(new ApiResponse<>("매장 프로필 조회 성공 코드", result));
     }
+
+    @Authorized(allowed = {Type.SHOP})
+    @PostMapping("/{nickname}/invite-employees")
+    public ResponseEntity<?> inviteEmployee(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
+                                            @RequestBody InviteEmployeeRequest inviteEmployeeRequest) {
+        shopProfileService.inviteEmployee(inviteEmployeeRequest.toDto(authProfileInfo.getNickname()));
+        return ResponseEntity.ok(new ApiResponse<>("직원 초대 성공 코드", null));
+    }
+
 }

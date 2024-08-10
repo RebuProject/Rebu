@@ -1,5 +1,6 @@
 package com.rebu.profile.shop.service;
 
+import com.rebu.alarm.service.AlarmService;
 import com.rebu.common.service.RedisService;
 import com.rebu.feed.review.repository.ReviewRepository;
 import com.rebu.follow.repository.FollowRepository;
@@ -8,11 +9,13 @@ import com.rebu.member.exception.MemberNotFoundException;
 import com.rebu.member.repository.MemberRepository;
 import com.rebu.profile.dto.ChangeImgDto;
 import com.rebu.profile.employee.entity.EmployeeProfile;
+import com.rebu.profile.employee.repository.EmployeeProfileRepository;
 import com.rebu.profile.entity.Profile;
 import com.rebu.profile.enums.Type;
 import com.rebu.profile.exception.ProfileNotFoundException;
 import com.rebu.profile.repository.ProfileRepository;
 import com.rebu.profile.service.ProfileService;
+import com.rebu.profile.shop.controller.dto.InviteEmployeeRequest;
 import com.rebu.profile.shop.dto.*;
 import com.rebu.profile.shop.entity.ShopProfile;
 import com.rebu.profile.shop.repository.ShopProfileRepository;
@@ -40,6 +43,8 @@ public class ShopProfileService {
     private final WorkingInfoService workingInfoService;
     private final ReviewRepository reviewRepository;
     private final FollowRepository followRepository;
+    private final EmployeeProfileRepository employeeProfileRepository;
+    private final AlarmService alarmService;
 
     @Transactional
     public void generateProfile(GenerateShopProfileDto generateShopProfileDto, HttpServletResponse response) {
@@ -128,6 +133,17 @@ public class ShopProfileService {
         }
 
         return getShopProfileResponse;
+    }
+
+    @Transactional
+    public void inviteEmployee(InviteEmployeeDto inviteEmployeeDto) {
+        ShopProfile shopProfile = shopProfileRepository.findByNickname(inviteEmployeeDto.getNickname())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        EmployeeProfile employeeProfile = employeeProfileRepository.findByNickname(inviteEmployeeDto.getEmployeeNickname())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        alarmService.alarmInviteEmployee(shopProfile, employeeProfile, inviteEmployeeDto.getRole());
     }
 
     private void resetToken(String nickname, String type, HttpServletResponse response) {
