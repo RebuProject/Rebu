@@ -8,6 +8,10 @@ import com.rebu.profile.shop.controller.dto.ChangeAddressRequest;
 import com.rebu.profile.shop.controller.dto.ChangeShopNameRequest;
 import com.rebu.profile.shop.controller.dto.GenerateShopProfileRequest;
 import com.rebu.profile.shop.controller.dto.UpdateReservationIntervalRequest;
+import com.rebu.profile.shop.dto.GetShopEmployeeDto;
+import com.rebu.profile.shop.dto.GetShopEmployeeResponse;
+import com.rebu.profile.shop.dto.GetShopProfileDto;
+import com.rebu.profile.shop.dto.GetShopProfileResponse;
 import com.rebu.profile.shop.exception.LicenseNumNotVerifiedException;
 import com.rebu.profile.shop.service.ShopProfileService;
 import com.rebu.security.dto.AuthProfileInfo;
@@ -17,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -67,7 +73,16 @@ public class ShopProfileController {
     }
 
     @GetMapping("/{nickname}/employees")
-    public ResponseEntity<?> getShopEmployees() {
+    public ResponseEntity<?> getShopEmployees(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
+                                              @PathVariable String nickname) {
+        List<GetShopEmployeeResponse> result = shopProfileService.getShopEmployees(new GetShopEmployeeDto(authProfileInfo.getNickname(), nickname));
+        return ResponseEntity.ok(new ApiResponse<>("매장 직원 조회 성공 코드", result));
+    }
 
+    @GetMapping("/{nickname}")
+    public ResponseEntity<?> getShopProfile(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
+                                            @PathVariable String nickname) {
+        GetShopProfileResponse result = shopProfileService.getShopProfile(new GetShopProfileDto(authProfileInfo.getNickname(), nickname));
+        return ResponseEntity.ok(new ApiResponse<>("매장 프로필 조회 성공 코드", result));
     }
 }

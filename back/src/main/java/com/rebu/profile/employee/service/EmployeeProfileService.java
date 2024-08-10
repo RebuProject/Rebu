@@ -76,7 +76,7 @@ public class EmployeeProfileService {
         Profile profile = profileRepository.findByNickname(getEmployeeProfileDto.getNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
-        GetEmployeeProfileResponse getEmployeeProfileResponse = employeeProfileRepository.getEmployeeProfileByEmployeeProfileId(targetProfile.getId())
+        GetEmployeeProfileResponse getEmployeeProfileResponse = employeeProfileRepository.getEmployeeProfileResponseByProfileId(targetProfile.getId())
                 .orElseThrow(ProfileNotFoundException::new);
 
         if (targetProfile.getNickname().equals(getEmployeeProfileDto.getNickname())) {

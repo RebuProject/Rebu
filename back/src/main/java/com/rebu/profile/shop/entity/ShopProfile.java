@@ -1,16 +1,17 @@
 package com.rebu.profile.shop.entity;
 
+import com.rebu.profile.employee.entity.EmployeeProfile;
 import com.rebu.profile.entity.Profile;
 import com.rebu.profile.shop.enums.Category;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -18,6 +19,9 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class ShopProfile extends Profile {
+
+    @OneToMany(mappedBy = "shop", fetch = FetchType.LAZY)
+    List<EmployeeProfile> employeeProfiles = new ArrayList<>();
 
     @Column(unique=true, nullable = false)
     private String licenseNum;
