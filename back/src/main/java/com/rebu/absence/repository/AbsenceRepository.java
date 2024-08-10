@@ -6,15 +6,26 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AbsenceRepository extends JpaRepository<Absence, Long> {
 
-    @Query("SELECT a FROM Absence a WHERE a.profile = :profile AND (a.startDate <= :endDate AND a.endDate >= :startDate)")
+    @Query(value = """
+                    SELECT a 
+                    FROM Absence a 
+                    WHERE a.profile = :profile AND (a.startDate < :endDate AND a.endDate > :startDate)
+                    """)
     List<Absence> findByProfileAndDateRange(
             @Param("profile") Profile profile,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
 
+    @Query(value = """
+                    SELECT a
+                    FROM Absence a
+                    WHERE a.profile.id = :profileId AND :date BETWEEN DATE(a.startDate) AND DATE(a.endDate)
+                    """)
+    List<Absence> findByProfileIdAndDate(Long profileId, LocalDate date);
 }
