@@ -14,6 +14,12 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("""
         SELECT r
         FROM Review r
+        WHERE r.employeeProfile.id = :employeeProfileId
+    """)
+    List<Review> findAllByEmployeeProfileId(Long employeeProfileId);
+    @Query("""
+        SELECT r
+        FROM Review r
         JOIN FETCH r.feedImages
         JOIN FETCH r.writer
         JOIN FETCH r.hashtags
