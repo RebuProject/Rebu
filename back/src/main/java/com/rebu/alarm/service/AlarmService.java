@@ -32,6 +32,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -281,10 +282,14 @@ public class AlarmService {
             alarmList.add(AlarmReservationReadDto.toDto(alarm));
         }
 
+        List<AlarmReadDto> sortedList = alarmList.parallelStream()
+                .sorted((o1, o2) -> o2.getCreateAt().compareTo(o1.getCreateAt()))
+                .collect(Collectors.toList());
+
         alarmCounts.put(userNickname, 0);
         SseEmitter sseEmitter = AlarmController.sseEmitters.get(userNickname);
         sseEmitter.send(SseEmitter.event().name("notificationCount").data(alarmCounts.get(userNickname)));
-        return alarmList;
+        return sortedList;
     }
 
     public boolean update(AlarmInviteEmployeeUpdateDto dto) {
