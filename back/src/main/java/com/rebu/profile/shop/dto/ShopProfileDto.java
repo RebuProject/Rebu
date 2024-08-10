@@ -3,7 +3,7 @@ package com.rebu.profile.shop.dto;
 import com.rebu.member.enums.Status;
 
 import com.rebu.profile.enums.Type;
-import com.rebu.profile.shop.Category;
+import com.rebu.profile.shop.enums.Category;
 import com.rebu.profile.shop.entity.ShopProfile;
 
 import lombok.Builder;

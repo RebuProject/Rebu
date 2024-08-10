@@ -23,6 +23,7 @@ import com.rebu.profile.exception.ProfileUnauthorizedException;
 import com.rebu.profile.repository.ProfileRepository;
 import com.rebu.profile.shop.dto.ShopProfileDto;
 import com.rebu.profile.shop.entity.ShopProfile;
+import com.rebu.profile.shop.repository.ShopProfileRepository;
 import com.rebu.reservation.entity.Reservation;
 import com.rebu.reservation.exception.ReservationNotFoundException;
 import com.rebu.reservation.repository.ReservationRepository;
@@ -57,6 +58,7 @@ public class ReviewService {
     private final ReviewKeywordRepository reviewKeywordRepository;
     private final ScrapRepository scrapRepository;
     private final LikeFeedRepository likeFeedRepository;
+    private final ShopProfileRepository shopProfileRepository;
 
     /**
      * ReviewService :: create method
@@ -191,9 +193,10 @@ public class ReviewService {
         return result;
     }
 
-    public List<ReviewByProfileDto> readReviewByProfile(String nickname) {
-        Profile profile = profileRepository.findByNickname(nickname).orElseThrow(ProfileNotFoundException::new);
-        List<Review> reviews = reviewRepository.findByProfileAndType(profile, Feed.Type.REVIEW);
+    public List<ReviewByProfileDto> readReviewByProfile(ReviewReadByProfileDto dto) {
+        Profile profile = profileRepository.findByNickname(dto.getProfileNickname()).orElseThrow(ProfileNotFoundException::new);
+        Profile searchProfile = profileRepository.findByNickname(dto.getSearchProfileNickname()).orElseThrow(ProfileNotFoundException::new);
+        List <Review> reviews = reviewRepository.findByProfileAndType(searchProfile, Feed.Type.REVIEW);
         List<Feed> feeds = ListUtils.applyFunctionToElements(reviews, review -> (Feed)review);
         List<Scrap> scraps = scrapRepository.findByProfileAndFeedInOrderByFeedId(profile, feeds);
         List<LikeFeed> likeFeeds = likeFeedRepository.findByProfileAndFeedInOrderByFeedId(profile, feeds);
@@ -215,6 +218,44 @@ public class ReviewService {
             }
 
             result.add(ReviewByProfileDto.builder()
+                    .writer(ProfileDto.from(review.getWriter()))
+                    .shop(ShopProfileDto.from(review.getShopProfile()))
+                    .review(ReviewDto.from(review))
+                    .feedImages(ListUtils.applyFunctionToElements(review.getFeedImages().stream().toList(), FeedImageDto::from))
+                    .hashtags(ListUtils.applyFunctionToElements(review.getHashtags().stream().toList(), HashtagDto::from))
+                    .reviewKeywords(ListUtils.applyFunctionToElements(review.getSelectedReviewKeywords().stream().toList(), ReviewKeywordDto::fromSelectedReviewKeyword))
+                    .isScraped(isScraped)
+                    .isLiked(isLiked)
+                    .build());
+        }
+        return result;
+    }
+
+    public List<ReviewToShopDto> readReviewToShop(ReviewReadToShopDto dto) {
+        Profile profile = profileRepository.findByNickname(dto.getProfileNickname()).orElseThrow(ProfileNotFoundException::new);
+        ShopProfile shop = shopProfileRepository.findByNickname(dto.getShopNickname()).orElseThrow(ProfileNotFoundException::new);
+        List<Review> reviews = reviewRepository.findByShopProfileAndType(shop, Feed.Type.REVIEW);
+        List<Feed> feeds = ListUtils.applyFunctionToElements(reviews, review -> (Feed)review);
+        List<Scrap> scraps = scrapRepository.findByProfileAndFeedInOrderByFeedId(profile, feeds);
+        List<LikeFeed> likeFeeds = likeFeedRepository.findByProfileAndFeedInOrderByFeedId(profile, feeds);
+
+        int sIdx = 0;
+        int lIdx = 0;
+
+        List<ReviewToShopDto> result = new ArrayList<>();
+        for(Review review : reviews){
+            boolean isScraped = false;
+            boolean isLiked = false;
+            if(!scraps.isEmpty() && scraps.get(sIdx) != null && scraps.get(sIdx).getId().equals(review.getId())){
+                sIdx++;
+                isScraped = true;
+            }
+            if(!likeFeeds.isEmpty() && likeFeeds.get(lIdx) != null && likeFeeds.get(lIdx).getId().equals(review.getId())){
+                lIdx++;
+                isLiked = true;
+            }
+
+            result.add(ReviewToShopDto.builder()
                     .writer(ProfileDto.from(review.getWriter()))
                     .shop(ShopProfileDto.from(review.getShopProfile()))
                     .review(ReviewDto.from(review))

@@ -6,14 +6,8 @@ import com.rebu.common.validation.annotation.NotNull;
 import com.rebu.feed.controller.dto.FeedReadByShopResponse;
 import com.rebu.feed.dto.FeedByShopDto;
 import com.rebu.feed.dto.FeedReadByShopDto;
-import com.rebu.feed.review.controller.dto.ReviewCreateRequest;
-import com.rebu.feed.review.controller.dto.ReviewModifyRequest;
-import com.rebu.feed.review.controller.dto.ReviewReadByProfileResponse;
-import com.rebu.feed.review.controller.dto.ReviewReadToEmployeeResponse;
-import com.rebu.feed.review.dto.ReviewByProfileDto;
-import com.rebu.feed.review.dto.ReviewDeleteDto;
-import com.rebu.feed.review.dto.ReviewReadToEmployeeDto;
-import com.rebu.feed.review.dto.ReviewToEmployeeDto;
+import com.rebu.feed.review.controller.dto.*;
+import com.rebu.feed.review.dto.*;
 import com.rebu.feed.review.service.ReviewService;
 import com.rebu.security.dto.AuthProfileInfo;
 import jakarta.validation.Valid;
@@ -64,12 +58,29 @@ public class ReviewController {
         return ResponseEntity.ok().body(new ApiResponse<>("1P04", response));
     }
 
-    @GetMapping("/profiles/{nickname}")
-    public ResponseEntity<?> readReviewByProfile(@NotNull @PathVariable String nickname) {
-        List<ReviewByProfileDto> dtos = reviewService.readReviewByProfile(nickname);
-        List<ReviewReadByProfileResponse> response = ListUtils.applyFunctionToElements(dtos, ReviewReadByProfileResponse::from);
+    @GetMapping("/shops/{nickname}")
+    public ResponseEntity<?> readReviewToShop(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
+                                                  @NotNull @PathVariable String nickname) {
+        List<ReviewToShopDto> dtos = reviewService.readReviewToShop(ReviewReadToShopDto.builder()
+                .shopNickname(nickname)
+                .profileNickname(authProfileInfo.getNickname())
+                .build());
+        List<ReviewReadToShopResponse> response = ListUtils.applyFunctionToElements(dtos, ReviewReadToShopResponse::from);
 
         return ResponseEntity.ok().body(new ApiResponse<>("1P04", response));
     }
+
+    @GetMapping("/profiles/{nickname}")
+    public ResponseEntity<?> readReviewByProfile(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
+                                                 @NotNull @PathVariable String nickname) {
+        List<ReviewByProfileDto> dtos = reviewService.readReviewByProfile(ReviewReadByProfileDto.builder()
+                .profileNickname(authProfileInfo.getNickname())
+                .searchProfileNickname(nickname)
+                .build());
+        List<ReviewReadByProfileResponse> response = ListUtils.applyFunctionToElements(dtos, ReviewReadByProfileResponse::from);
+        return ResponseEntity.ok().body(new ApiResponse<>("1P04", response));
+    }
+
+
 
 }
