@@ -71,4 +71,10 @@ public class MenuController {
         return new ResponseEntity<>(new ApiResponse<>("1J05", menuCategoryReadDto), HttpStatus.OK);
     }
 
+    @GetMapping("/category")
+    public ResponseEntity<?> categoryRead(@RequestParam(value = "employeeNickname", required = false) String employeeNickname) {
+        MenuCategoryReadDto menuCategoryReadDto =menuService.category(employeeNickname);
+        return new ResponseEntity<>(new ApiResponse<>("1J02", menuCategoryReadDto), HttpStatus.OK);
+    }
+
 }

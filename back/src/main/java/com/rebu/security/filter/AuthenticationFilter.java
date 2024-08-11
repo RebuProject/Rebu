@@ -6,6 +6,7 @@ import com.rebu.member.controller.dto.MemberLoginRequest;
 import com.rebu.profile.entity.Profile;
 import com.rebu.profile.repository.ProfileRepository;
 import com.rebu.security.dto.AuthProfileInfo;
+import com.rebu.security.dto.ProfileInfo;
 import com.rebu.security.entity.RefreshToken;
 import com.rebu.security.service.RefreshTokenService;
 import com.rebu.security.util.JWTUtil;
@@ -74,10 +75,10 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         String status = auth.getAuthority();
 
         if (status.equals("ROLE_DORMANT")) {
-            setResponse(response, "휴면 사용자 입니다", null);
+            setResponse(response, "0A13", null);
             return;
         } else if (status.equals("ROLE_DELETED")) {
-            setResponse(response, "탈퇴한 회원입니다.", null);
+            setResponse(response, "0A14", null);
             return;
         }
 
@@ -98,13 +99,13 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         response.setHeader("access", access);
         response.addCookie(createCookie("refresh", refresh));
-        setResponse(response, "로그인 성공 코드", type);
+        setResponse(response, "1A07", new ProfileInfo(nickname, type));
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
 
-        setResponse(response, "로그인 에러 코드", null);
+        setResponse(response, "0A12", null);
     }
 
     private Cookie createCookie(String key, String value) {
@@ -116,7 +117,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         return cookie;
     }
 
-    private void setResponse(HttpServletResponse response, String code, String data) throws IOException {
+    private void setResponse(HttpServletResponse response, String code, ProfileInfo data) throws IOException {
         response.setStatus(HttpStatus.OK.value());
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

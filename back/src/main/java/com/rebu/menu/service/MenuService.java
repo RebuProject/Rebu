@@ -95,6 +95,4 @@ public class MenuService {
         List<String> images = menuPhotoService.readPhotos(menu);
         return MenuReadDto.from(menu, images);
     }
-
-
 }
