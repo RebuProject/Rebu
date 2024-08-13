@@ -156,4 +156,16 @@ public class ProfileController {
         return ResponseEntity.ok(new ApiResponse<>("1C11", result));
     }
 
+    @GetMapping("/mypage")
+    public ResponseEntity<?> getMyPage(@AuthenticationPrincipal AuthProfileInfo authProfileInfo) {
+        GetProfileResponse result = profileService.getMyProfile(authProfileInfo);
+        return ResponseEntity.ok(new ApiResponse<>("1C10", result));
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<?> getProfileInfo(@AuthenticationPrincipal AuthProfileInfo authProfileInfo) {
+        GetProfileInfoResponse result = profileService.getMyProfileInfo(authProfileInfo);
+        return ResponseEntity.ok(new ApiResponse<>("1C11", result));
+    }
+
 }

@@ -83,4 +83,7 @@ public class EmployeeProfileController {
         EmployeeReadPeriodScheduleResponse response = EmployeeReadPeriodScheduleResponse.from(dto);
         return ResponseEntity.ok(new ApiResponse<>("1R04", response));
     }
+
+    @GetMapping("/mypage")
+    public ResponseEntity<?>
 }
