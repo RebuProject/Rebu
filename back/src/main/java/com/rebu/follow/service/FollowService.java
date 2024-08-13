@@ -1,6 +1,8 @@
 package com.rebu.follow.service;
 
 import com.rebu.alarm.service.AlarmService;
+import com.rebu.follow.controller.dto.GetFollowerResponse;
+import com.rebu.follow.dto.GetFollowingResultDto;
 import com.rebu.follow.dto.*;
 import com.rebu.follow.entity.Follow;
 import com.rebu.follow.exception.AlreadyFollowingException;
@@ -61,7 +63,7 @@ public class FollowService {
 
 
     @Transactional(readOnly = true)
-    public Slice<GetFollowingResponse> getFollowings(GetFollowingsTargetDto getFollowingsTargetDto) {
+    public Slice<GetFollowingResultDto> getFollowings(GetFollowingsTargetDto getFollowingsTargetDto) {
         Profile profile = profileRepository.findByNickname(getFollowingsTargetDto.getTargetNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
@@ -73,7 +75,7 @@ public class FollowService {
 
         Slice<Follow> followingList = followRepository.findByFollowerId(profile.getId(), getFollowingsTargetDto.getPageable());
 
-        return followingList.map(GetFollowingResponse::from);
+        return followingList.map(GetFollowingResultDto::from);
     }
 
     @Transactional(readOnly = true)
@@ -87,7 +89,7 @@ public class FollowService {
             }
         }
 
-        Slice<Follow> followerList = followRepository.findByFollowingId(profile.getId(), getFollowersTargetDto.getPageable());
+        Slice<FollowerDto> followerList = followRepository.findByFollowingId(profile.getId(), getFollowersTargetDto.getPageable());
 
         return followerList.map(GetFollowerResponse::from);
     }

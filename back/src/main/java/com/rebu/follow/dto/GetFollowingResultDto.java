@@ -9,15 +9,15 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class GetFollowingResponse {
+public class GetFollowingResultDto {
     private Long followId;
     private String nickname;
     private String imgSrc;
     private String introduction;
     private Type type;
 
-    public static GetFollowingResponse from(Follow follow) {
-        return GetFollowingResponse.builder()
+    public static GetFollowingResultDto from(Follow follow) {
+        return GetFollowingResultDto.builder()
                 .followId(follow.getId())
                 .nickname(follow.getFollowing().getNickname())
                 .imgSrc(follow.getFollowing().getImageSrc())

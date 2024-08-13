@@ -1,5 +1,6 @@
 package com.rebu.follow.repository;
 
+import com.rebu.follow.dto.FollowerDto;
 import com.rebu.follow.entity.Follow;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -21,12 +22,19 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
     Slice<Follow> findByFollowerId(@Param("followerId") Long followerId, Pageable pageable);
 
     @Query(value = """
-                   SELECT f FROM Follow f
-                   JOIN FETCH f.follower
+                   SELECT new com.rebu.follow.dto.FollowerDto(
+                    f.follower,
+                    (CASE
+                        WHEN g.follower.id IS NOT NULL THEN true
+                        ELSE false
+                    END)
+                   )
+                   FROM Follow f
+                   LEFT JOIN Follow g ON f.follower.id = g.following.id AND g.follower.id = :followingId
                    WHERE f.following.id = :followingId
                    AND f.follower.status <> 'ROLE_DELETED'
                    """)
-    Slice<Follow> findByFollowingId(@Param("followingId") Long followingId, Pageable pageable);
+    Slice<FollowerDto> findByFollowingId(@Param("followingId") Long followingId, Pageable pageable);
 
     Optional<Follow> findByFollowerIdAndFollowingId(Long followerId, Long followingId);
 
