@@ -92,11 +92,11 @@ public class AlarmService {
                         eventData.put("feedId", feed.getId());
                         eventData.put("alarmCreateAT", now);
                         eventData.put("alarmId", alarmComment.getId());
-                        sseEmitter.send(SseEmitter.event().name("addComment").data(eventData));
+                        sseEmitter.send(SseEmitter.event().name("CommentAlarm").data(eventData));
                     }
 
                     alarmCounts.put(userNickname, alarmCounts.getOrDefault(userNickname, 0) + 1);
-                    sseEmitter.send(SseEmitter.event().name("notificationCount").data(alarmCounts.get(userNickname)));
+                    sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCounts.get(userNickname)));
 
                 } catch (IOException e) {
                     AlarmController.sseEmitters.remove(userNickname);
@@ -127,10 +127,10 @@ public class AlarmService {
                     eventData.put("feedId", feed.getId());
                     eventData.put("alarmCreateAT", now);
                     eventData.put("alarmId", alarmComment.getId());
-                    sseEmitter.send(SseEmitter.event().name("addComment").data(eventData));
+                    sseEmitter.send(SseEmitter.event().name("nestedCommentAlarm").data(eventData));
 
                     alarmCounts.put(userNickname, alarmCounts.getOrDefault(userNickname, 0) + 1);
-                    sseEmitter.send(SseEmitter.event().name("notificationCount").data(alarmCounts.get(userNickname)));
+                    sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCounts.get(userNickname)));
 
                 } catch (IOException e) {
                     AlarmController.sseEmitters.remove(userNickname);
@@ -168,10 +168,10 @@ public class AlarmService {
                 eventData.put("role", role);
                 eventData.put("alarmCreateAT", now);
                 eventData.put("alarmId", alarmInviteEmployee.getId());
-                sseEmitter.send(SseEmitter.event().name("alarmInviteEmployee").data(eventData));
+                sseEmitter.send(SseEmitter.event().name("inviteEmployeeAlarm").data(eventData));
 
                 alarmCounts.put(userNickname, alarmCounts.getOrDefault(userNickname, 0) + 1);
-                sseEmitter.send(SseEmitter.event().name("notificationCount").data(alarmCounts.get(userNickname)));
+                sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCounts.get(userNickname)));
 
             } catch (IOException e) {
                 AlarmController.sseEmitters.remove(userNickname);
@@ -212,12 +212,12 @@ public class AlarmService {
                 eventData.put("startDateTime", startDateTime);
                 eventData.put("timeTaken", timeTaken);
                 eventData.put("alarmCreateAT", now);
-                eventData.put("reservationId", alarmReservation.getId());
+                eventData.put("reservationId", reservation.getId());
                 eventData.put("alarmId", alarmReservation.getId());
-                sseEmitter.send(SseEmitter.event().name("alarmReservation").data(eventData));
+                sseEmitter.send(SseEmitter.event().name("reservationAlarm").data(eventData));
 
                 alarmCounts.put(userNickname, alarmCounts.getOrDefault(userNickname, 0) + 1);
-                sseEmitter.send(SseEmitter.event().name("notificationCount").data(alarmCounts.get(userNickname)));
+                sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCounts.get(userNickname)));
 
             } catch (IOException e) {
                 AlarmController.sseEmitters.remove(userNickname);
@@ -251,10 +251,10 @@ public class AlarmService {
                 eventData.put("receiverType", receiver.getType());
                 eventData.put("alarmCreateAT", now);
                 eventData.put("alarmId", alarmFollow.getId());
-                sseEmitter.send(SseEmitter.event().name("addFollow").data(eventData));
+                sseEmitter.send(SseEmitter.event().name("FollowAlarm").data(eventData));
 
                 alarmCounts.put(userNickname, alarmCounts.getOrDefault(userNickname, 0) + 1);
-                sseEmitter.send(SseEmitter.event().name("notificationCount").data(alarmCounts.get(userNickname)));
+                sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCounts.get(userNickname)));
 
             } catch (IOException e) {
                 AlarmController.sseEmitters.remove(userNickname);
@@ -290,10 +290,10 @@ public class AlarmService {
                 eventData.put("reservationStatus", reservation.getReservationStatus());
                 eventData.put("alarmCreateAT", now);
                 eventData.put("alarmId", alarmReservationResponse.getId());
-                sseEmitter.send(SseEmitter.event().name("addFollow").data(eventData));
+                sseEmitter.send(SseEmitter.event().name("reservationResponseAlarm").data(eventData));
 
                 alarmCounts.put(userNickname, alarmCounts.getOrDefault(userNickname, 0) + 1);
-                sseEmitter.send(SseEmitter.event().name("notificationCount").data(alarmCounts.get(userNickname)));
+                sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCounts.get(userNickname)));
 
             } catch (IOException e) {
                 AlarmController.sseEmitters.remove(userNickname);
@@ -331,7 +331,7 @@ public class AlarmService {
 
         alarmCounts.put(userNickname, 0);
         SseEmitter sseEmitter = AlarmController.sseEmitters.get(userNickname);
-        sseEmitter.send(SseEmitter.event().name("notificationCount").data(alarmCounts.get(userNickname)));
+        sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCounts.get(userNickname)));
 
         return new SliceImpl<>(alarmReadDtos, pageable, alarms.hasNext());
     }
@@ -382,7 +382,7 @@ public class AlarmService {
             }
         }
         SseEmitter sseEmitter = AlarmController.sseEmitters.get(userNickname);
-        sseEmitter.send(SseEmitter.event().name("notificationCount").data(alarmCounts.get(userNickname)));
+        sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCounts.get(userNickname)));
         return true;
     }
 }
