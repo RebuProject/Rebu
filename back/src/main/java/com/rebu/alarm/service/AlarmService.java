@@ -95,8 +95,8 @@ public class AlarmService {
                         sseEmitter.send(SseEmitter.event().name("CommentAlarm").data(eventData));
                     }
 
-                    alarmCounts.put(userNickname, alarmCounts.getOrDefault(userNickname, 0) + 1);
-                    sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCounts.get(userNickname)));
+                    Long alarmCount = alarmRepository.countByReceiverProfileAndIsReadFalse(profile);
+                    sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCount));
 
                 } catch (IOException e) {
                     AlarmController.sseEmitters.remove(userNickname);
@@ -129,8 +129,8 @@ public class AlarmService {
                     eventData.put("alarmId", alarmComment.getId());
                     sseEmitter.send(SseEmitter.event().name("nestedCommentAlarm").data(eventData));
 
-                    alarmCounts.put(userNickname, alarmCounts.getOrDefault(userNickname, 0) + 1);
-                    sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCounts.get(userNickname)));
+                    Long alarmCount = alarmRepository.countByReceiverProfileAndIsReadFalse(profile);
+                    sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCount));
 
                 } catch (IOException e) {
                     AlarmController.sseEmitters.remove(userNickname);
@@ -170,8 +170,8 @@ public class AlarmService {
                 eventData.put("alarmId", alarmInviteEmployee.getId());
                 sseEmitter.send(SseEmitter.event().name("inviteEmployeeAlarm").data(eventData));
 
-                alarmCounts.put(userNickname, alarmCounts.getOrDefault(userNickname, 0) + 1);
-                sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCounts.get(userNickname)));
+                Long alarmCount = alarmRepository.countByReceiverProfileAndIsReadFalse(receiverProfile);
+                sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCount));
 
             } catch (IOException e) {
                 AlarmController.sseEmitters.remove(userNickname);
@@ -189,8 +189,8 @@ public class AlarmService {
         String userNickname = employeeProfile.getNickname();
 
         AlarmReservation alarmReservation = alarmReservationRepository.save(AlarmReservation.builder()
-                .receiverProfile(profile)
-                .senderProfile(employeeProfile)
+                .receiverProfile(employeeProfile)
+                .senderProfile(profile)
                 .reservation(reservation)
                 .type(Type.RESERVATION)
                 .timeTaken(timeTaken)
@@ -216,8 +216,8 @@ public class AlarmService {
                 eventData.put("alarmId", alarmReservation.getId());
                 sseEmitter.send(SseEmitter.event().name("reservationAlarm").data(eventData));
 
-                alarmCounts.put(userNickname, alarmCounts.getOrDefault(userNickname, 0) + 1);
-                sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCounts.get(userNickname)));
+                Long alarmCount = alarmRepository.countByReceiverProfileAndIsReadFalse(employeeProfile);
+                sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCount));
 
             } catch (IOException e) {
                 AlarmController.sseEmitters.remove(userNickname);
@@ -253,8 +253,8 @@ public class AlarmService {
                 eventData.put("alarmId", alarmFollow.getId());
                 sseEmitter.send(SseEmitter.event().name("FollowAlarm").data(eventData));
 
-                alarmCounts.put(userNickname, alarmCounts.getOrDefault(userNickname, 0) + 1);
-                sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCounts.get(userNickname)));
+                Long alarmCount = alarmRepository.countByReceiverProfileAndIsReadFalse(receiver);
+                sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCount));
 
             } catch (IOException e) {
                 AlarmController.sseEmitters.remove(userNickname);
@@ -292,8 +292,8 @@ public class AlarmService {
                 eventData.put("alarmId", alarmReservationResponse.getId());
                 sseEmitter.send(SseEmitter.event().name("reservationResponseAlarm").data(eventData));
 
-                alarmCounts.put(userNickname, alarmCounts.getOrDefault(userNickname, 0) + 1);
-                sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCounts.get(userNickname)));
+                Long alarmCount = alarmRepository.countByReceiverProfileAndIsReadFalse(receiver);
+                sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCount));
 
             } catch (IOException e) {
                 AlarmController.sseEmitters.remove(userNickname);
@@ -328,10 +328,9 @@ public class AlarmService {
                     break;
             }
         }
-
-        alarmCounts.put(userNickname, 0);
         SseEmitter sseEmitter = AlarmController.sseEmitters.get(userNickname);
-        sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCounts.get(userNickname)));
+        alarmRepository.markAllAsReadByReceiverProfile(requestProfile);
+        sseEmitter.send(SseEmitter.event().name("alarmCount").data(0));
 
         return new SliceImpl<>(alarmReadDtos, pageable, alarms.hasNext());
     }
@@ -375,14 +374,11 @@ public class AlarmService {
                 alarmReservationResponseRepository.delete(alarmReservationResponse);
                 break;
         }
-        if (alarmCounts.containsKey(userNickname)) {
-            int currentCount = alarmCounts.get(userNickname);
-            if (currentCount > 0) {
-                alarmCounts.put(userNickname, currentCount - 1);
-            }
-        }
+
         SseEmitter sseEmitter = AlarmController.sseEmitters.get(userNickname);
-        sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCounts.get(userNickname)));
+        Long alarmCount = alarmRepository.countByReceiverProfileAndIsReadFalse(profile);
+        sseEmitter.send(SseEmitter.event().name("alarmCount").data(alarmCount));
+
         return true;
     }
 }
