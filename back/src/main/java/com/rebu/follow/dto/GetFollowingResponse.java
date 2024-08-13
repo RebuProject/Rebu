@@ -2,16 +2,15 @@ package com.rebu.follow.dto;
 
 import com.rebu.follow.entity.Follow;
 import com.rebu.profile.enums.Type;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class GetFollowingResponse {
+    private Long followId;
     private String nickname;
     private String imgSrc;
     private String introduction;
@@ -19,6 +18,7 @@ public class GetFollowingResponse {
 
     public static GetFollowingResponse from(Follow follow) {
         return GetFollowingResponse.builder()
+                .followId(follow.getId())
                 .nickname(follow.getFollowing().getNickname())
                 .imgSrc(follow.getFollowing().getImageSrc())
                 .introduction(follow.getFollowing().getIntroduction())
