@@ -1,21 +1,17 @@
-package com.rebu.profile.dto;
+package com.rebu.profile.employee.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class GetProfileInfoResponse {
+public class GetEmployeeProfileInfoResultDto {
     private String imageSrc;
     private String nickname;
-    private String email;
+    private String workingName;
     private String phone;
-    private String gender;
-    private LocalDate birth;
 }

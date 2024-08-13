@@ -61,14 +61,14 @@ public class EmployeeProfileController {
     @GetMapping("/{nickname}")
     public ResponseEntity<?> getEmployeeProfile(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
                                                 @PathVariable String nickname) {
-        GetEmployeeProfileResponse result = employeeProfileService.getEmployeeProfile(new GetEmployeeProfileDto(authProfileInfo.getNickname(), nickname));
-        return ResponseEntity.ok(new ApiResponse<>("1D03", result));
+        GetEmployeeProfileResultDto result = employeeProfileService.getEmployeeProfile(new GetEmployeeProfileDto(authProfileInfo.getNickname(), nickname));
+        return ResponseEntity.ok(new ApiResponse<>("1C10", result));
     }
 
     @PatchMapping("/{nickname}/shop")
     public ResponseEntity<?> acceptInvite(@RequestBody AcceptInviteDto acceptInviteDto) {
         employeeProfileService.acceptInvite(acceptInviteDto);
-        return ResponseEntity.ok(new ApiResponse<>("1D04", null));
+        return ResponseEntity.ok(new ApiResponse<>("1D03", null));
     }
 
     @GetMapping("/{nickname}/period-schedule")
@@ -85,5 +85,14 @@ public class EmployeeProfileController {
     }
 
     @GetMapping("/mypage")
-    public ResponseEntity<?>
+    public ResponseEntity<?> getMyProfile(@AuthenticationPrincipal AuthProfileInfo authProfileInfo) {
+        GetEmployeeProfileResultDto result = employeeProfileService.getMyProfile(authProfileInfo);
+        return ResponseEntity.ok(new ApiResponse<>("1C10", result));
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<?> getMyProfileInfo(@AuthenticationPrincipal AuthProfileInfo authProfileInfo) {
+        GetEmployeeProfileInfoResultDto result = employeeProfileService.getMyProfileInfo(authProfileInfo);
+        return ResponseEntity.ok(new ApiResponse<>("1C11", result));
+    }
 }
