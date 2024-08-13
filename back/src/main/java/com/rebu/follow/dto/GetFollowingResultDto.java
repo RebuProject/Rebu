@@ -11,6 +11,7 @@ import lombok.*;
 @Builder
 public class GetFollowingResultDto {
     private Long followId;
+    public Boolean isFollow;
     private String nickname;
     private String imgSrc;
     private String introduction;

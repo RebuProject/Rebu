@@ -27,7 +27,8 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
                     (CASE
                         WHEN g.follower.id IS NOT NULL THEN true
                         ELSE false
-                    END)
+                    END),
+                    g.id
                    )
                    FROM Follow f
                    LEFT JOIN Follow g ON f.follower.id = g.following.id AND g.follower.id = :followingId

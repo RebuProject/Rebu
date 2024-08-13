@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class FollowerDto {
     private Profile profile;
     private Boolean isFollow;
+    private Long followId;
 }

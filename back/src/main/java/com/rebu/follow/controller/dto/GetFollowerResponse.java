@@ -17,6 +17,7 @@ public class GetFollowerResponse {
     private String introduction;
     private Type type;
     private Boolean isFollow;
+    private Long followId;
 
     public static GetFollowerResponse from(FollowerDto followerDto) {
         return GetFollowerResponse.builder()
@@ -25,6 +26,7 @@ public class GetFollowerResponse {
                 .introduction(followerDto.getProfile().getIntroduction())
                 .type(followerDto.getProfile().getType())
                 .isFollow(followerDto.getIsFollow())
+                .followId(followerDto.getFollowId())
                 .build();
     }
 }
