@@ -16,7 +16,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 @Service
 @RequiredArgsConstructor
 public class FollowService {
@@ -67,7 +66,7 @@ public class FollowService {
                 .orElseThrow(ProfileNotFoundException::new);
 
         if (!getFollowingsTargetDto.getNickname().equals(getFollowingsTargetDto.getTargetNickname())) {
-            if (profile.isPrivate()) {
+            if (profile.getIsPrivate()) {
                 throw new ProfileCantAccessException();
             }
         }
@@ -83,7 +82,7 @@ public class FollowService {
                 .orElseThrow(ProfileNotFoundException::new);
 
         if (!getFollowersTargetDto.getNickname().equals(getFollowersTargetDto.getTargetNickname())) {
-            if (profile.isPrivate()) {
+            if (profile.getIsPrivate()) {
                 throw new ProfileCantAccessException();
             }
         }
