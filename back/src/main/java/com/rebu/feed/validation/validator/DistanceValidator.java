@@ -9,7 +9,7 @@ public class DistanceValidator implements ConstraintValidator<Distance, Integer>
 
     @Override
     public boolean isValid(Integer distance, ConstraintValidatorContext constraintValidatorContext) {
-        if(distance != null && distance > 30)
+        if(distance != null && distance > 100)
             throw new DistanceMismatchException();
         return true;
     }

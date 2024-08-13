@@ -6,7 +6,7 @@ import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.rebu.feed.dto.FeedSearchDto;
-import com.rebu.feed.dto.FeedSearchedDto;
+import com.rebu.feed.dto.FeedOrReviewDto;
 import static com.rebu.feed.entity.QFeed.feed;
 import static com.rebu.feed.entity.QFeedImage.feedImage;
 import static com.rebu.feed.entity.QHashtag.hashtag;
@@ -17,6 +17,7 @@ import static com.rebu.reviewkeyword.entity.QReviewKeyword.reviewKeyword;
 import static com.rebu.reviewkeyword.entity.QSelectedReviewKeyword.selectedReviewKeyword;
 import static com.rebu.scrap.entity.QScrap.scrap;
 
+import com.rebu.feed.entity.Feed;
 import com.rebu.profile.shop.entity.QShopProfile;
 import lombok.AllArgsConstructor;
 
@@ -29,20 +30,20 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom{
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<FeedSearchedDto> searchFeeds(FeedSearchDto dto) {
+    public List<FeedOrReviewDto> searchFeeds(FeedSearchDto dto) {
         QShopProfile ownerJoinedShop = new QShopProfile("joinedShop");
 
-        JPAQuery<FeedSearchedDto> query = queryFactory
-                .select(Projections.constructor(FeedSearchedDto.class
-                        ,feed, ownerJoinedShop, review, review.shopProfile))
+        JPAQuery<FeedOrReviewDto> query = queryFactory
+                .select(Projections.constructor(FeedOrReviewDto.class, feed, ownerJoinedShop, review, review.shopProfile))
                 .from(feed)
                 .leftJoin(ownerJoinedShop).on(feed.owner.id.eq(ownerJoinedShop.id))
                 .leftJoin(review).on(feed.id.eq(review.id))
-                .join(review.shopProfile, shopProfile).fetchJoin()
-                .join(feed.feedImages, feedImage).fetchJoin()
+                .leftJoin(review.shopProfile, shopProfile).fetchJoin()
+                .leftJoin(feed.feedImages, feedImage).fetchJoin()
                 .leftJoin(feed.hashtags, hashtag).fetchJoin()
                 .leftJoin(review.selectedReviewKeywords, selectedReviewKeyword).fetchJoin()
-                .join(selectedReviewKeyword.reviewKeyword, reviewKeyword).fetchJoin();
+                .leftJoin(selectedReviewKeyword.reviewKeyword, reviewKeyword).fetchJoin()
+                .where(ownerJoinedShop.isNotNull().or(feed.type.eq(Feed.Type.REVIEW)));
 
         if(dto.getLng() != null && dto.getLat() != null && dto.getDistance() != null) {
             String template = "6371 * acos( cos(radians({0})) * cos(radians({1})) * cos(radians({2}) - radians({3})) + sin(radians({0})) * sin(radians({1})))";
@@ -62,7 +63,7 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom{
                         .or(review.isNull().and(ownerJoinedShop.category.eq(dto.getCategory()))));
 
         if(dto.getPeriod() != null)
-            query.where(feed.createdAt.before(LocalDateTime.now().minusDays(dto.getPeriod())));
+            query.where(feed.createdAt.after(LocalDateTime.now().minusDays(dto.getPeriod())));
 
         if(dto.getHashtag() != null)
             query.where(feed.hashtags.any().tag.eq(dto.getHashtag()));
@@ -73,10 +74,12 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom{
         if(dto.getSortedLike()) {
             query.leftJoin(likeFeed).on(likeFeed.feed.id.eq(feed.id))
                     .groupBy(feed.id)
-                    .orderBy(likeFeed.count().desc());
-        } else {
+                    .orderBy(likeFeed.count().desc(), feed.createdAt.desc());
+        }
+        else{
             query.orderBy(feed.createdAt.desc());
         }
-        return query.fetch();
+
+        return query.groupBy(feed.id).fetch();
     }
 }

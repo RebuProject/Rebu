@@ -1,11 +1,11 @@
 package com.rebu.feed.repository;
 
 import com.rebu.feed.dto.FeedSearchDto;
-import com.rebu.feed.dto.FeedSearchedDto;
+import com.rebu.feed.dto.FeedOrReviewDto;
 
 import java.util.List;
 
 public interface FeedRepositoryCustom {
 
-    List<FeedSearchedDto> searchFeeds(FeedSearchDto dto);
+    List<FeedOrReviewDto> searchFeeds(FeedSearchDto dto);
 }
