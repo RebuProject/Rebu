@@ -1,11 +1,15 @@
 package com.rebu.menu.entity;
 
+import com.rebu.menu.dto.MenuUpdateDto;
 import com.rebu.profile.employee.entity.EmployeeProfile;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.Hibernate;
+
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -33,4 +37,24 @@ public class Menu {
 
     private String category;
 
+    public void updateMenu(MenuUpdateDto dto) {
+        this.title = dto.getTitle();
+        this.content = dto.getContent();
+        this.price = dto.getPrice();
+        this.timeTaken = dto.getTimeTaken();
+        this.category = dto.getCategory();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Menu menu = (Menu) o;
+        return Objects.equals(id, menu.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
 }

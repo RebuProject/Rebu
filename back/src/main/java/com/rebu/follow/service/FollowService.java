@@ -1,5 +1,6 @@
 package com.rebu.follow.service;
 
+import com.rebu.alarm.service.AlarmService;
 import com.rebu.follow.dto.*;
 import com.rebu.follow.entity.Follow;
 import com.rebu.follow.exception.AlreadyFollowingException;
@@ -11,10 +12,10 @@ import com.rebu.profile.exception.ProfileCantAccessException;
 import com.rebu.profile.exception.ProfileNotFoundException;
 import com.rebu.profile.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +23,7 @@ public class FollowService {
 
     private final ProfileRepository profileRepository;
     private final FollowRepository followRepository;
+    private final AlarmService alarmService;
 
     @Transactional
     public void follow(FollowDto followDto) {
@@ -39,7 +41,9 @@ public class FollowService {
             throw new AlreadyFollowingException();
         }
 
-        followRepository.save(followDto.toEntity(sender, receiver));
+        Follow follow = followRepository.save(followDto.toEntity(sender, receiver));
+
+        alarmService.alarmFollow(follow, receiver, sender);
     }
 
     @Transactional
@@ -58,7 +62,7 @@ public class FollowService {
 
 
     @Transactional(readOnly = true)
-    public List<GetFollowingDto> getFollowings(GetFollowingsTargetDto getFollowingsTargetDto) {
+    public Slice<GetFollowingResponse> getFollowings(GetFollowingsTargetDto getFollowingsTargetDto) {
         Profile profile = profileRepository.findByNickname(getFollowingsTargetDto.getTargetNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
@@ -68,13 +72,13 @@ public class FollowService {
             }
         }
 
-        List<Follow> followings = followRepository.findByFollowerId(profile.getId());
+        Slice<Follow> followingList = followRepository.findByFollowerId(profile.getId(), getFollowingsTargetDto.getPageable());
 
-        return followings.stream().map(GetFollowingDto::from).toList();
+        return followingList.map(GetFollowingResponse::from);
     }
 
     @Transactional(readOnly = true)
-    public List<GetFollowerDto> getFollowers(GetFollowersTargetDto getFollowersTargetDto) {
+    public Slice<GetFollowerResponse> getFollowers(GetFollowersTargetDto getFollowersTargetDto) {
         Profile profile = profileRepository.findByNickname(getFollowersTargetDto.getTargetNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
@@ -84,8 +88,8 @@ public class FollowService {
             }
         }
 
-        List<Follow> followers = followRepository.findByFollowingId(profile.getId());
+        Slice<Follow> followerList = followRepository.findByFollowingId(profile.getId(), getFollowersTargetDto.getPageable());
 
-        return followers.stream().map(GetFollowerDto::from).toList();
+        return followerList.map(GetFollowerResponse::from);
     }
 }

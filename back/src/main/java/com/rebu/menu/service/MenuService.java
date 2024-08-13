@@ -1,9 +1,6 @@
 package com.rebu.menu.service;
 
-import com.rebu.menu.dto.MenuCreateDto;
-import com.rebu.menu.dto.MenuDeleteDto;
-import com.rebu.menu.dto.MenuReadDto;
-import com.rebu.menu.dto.MenuUpdateDto;
+import com.rebu.menu.dto.*;
 import com.rebu.menu.entity.Menu;
 import com.rebu.menu.exception.MenuNotFoundException;
 import com.rebu.menu.repositoy.MenuRepository;
@@ -13,6 +10,8 @@ import com.rebu.profile.entity.Profile;
 import com.rebu.profile.exception.ProfileNotFoundException;
 import com.rebu.profile.exception.ProfileUnauthorizedException;
 import com.rebu.profile.repository.ProfileRepository;
+import com.rebu.profile.shop.entity.ShopProfile;
+import com.rebu.profile.shop.repository.ShopProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +28,7 @@ public class MenuService {
     private final MenuPhotoService menuPhotoService;
     private final ProfileRepository profileRepository;
     private final EmployeeProfileRepository employeeProfileRepository;
+    private final ShopProfileRepository shopProfileRepository;
 
     @Transactional
     public boolean create(MenuCreateDto dto) {
@@ -61,12 +61,15 @@ public class MenuService {
 
     @Transactional
     public boolean update(MenuUpdateDto dto) {
-        Profile profile = profileRepository.findByNickname(dto.getProfileNickname()).orElseThrow(ProfileNotFoundException::new);
-        EmployeeProfile employee = employeeProfileRepository.findById(profile.getId()).orElseThrow(ProfileNotFoundException::new);
+        Profile requestProfile = profileRepository.findByNickname(dto.getProfileNickname()).orElseThrow(ProfileNotFoundException::new);
         Menu menu = menuRepository.findById(dto.getMenuId()).orElseThrow(MenuNotFoundException::new);
+        Profile menuProfile = profileRepository.findById(menu.getEmployee().getId()).orElseThrow(ProfileNotFoundException::new);
+        if (!menuProfile.equals(requestProfile)){
+            throw new ProfileUnauthorizedException();
+        }
         menuPhotoService.updatePhoto(dto, menu);
         menuRepository.findById(dto.getMenuId()).orElseThrow(MenuNotFoundException::new);
-        menuRepository.save(dto.toEntity(dto.getMenuId(), employee));
+        menu.updateMenu(dto);
         return true;
     }
 
@@ -80,6 +83,12 @@ public class MenuService {
         menuPhotoService.deletePhoto(menu);
         menuRepository.delete(menu);
         return true;
+    }
+
+    public MenuCategoryReadDto category(String shopNickname) {
+        ShopProfile shopProfile = shopProfileRepository.findByNickname(shopNickname).orElseThrow(ProfileNotFoundException::new);
+        List<String> categoryList = menuRepository.findDistinctCategoriesByShopProfile(shopProfile);
+        return MenuCategoryReadDto.from(categoryList);
     }
 
     private MenuReadDto readMenu(Menu menu) {

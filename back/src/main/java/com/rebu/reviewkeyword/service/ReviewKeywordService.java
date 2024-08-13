@@ -9,7 +9,6 @@ import com.rebu.profile.repository.ProfileRepository;
 import com.rebu.reviewkeyword.dto.ReviewKeywordCountDto;
 import com.rebu.reviewkeyword.dto.ReviewKeywordDto;
 import com.rebu.reviewkeyword.entity.ReviewKeyword;
-import com.rebu.reviewkeyword.exception.ReviewKeywordNotFoundException;
 import com.rebu.reviewkeyword.repository.ReviewKeywordRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,7 +31,7 @@ public class ReviewKeywordService {
     @Transactional(readOnly = true)
     public List<ReviewKeywordDto> readAll() {
         List<ReviewKeyword> reviewKeywords = reviewKeywordRepository.findAll();
-        return ListUtils.applyFunctionToElements(reviewKeywords, ReviewKeywordDto::from);
+        return ListUtils.applyFunctionToElements(reviewKeywords, ReviewKeywordDto::fromReviewKeyword);
     }
 
     /**
