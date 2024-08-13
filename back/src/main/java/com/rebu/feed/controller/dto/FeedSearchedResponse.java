@@ -25,7 +25,7 @@ public class FeedSearchedResponse {
     @Getter
     @Builder
     private static class Writer {
-        private String profileImageSrc;
+        private String imageSrc;
         private String nickname;
     }
 
@@ -47,8 +47,8 @@ public class FeedSearchedResponse {
     @Getter
     @Builder
     private static class Shop {
-        private String shopName;
-        private String shopNickname;
+        private String name;
+        private String nickname;
     }
 
     public static FeedSearchedResponse from(FeedSearchedDto dto){
@@ -56,10 +56,11 @@ public class FeedSearchedResponse {
                 .isScraped(dto.getIsScraped())
                 .isLiked(dto.getIsLiked())
                 .writer(Writer.builder()
-                        .profileImageSrc(dto.getWriter().getImageSrc())
+                        .imageSrc(dto.getWriter().getImageSrc())
                         .nickname(dto.getWriter().getNickname())
                         .build())
                 .feed(Feed.builder()
+                        .type(dto.getFeed().getType())
                         .feedId(dto.getFeed().getId())
                         .imageSrcs(ListUtils.applyFunctionToElements(dto.getFeedImages(), FeedImageDto::getSrc))
                         .content(dto.getFeed().getContent())
@@ -67,12 +68,12 @@ public class FeedSearchedResponse {
                         .createAt(dto.getFeed().getCreatedAt())
                         .likeCnt(dto.getFeed().getLikeFeedCnt())
                         .commentCnt(dto.getFeed().getCommentCnt())
-                        .reviewKeywords(ListUtils.applyFunctionToElements(dto.getReviewKeywords(), ReviewKeywordDto::getKeyword))
+                        .reviewKeywords(dto.getReviewKeywords() != null ? ListUtils.applyFunctionToElements(dto.getReviewKeywords(), ReviewKeywordDto::getKeyword) : null)
                         .rating(dto.getReview() != null ? dto.getReview().getRating() : null)
                         .build())
                 .shop(Shop.builder()
-                        .shopName(dto.getShop().getName())
-                        .shopNickname(dto.getShop().getNickname())
+                        .name(dto.getShop().getName())
+                        .nickname(dto.getShop().getNickname())
                         .build())
                 .build();
     }

@@ -117,8 +117,8 @@ public class FeedController {
                 .period(period)
                 .sortedLike(sortedLike)
                 .build());
-
-        return ResponseEntity.ok().body(new ApiResponse<>("1P05", dtos));
+        List<FeedSearchedResponse> response = ListUtils.applyFunctionToElements(dtos, FeedSearchedResponse::from);
+        return ResponseEntity.ok().body(new ApiResponse<>("1P05", response));
     }
 
 }
