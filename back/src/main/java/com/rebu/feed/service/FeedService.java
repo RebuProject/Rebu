@@ -215,4 +215,9 @@ public class FeedService {
         }
         return result;
     }
+
+    @Transactional(readOnly = true)
+    public List<FeedSearchedDto> searchFeeds(FeedSearchDto dto){
+        return feedRepository.searchFeeds(dto);
+    }
 }

@@ -21,8 +21,8 @@ import java.util.List;
 public class EmployeePeriodScheduleDto {
     @Setter
     private EmployeeProfileDto employeeProfile;
-    private List<WorkingInfoDto> workingInfos = new ArrayList<>();
-    private List<AbsenceDto> absences = new ArrayList<>();
-    private List<ReservationDto> reservations = new ArrayList<>();
-    private List<MenuDto> menus = new ArrayList<>();
+    private final List<WorkingInfoDto> workingInfos = new ArrayList<>();
+    private final List<AbsenceDto> absences = new ArrayList<>();
+    private final List<ReservationDto> reservations = new ArrayList<>();
+    private final List<MenuDto> menus = new ArrayList<>();
 }
