@@ -129,10 +129,17 @@ public class ShopProfileController {
     @Authorized(allowed = {Type.SHOP})
     @DeleteMapping("/{shopNickname}/employees/{employeeNickname}")
     public ResponseEntity<?> deleteEmployee(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
-                                            @PathVariable String shopNickname,
                                             @PathVariable String employeeNickname) {
         shopProfileService.deleteEmployee(new DeleteEmployeeDto(authProfileInfo.getNickname(), employeeNickname));
         return ResponseEntity.ok(new ApiResponse<>("1E06", null));
     }
 
+    @Authorized(allowed = {Type.SHOP})
+    @PatchMapping("/{shopNickname}/employees/{employeeNickname}/role")
+    public ResponseEntity<?> updateEmployeeRole(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
+                                                @PathVariable String employeeNickname,
+                                                @RequestBody UpdateEmployeeRoleRequest updateEmployeeRoleRequest) {
+        shopProfileService.updateEmployeeRole(updateEmployeeRoleRequest.toDto(authProfileInfo.getNickname(), employeeNickname));
+        return ResponseEntity.ok(new ApiResponse<>("1E07", null));
+    }
 }
