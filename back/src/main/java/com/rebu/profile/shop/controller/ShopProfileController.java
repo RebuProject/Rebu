@@ -56,7 +56,7 @@ public class ShopProfileController {
     @Authorized(allowed = {Type.SHOP})
     @PatchMapping("/{nickname}/name")
     public ResponseEntity<?> updateShopName(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
-                                            @RequestBody ChangeShopNameRequest changeShopNameRequest) {
+                                            @Valid @RequestBody ChangeShopNameRequest changeShopNameRequest) {
         shopProfileService.updateShopName(changeShopNameRequest.toDto(authProfileInfo.getNickname()));
         return ResponseEntity.ok(new ApiResponse<>("1E02", null));
     }
