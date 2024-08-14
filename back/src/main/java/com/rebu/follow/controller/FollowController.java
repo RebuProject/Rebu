@@ -3,7 +3,7 @@ package com.rebu.follow.controller;
 import com.rebu.common.controller.dto.ApiResponse;
 import com.rebu.follow.controller.dto.FollowRequest;
 import com.rebu.follow.controller.dto.GetFollowerResponse;
-import com.rebu.follow.dto.GetFollowingResultDto;
+import com.rebu.follow.controller.dto.GetFollowingResponse;
 import com.rebu.follow.dto.*;
 import com.rebu.follow.service.FollowService;
 import com.rebu.security.dto.AuthProfileInfo;
@@ -41,7 +41,7 @@ public class FollowController {
     public ResponseEntity<?> getFollowings(@AuthenticationPrincipal AuthProfileInfo authProfileInfo,
                                            @PathVariable String nickname,
                                            @PageableDefault(size = 20, sort = "id") Pageable pageable) {
-        Slice<GetFollowingResultDto> followings = followService.getFollowings(new GetFollowingsTargetDto(authProfileInfo.getNickname(), nickname, pageable));
+        Slice<GetFollowingResponse> followings = followService.getFollowings(new GetFollowingsTargetDto(authProfileInfo.getNickname(), nickname, pageable));
         return ResponseEntity.ok(new ApiResponse<>("1O02", followings));
     }
 

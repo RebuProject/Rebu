@@ -2,7 +2,7 @@ package com.rebu.follow.service;
 
 import com.rebu.alarm.service.AlarmService;
 import com.rebu.follow.controller.dto.GetFollowerResponse;
-import com.rebu.follow.dto.GetFollowingResultDto;
+import com.rebu.follow.controller.dto.GetFollowingResponse;
 import com.rebu.follow.dto.*;
 import com.rebu.follow.entity.Follow;
 import com.rebu.follow.exception.AlreadyFollowingException;
@@ -63,33 +63,39 @@ public class FollowService {
 
 
     @Transactional(readOnly = true)
-    public Slice<GetFollowingResultDto> getFollowings(GetFollowingsTargetDto getFollowingsTargetDto) {
-        Profile profile = profileRepository.findByNickname(getFollowingsTargetDto.getTargetNickname())
+    public Slice<GetFollowingResponse> getFollowings(GetFollowingsTargetDto getFollowingsTargetDto) {
+        Profile targetProfile = profileRepository.findByNickname(getFollowingsTargetDto.getTargetNickname())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        Profile myProfile = profileRepository.findByNickname(getFollowingsTargetDto.getNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
         if (!getFollowingsTargetDto.getNickname().equals(getFollowingsTargetDto.getTargetNickname())) {
-            if (profile.getIsPrivate()) {
+            if (targetProfile.getIsPrivate()) {
                 throw new ProfileCantAccessException();
             }
         }
 
-        Slice<Follow> followingList = followRepository.findByFollowerId(profile.getId(), getFollowingsTargetDto.getPageable());
+        Slice<FollowingDto> followingList = followRepository.findByFollowerId(targetProfile.getId(), myProfile.getId(), getFollowingsTargetDto.getPageable());
 
-        return followingList.map(GetFollowingResultDto::from);
+        return followingList.map(GetFollowingResponse::from);
     }
 
     @Transactional(readOnly = true)
     public Slice<GetFollowerResponse> getFollowers(GetFollowersTargetDto getFollowersTargetDto) {
-        Profile profile = profileRepository.findByNickname(getFollowersTargetDto.getTargetNickname())
+        Profile targetProfile = profileRepository.findByNickname(getFollowersTargetDto.getTargetNickname())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        Profile myProfile = profileRepository.findByNickname(getFollowersTargetDto.getNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
         if (!getFollowersTargetDto.getNickname().equals(getFollowersTargetDto.getTargetNickname())) {
-            if (profile.getIsPrivate()) {
+            if (targetProfile.getIsPrivate()) {
                 throw new ProfileCantAccessException();
             }
         }
 
-        Slice<FollowerDto> followerList = followRepository.findByFollowingId(profile.getId(), getFollowersTargetDto.getPageable());
+        Slice<FollowerDto> followerList = followRepository.findByFollowingId(targetProfile.getId(), myProfile.getId(), getFollowersTargetDto.getPageable());
 
         return followerList.map(GetFollowerResponse::from);
     }

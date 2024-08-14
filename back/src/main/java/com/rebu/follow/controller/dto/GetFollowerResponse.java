@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class GetFollowerResponse {
     private String nickname;
-    private String imgSrc;
+    private String imageSrc;
     private String introduction;
     private Type type;
     private Boolean isFollow;
@@ -21,10 +21,10 @@ public class GetFollowerResponse {
 
     public static GetFollowerResponse from(FollowerDto followerDto) {
         return GetFollowerResponse.builder()
-                .nickname(followerDto.getProfile().getNickname())
-                .imgSrc(followerDto.getProfile().getImageSrc())
-                .introduction(followerDto.getProfile().getIntroduction())
-                .type(followerDto.getProfile().getType())
+                .nickname(followerDto.getFollower().getNickname())
+                .imageSrc(followerDto.getFollower().getImageSrc())
+                .introduction(followerDto.getFollower().getIntroduction())
+                .type(followerDto.getFollower().getType())
                 .isFollow(followerDto.getIsFollow())
                 .followId(followerDto.getFollowId())
                 .build();

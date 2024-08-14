@@ -6,10 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
-public class FollowerDto {
-    private Profile follower;
+@AllArgsConstructor
+public class FollowingDto {
+    private Profile following;
     private Boolean isFollow;
     private Long followId;
 }
