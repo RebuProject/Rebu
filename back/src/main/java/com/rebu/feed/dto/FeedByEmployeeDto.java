@@ -25,7 +25,6 @@ public class FeedByEmployeeDto {
     private List<FeedImageDto> feedImages;
     private List<HashtagDto> hashtags;
 
-
     public static FeedByEmployeeDto of(Feed feed, EmployeeProfile employee){
         return FeedByEmployeeDto.builder()
                 .writer(ProfileDto.from(feed.getWriter()))
@@ -37,5 +36,4 @@ public class FeedByEmployeeDto {
                 .isScraped(false)
                 .build();
     }
-
 }
