@@ -5,7 +5,6 @@ import com.rebu.feed.entity.Feed;
 import com.rebu.profile.dto.ProfileDto;
 import com.rebu.profile.employee.dto.EmployeeProfileDto;
 import com.rebu.profile.employee.entity.EmployeeProfile;
-import com.rebu.profile.shop.dto.ShopProfileDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
