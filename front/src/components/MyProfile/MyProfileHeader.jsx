@@ -103,6 +103,7 @@ const Header = ({
   currentUser,
   loginUser,
   handleLogout,
+  setProfile
 }) => {
   const [LogoutModalOpen, setLogoutModalOpen] = useState(false);
   const [SecretModalOpen, setSecretModalOpen] = useState(false);
@@ -112,6 +113,7 @@ const Header = ({
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const { type } = useSelector((state) => state.auth);
+  const [user, setCurrentUser] = useState(currentUser)
 
   const logoutModalOpen = () => {
     setLogoutModalOpen(true);
@@ -221,6 +223,8 @@ const Header = ({
           <SecretMode
             secretModalOpen={SecretModalOpen}
             closeModal={closeModal}
+            currentUser={currentUser}
+            setProfile={setProfile}
           />
         )}
         {ProfileChangeModalOpen && (

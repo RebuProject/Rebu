@@ -386,11 +386,11 @@ export default function ProfileLarge({ currentUser, time }) {
         >
           <FollowInfo>
             <FollowerInfo>
-              <FollowCount>{currentUser?.followerCnt}</FollowCount>
+              <FollowCount>{currentUser.followerCnt}</FollowCount>
               <FollowText onClick={handleOpenFollowersModal}>팔로워</FollowText>
             </FollowerInfo>
             <FollowingInfo>
-              <FollowCount>{currentUser?.followingCnt}</FollowCount>
+              <FollowCount>{currentUser.followingCnt}</FollowCount>
               <FollowText onClick={handleOpenFollowingModal}>팔로잉</FollowText>
             </FollowingInfo>
           </FollowInfo>

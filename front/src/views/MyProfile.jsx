@@ -90,8 +90,8 @@ const ProfilePage = ({ theme, toggleTheme, handleLogout }) => {
   const [loginUser, setLoginUser] = useState([]);
 
   // Redux 상태에서 필요한 정보 가져오기
-  const loginNickname = useSelector((state) => state.auth.nickname);
-  const loginType = useSelector((state) => state.auth.type);
+  const loginNickname = localStorage.getItem('nickname')
+  const loginType = localStorage.getItem('type')
   const { nickname, type } = useParams(); // URL 파라미터에서 nickname과 type을 추출
   const [profile, setProfile] = useState([]); //profile 조회
   const [error, setError] = useState(null);
@@ -99,9 +99,7 @@ const ProfilePage = ({ theme, toggleTheme, handleLogout }) => {
   // 다른사람 프로필 조회시 필요한 정보
   // const [tempNickname, setTempNickname] = useState(nickname);
   // const [tempType, setTempType] = useState(type);
-  console.log(nickname)
-  console.log(loginNickname)
-  console.log("MyProfile호출!", nickname, type);
+  
 
   // 타입별 프로필 조회
   useEffect(() => {
@@ -342,8 +340,8 @@ const ProfilePage = ({ theme, toggleTheme, handleLogout }) => {
           },
         })
         .then((response) => {
-          console.log(response.data.body);
-          setLikeCard(response.data.body);
+          console.log(response.data.body.content);
+          setLikeCard(response.data.body.content);
         })
         .catch((err) => {
           console.log("즐겨찾기 데이터를 찾지 못했습니다");
@@ -421,9 +419,14 @@ useEffect(() => {
     } else if (content === "Likes") {
       return (
         <>
-          {likeCard?.map((item) => (
+          {likeCard.map((item) => (
             <LikesCard key={item.id} Card={item} loginUser={loginNickname} />
           ))}
+          {likeCard == false && (
+            <h3 style={{color: "#b475f3", fontSize: "18px"}}>
+              좋아요한 가게가 없습니다
+            </h3>
+          )}
         </>
       );
     } else if (content === "Review") {
@@ -463,6 +466,7 @@ useEffect(() => {
           currentUser={profile}
           loginUser={loginNickname}
           handleLogout={handleLogout}
+          setProfile={setProfile}
         />
         <ProfileContainer>
           <IntroduceBox>
@@ -472,7 +476,6 @@ useEffect(() => {
                 currentUser={profile}
                 loginUser={loginNickname}
                 rating={ratingAvg}
-                likeshop={likeCard}
               />
             ) : (
               <ProfileInfo currentUser={profile} loginUser={loginNickname} />

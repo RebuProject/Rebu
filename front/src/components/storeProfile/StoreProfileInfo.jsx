@@ -164,18 +164,12 @@ const CloseButton = styled.button`
   }
 `;
 
-const InfoComponent = ({ currentUser, loginUser, rating, likeshop }) => {
+const InfoComponent = ({ currentUser, loginUser, rating }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newIntroduce, setNewIntroduce] = useState(currentUser.introduction);
   const [tempIntroduce, setTempIntroduce] = useState(currentUser.introduction);
   const [isLikes, setIsLikes] = useState(currentUser.isfavorite);
 
-  useEffect(() => {
-    if (likeshop.map((shop) => {shop.nickname === currentUser.nickname})) {
-      setIsLikes(true);
-    };
-  }, []);
-  
 
   useEffect(() => {
     setNewIntroduce(currentUser.introduction);
@@ -199,8 +193,6 @@ const InfoComponent = ({ currentUser, loginUser, rating, likeshop }) => {
   const handleLikeToggle = useCallback(() => {
     
     const access = localStorage.getItem('access');
-
-    // const isCurrentlyLiked = profile.isfavorite;
 
     // 좋아요 취소
     if (isLikes) {
@@ -235,12 +227,8 @@ const InfoComponent = ({ currentUser, loginUser, rating, likeshop }) => {
         console.log("좋아요 오류 발생:", error);
       });
     }
-  }, []);
+  }, [isLikes, currentUser.nickname]);
 
-  // const handleunLikeToggle = () => {
-  //   // 매장 즐겨찾기 삭제 api delete 호출
-  //   setIsLikes(!isLikes)
-  // };
 
   const saveIntroduce = async () => {
     try {
@@ -248,30 +236,22 @@ const InfoComponent = ({ currentUser, loginUser, rating, likeshop }) => {
       // 백엔드 API 엔드포인트 주소
       const url = `${BASE_URL}/api/profiles/${currentUser.nickname}/introduction`;
 
-      // 업데이트할 데이터
-      // const updatedData = {
-      //   introduction: tempIntroduce,
-      // };
-
       const headers = {
         "Content-Type": "application/json",
         "access" : access
       }
-
       // PATCH 요청 보내기
       const response = await axios.patch(url, {
         introduction: tempIntroduce,
       }, {headers});
 
-      // 성공 시 추가로 처리할 작업이 있다면 여기에 작성
-      console.log('소개글이 성공적으로 수정되었습니다:', response.data);
-    } catch (error) {
-      // 에러 처리 로직 작성
-      console.error('소개글 수정에 실패했습니다:', error);
-    }
-    setNewIntroduce(tempIntroduce)
-    closeModal();
-  };
+        console.log('소개글이 성공적으로 수정되었습니다:', response.data);
+      } catch (error) {
+        console.error('소개글 수정에 실패했습니다:', error);
+      }
+      setNewIntroduce(tempIntroduce)
+      closeModal();
+    };
 
   return (
     <InfoBox>

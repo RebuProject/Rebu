@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import axios from 'axios';
+import { BASE_URL } from '../../views/Signup';
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -89,13 +91,40 @@ const ToggleContainer = styled.div`
 `;
 
 
-const SecretMode = ({secretModalOpen, closeModal}) => {
-  const [isSecret, setisSecret] = useState(false);
-  const secretMode = isSecret
+const SecretMode = ({secretModalOpen, closeModal, currentUser, setProfile}) => {
+  const [isSecret, setisSecret] = useState(currentUser.isPrivate);
 
-  const toggleHandler = () => {
-    setisSecret(!isSecret);
-    console.log(isSecret);
+
+  const toggleHandler = async () => {
+    try {
+      const access = localStorage.getItem('access');
+      // 백엔드 API 엔드포인트 주소
+      const url = `${BASE_URL}/api/profiles/${currentUser.nickname}/is-private`;
+
+      // 업데이트할 데이터
+      // const updatedData = {
+      //   introduction: tempIntroduce,
+      // };
+
+      const headers = {
+        "Content-Type": "application/json",
+        "access" : access
+      }
+
+      // PATCH 요청 보내기
+      const response = await axios.patch(url, {
+        isPrivate: isSecret,
+      }, {headers});
+      console.log(isSecret)
+      // 성공 시 추가로 처리할 작업이 있다면 여기에 작성
+      console.log('공개범위가 수정되었습니다:', response.data);
+      setisSecret(!isSecret);
+      
+    } catch (error) {
+      // 에러 처리 로직 작성
+      console.error('공개범위 수정에 실패했습니다:', error);
+    }
+    setProfile({ ...currentUser, isPrivate: isSecret })
   };
     
 
@@ -109,8 +138,8 @@ const SecretMode = ({secretModalOpen, closeModal}) => {
           </ModalHeader>
           <ModalText>내 스크랩 항목 비공개</ModalText>
           <ToggleContainer onClick={toggleHandler}>
-            <div className={`toggle-container ${isSecret ? null : "toggle--checked" }`}></div>
-            <div className={`toggle-circle ${isSecret ? null : "toggle--checked" }`}></div>
+            <div className={`toggle-container ${isSecret ? "toggle--checked" : null }`}></div>
+            <div className={`toggle-circle ${isSecret ? "toggle--checked" : null }`}></div>
           </ToggleContainer>
         </ModalContent>
       </ModalOverlay>
