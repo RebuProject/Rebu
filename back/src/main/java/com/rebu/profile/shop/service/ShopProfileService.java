@@ -34,6 +34,7 @@ import com.rebu.reservation.repository.ReservationRepository;
 import com.rebu.security.dto.AuthProfileInfo;
 import com.rebu.security.dto.ProfileInfo;
 import com.rebu.security.util.JWTUtil;
+import com.rebu.shop_favorite.entity.ShopFavoriteId;
 import com.rebu.shop_favorite.repository.ShopFavoriteRepository;
 import com.rebu.workingInfo.dto.WorkingInfoDto;
 import com.rebu.workingInfo.entity.WorkingInfo;
@@ -173,7 +174,9 @@ public class ShopProfileService {
         }
 
         if (myProfile.getType() == Type.COMMON) {
-            shopFavoriteRepository.
+            if (shopFavoriteRepository.findById(new ShopFavoriteId(myProfile, targetProfile)).isPresent()) {
+                getShopProfileResultDto.setIsFavorite(true);
+            }
         }
 
         return getShopProfileResultDto;
