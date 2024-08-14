@@ -114,6 +114,7 @@ public class ShopProfileController {
         return ResponseEntity.ok(new ApiResponse<>("기간 일정 조회 성공", ShopReadPeriodScheduleResponse.from(dto)));
     }
 
+    @UpdateRecentTime
     @GetMapping("/mypage")
     public ResponseEntity<?> getMyProfile(@AuthenticationPrincipal AuthProfileInfo authProfileInfo) {
         GetShopProfileResultDto result = shopProfileService.getMyProfile(authProfileInfo);
