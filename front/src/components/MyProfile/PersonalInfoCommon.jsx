@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { FiChevronLeft } from "react-icons/fi";
-import { useLocation, useNavigate } from "react-router-dom";
-import { AiTwotonePlusCircle } from "react-icons/ai";
+import { useNavigate } from "react-router-dom";
 import { getCommonProfileInfo } from "../../features/common/userSlice";
+import { updateNickname } from "../../features/auth/authSlice";
 import Img from "../../assets/images/img.webp";
 
 const Form = styled.div`
@@ -57,7 +56,7 @@ const InfoBox = styled.input`
 
 const ButtonContainer = styled.div`
   display: flex;
-  justify-content: space-around;
+  justify-content: start;
   margin-top: 20px;
   margin-bottom: 10px;
   width: 80%;
@@ -89,13 +88,8 @@ const Button = styled.button`
 
 const SaveButton = styled(Button)`
   background: #943aee;
+  justify-content: flex-start;
   color: white;
-  cursor: pointer;
-`;
-
-const DeleteButton = styled(Button)`
-  background: #cccccc;
-  color: black;
   cursor: pointer;
 `;
 
@@ -109,6 +103,7 @@ export const PersonalInfoCommon = () => {
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const oldNickname = localStorage.getItem("nickname");
 
   useEffect(() => {
     const fetchProfileInfo = async () => {
@@ -128,7 +123,11 @@ export const PersonalInfoCommon = () => {
         setEmail(result.data.email);
         setBirth(result.data.birth);
         setPhone(result.data.phone);
-        setGender(result.data.birth);
+        if (result.data.gender === "FEMALE") {
+          setGender("여성");
+        } else {
+          setGender("남성");
+        }
         console.log("profile 조회 성공", profile);
       } else {
         setError(result.error);
@@ -151,11 +150,8 @@ export const PersonalInfoCommon = () => {
   };
 
   const handleEdit = () => {
-    const updateNickname = {
-      ...user,
-      nickname: nickname,
-    };
-    console.log(updateNickname);
+    console.log("handleEdit", nickname);
+    updateNickname(oldNickname, nickname);
   };
 
   const handleSave = () => {
@@ -192,10 +188,9 @@ export const PersonalInfoCommon = () => {
         <InfoBox type="text" value={gender} readOnly />
       </Form>
       <ButtonContainer>
-        <DeleteButton onClick={() => navigate("/withdrawal")}>
+        <SaveButton onClick={() => navigate("/withdrawal")}>
           회원탈퇴
-        </DeleteButton>
-        <SaveButton onClick={handleSave}>저장</SaveButton>
+        </SaveButton>
       </ButtonContainer>
     </>
   );

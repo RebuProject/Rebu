@@ -58,6 +58,9 @@ const authSlice = createSlice({
     setProfile(state, action) {
       state.profile = { ...state.profile, ...action.payload };
     },
+    setUpdateNickname(state, action) {
+      state.nickname = action.payload;
+    },
     //알람 리듀서
     setAlarmConnection(state, action) {
       state.alarmConnection = action.payload;
@@ -74,7 +77,7 @@ const authSlice = createSlice({
   },
 });
 
-export const { loginSuccess, logout, setProfile, setAlarmConnection, addAlarm, setAlarms, clearAlarms } = authSlice.actions;
+export const { loginSuccess, logout, setProfile, setUpdateNickname, setAlarmConnection, addAlarm, setAlarms, clearAlarms } = authSlice.actions;
 
 export const login = (email, password, navLogin) => async (dispatch) => {
   try {
@@ -140,6 +143,7 @@ export const getProfile = (nickname) => async (dispatch) => {
   }
 };
 
+// 프로필 전환 API
 export const switchProfile = (nickname) => async (dispatch) => {
   const access = localStorage.getItem("access");
   console.log("existing access", access);
@@ -179,6 +183,7 @@ export const switchProfile = (nickname) => async (dispatch) => {
   }
 };
 
+// 비밀번호 인증 API
 export const verifyPassword = async (password, purpose) => {
   const access = localStorage.getItem("access");
   try {
@@ -199,6 +204,7 @@ export const verifyPassword = async (password, purpose) => {
     // 성공 시 처리할 코드
     if (response.data.code === "1A00") {
       console.log('비밀번호 인증 성공', response.data);
+
       return { success: true, data: response.data.body };
     } else {
       console.log('Verification failed:', response);
@@ -211,5 +217,67 @@ export const verifyPassword = async (password, purpose) => {
     throw error;
   }
 };
+
+
+// 닉네임 변경 API
+export const updateNickname = async (currentNickname, newNickname) => {
+  const access = localStorage.getItem("access");
+  try {
+    const response = await axios.patch(
+      `/api/profiles/${currentNickname}/nickname`,
+      {
+        nickname: newNickname,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          'access': access, // 실제 토큰 값으로 대체 필요
+        },
+      }
+    );
+
+    if (response.data.code === "1C02") {
+      console.log("Nickname updated successfully:", response.data);
+      // nickname만 업데이트
+      dispatch(setUpdateNickname(newNickname));
+      return { success: true, data: response.data.body }
+    } else {
+      return { success: false, data: response.data.body };
+    }
+  } catch (error) {
+    console.error("Error updating nickname:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const withdrawal = async (dispatch) => {
+  const access = localStorage.getItem("access");
+  try {
+    const response = await axios.post(
+      `${BASE_URL}/api/members`,
+      { nickname },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          'access': access,
+        },
+      }
+    );
+    console.log("withdrawal response", response);
+    if (response.data.code === "1B04") {
+      alert("회원탈퇴가 완료되었습니다.");
+      localStorage.removeItem("access");
+      dispatch(logout());
+      navigate("/login");
+    } else {
+      alert("회원탈퇴에 실패했습니다.");
+      console.log("회원탈퇴 실패", response);
+    }
+  } catch (error) {
+    console.error("Error withdrawing:", error);
+  }
+};
+
+
 
 export default authSlice.reducer;
