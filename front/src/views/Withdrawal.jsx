@@ -8,6 +8,8 @@ import ButtonBack from "../components/common/ButtonBack";
 import LoginTitle from "../components/common/LoginTitle";
 import "./Login.css";
 import { BASE_URL } from "./Signup";
+import { verifyPassword, withdrawal } from "../features/auth/authSlice";
+import { useSelector } from "react-redux";
 
 const Container = styled.div`
   align-items: center;
@@ -44,39 +46,8 @@ const SubmitButton = styled.button`
   padding: 1rem;
 `;
 
-const Tooltip = styled.div`
-  position: absolute;
-  background-color: whitesmoke;
-  color: gray;
-  padding: 0.5rem;
-  border-radius: 1rem;
-  top: -2.5rem;
-  transform: translateX(-50%);
-  min-width: 200px;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s, visibility 0.2s;
-`;
-
-const InfoIconContainer = styled.div`
-  cursor: pointer;
-  position: relative;
-
-  &:hover ${Tooltip} {
-    opacity: 1;
-    visibility: visible;
-  }
-`;
-
 const SmallButtonHover = styled(ButtonHover)`
   width: 30%;
-`;
-
-const PwdIcon = styled("div")`
-  display: flex;
-  flex-direction: row;
-  justify-self: stretch;
-  align-items: center;
 `;
 
 const Msg = styled.p`
@@ -86,8 +57,9 @@ const Msg = styled.p`
   color: ${(props) => (props.isValid ? "blue" : "red")};
 `;
 
-const Withdrawal = ({ purpose = "withdrawal", buttonTitle = "Submit" }) => {
+const Withdrawal = ({ purpose = "withdrawal", buttonTitle = "탈퇴하기" }) => {
   const navigate = useNavigate();
+  const nickname = useSelector((state) => state.auth.nickname);
   const [formData, setFormData] = useState({
     password: "",
   });
@@ -132,23 +104,6 @@ const Withdrawal = ({ purpose = "withdrawal", buttonTitle = "Submit" }) => {
     }
   };
 
-  const handlePasswordConfirmChange = (e) => {
-    const confirmPassword = e.target.value;
-    setPasswordConfirm(confirmPassword);
-    if (confirmPassword !== formData.password) {
-      setPasswordConfirmMsg("비밀번호가 일치하지 않습니다.");
-    } else {
-      setPasswordConfirmMsg("비밀번호가 일치합니다.");
-    }
-    setEmptyFieldsMsg((prev) => ({ ...prev, passwordConfirm: false }));
-  };
-
-  const handlePasswordConfirmBlur = () => {
-    if (!passwordConfirm) {
-      setEmptyFieldsMsg((prev) => ({ ...prev, passwordConfirm: true }));
-    }
-  };
-
   const validatePassword = (password) => {
     const passwordRegex =
       /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,15}$/;
@@ -158,34 +113,15 @@ const Withdrawal = ({ purpose = "withdrawal", buttonTitle = "Submit" }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsChecking(true);
+    const access = localStorage.getItem("access");
 
-    try {
-      const response = await axios.post(
-        `${BASE_URL}/api/auths/password/verify`,
-        {
-          receiverPassword: formData.password,
-          purpose: purpose,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      // 성공 처리
-      if (response.data.success) {
-        // 예시로 navigate를 사용해 다음 단계로 이동
-        navigate("/next-step");
-      } else {
-        // 실패 시 처리
-        setPasswordMsg("비밀번호 확인에 실패했습니다.");
+    const response = verifyPassword(formData.password, purpose);
+    if (response.success) {
+      try {
+        withdrawal(nickname);
+      } catch (error) {
+        console.error("Error withdrawing:", error);
       }
-    } catch (error) {
-      console.error("Password verification error:", error);
-      setPasswordMsg("비밀번호 확인 중 오류가 발생했습니다.");
-    } finally {
-      setIsChecking(false);
     }
   };
 

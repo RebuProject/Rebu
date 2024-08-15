@@ -348,3 +348,42 @@ export const deleteProfile = async (nickname) => {
     return { success: false, error: error.message };
   }
 };
+
+
+// 비밀번호 인증 API - 회원탈퇴용
+export const verifyPassword = async (nickname, password) => {
+  const access = localStorage.getItem("access");
+  try {
+    const response = await axios.post(
+      `${BASE_URL}/api/auths/password/verify`,
+      {
+        'receiverPassword': password,
+        'purpose': purpose,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          'access': access,
+        },
+      }
+    );
+
+    if (response.data.code === "1A00") {
+      console.log("비밀번호 인증 성공", response.data);
+      localStorage.setItem("nickname", nickname);
+
+      return { success: true, data: response.data.body };
+    } else {
+      console.log("Verification failed:", response);
+      return { success: false, data: response.data.body };
+    }
+  } catch (error) {
+    console.error(
+      "Verification failed:",
+      error.response ? error.response.data : error.message
+    );
+    throw error;
+  }
+};
+
+
