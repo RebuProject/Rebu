@@ -9,7 +9,6 @@ import com.rebu.feed.repository.FeedRepository;
 import com.rebu.feed.repository.HashtagRepository;
 import com.rebu.like.entity.LikeFeed;
 import com.rebu.like.repository.LikeFeedRepository;
-import com.rebu.profile.dto.ProfileDto;
 import com.rebu.profile.employee.entity.EmployeeProfile;
 import com.rebu.profile.employee.repository.EmployeeProfileRepository;
 import com.rebu.profile.entity.Profile;
@@ -17,7 +16,6 @@ import com.rebu.profile.enums.Type;
 import com.rebu.profile.exception.ProfileNotFoundException;
 import com.rebu.profile.exception.ProfileUnauthorizedException;
 import com.rebu.profile.repository.ProfileRepository;
-import com.rebu.profile.shop.dto.ShopProfileDto;
 import com.rebu.profile.shop.entity.ShopProfile;
 import com.rebu.profile.shop.repository.ShopProfileRepository;
 import com.rebu.scrap.entity.Scrap;
@@ -27,13 +25,11 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
 public class FeedService {
-
     private final FeedRepository feedRepository;
     private final FeedImageService feedImageService;
     private final HashtagService hashtagService;
@@ -43,6 +39,91 @@ public class FeedService {
     private final ShopProfileRepository shopProfileRepository;
     private final ScrapRepository scrapRepository;
     private final LikeFeedRepository likeFeedRepository;
+
+    /**
+     * FeedService :: searchFeeds method
+     * 전체 피드를 조회
+     * @param dto 피드 조회 변수 정보
+     */
+    @Transactional(readOnly = true)
+    public List<FeedSearchedDto> searchFeeds(FeedSearchDto dto){
+        Profile profile = profileRepository.findByNickname(dto.getNickname()).orElseThrow(ProfileNotFoundException::new);
+
+        List<FeedOrReviewDto> dtos = feedRepository.searchFeeds(dto);
+
+        List<Feed> feeds = ListUtils.applyFunctionToElements(dtos, FeedOrReviewDto::getFeed);
+        List<Scrap> scraps = scrapRepository.findByProfileAndFeedIn(profile, feeds);
+        List<LikeFeed> likeFeeds = likeFeedRepository.findByProfileAndFeedIn(profile, feeds);
+
+        Map<Long, FeedSearchedDto> map = new LinkedHashMap<>();
+
+        for(FeedOrReviewDto data : dtos)
+            map.put(data.getFeed().getId(), FeedSearchedDto.from(data));
+
+        for(Scrap scrap : scraps)
+            map.get(scrap.getFeed().getId()).setIsScraped(true);
+
+        for(LikeFeed likeFeed : likeFeeds)
+            map.get(likeFeed.getFeed().getId()).setIsLiked(true);
+
+        return map.values().stream().toList();
+    }
+
+    /**
+     * FeedService :: readEmployeeFeeds method
+     * 직원에 등록된 피드를 조회
+     * @param dto 직원 피드 조회시 필요한 정보
+     */
+    @Transactional(readOnly = true)
+    public List<FeedByEmployeeDto> readEmployeeFeeds(FeedReadByEmployeeDto dto) {
+        Profile profile = profileRepository.findByNickname(dto.getProfileNickname()).orElseThrow(ProfileNotFoundException::new);
+        EmployeeProfile employee = employeeProfileRepository.findByNickname(dto.getEmployeeNickname()).orElseThrow(ProfileNotFoundException::new);
+
+        List<Feed> feeds = feedRepository.findByOwnerAndType(employee, Feed.Type.NONE);
+        List<Scrap> scraps = scrapRepository.findByProfileAndFeedIn(profile, feeds);
+        List<LikeFeed> likeFeeds = likeFeedRepository.findByProfileAndFeedIn(profile, feeds);
+
+        Map<Long, FeedByEmployeeDto> map = new LinkedHashMap<>();
+
+        for(Feed feed : feeds)
+            map.put(feed.getId(), FeedByEmployeeDto.of(feed, employee));
+
+        for(Scrap scrap : scraps)
+            map.get(scrap.getFeed().getId()).setIsScraped(true);
+
+        for(LikeFeed likeFeed : likeFeeds)
+            map.get(likeFeed.getFeed().getId()).setIsLiked(true);
+
+        return map.values().stream().toList();
+    }
+
+    /**
+     * FeedService :: readShopFeeds method
+     * 매장에 등록된 피드를 조회
+     * @param dto 매장 피드 조회시 필요한 정보
+     */
+    @Transactional(readOnly = true)
+    public List<FeedByShopDto> readShopFeeds(FeedReadByShopDto dto) {
+        Profile profile = profileRepository.findByNickname(dto.getProfileNickname()).orElseThrow(ProfileNotFoundException::new);
+        ShopProfile shop = shopProfileRepository.findByNickname(dto.getShopNickname()).orElseThrow(ProfileNotFoundException::new);
+
+        List<Feed> feeds = feedRepository.findByOwnerAndType(shop, Feed.Type.NONE);
+        List<Scrap> scraps = scrapRepository.findByProfileAndFeedIn(profile, feeds);
+        List<LikeFeed> likeFeeds = likeFeedRepository.findByProfileAndFeedIn(profile, feeds);
+
+        Map<Long, FeedByShopDto> map = new LinkedHashMap<>();
+
+        for(Feed feed : feeds)
+            map.put(feed.getId(), FeedByShopDto.of(feed, shop));
+
+        for(Scrap scrap : scraps)
+            map.get(scrap.getFeed().getId()).setIsScraped(true);
+
+        for(LikeFeed likeFeed : likeFeeds)
+            map.get(likeFeed.getFeed().getId()).setIsLiked(true);
+
+        return map.values().stream().toList();
+    }
 
     /**
      * FeedService :: createByEmployee method
@@ -139,42 +220,5 @@ public class FeedService {
             if (!employees.contains(profile))
                 throw new ProfileUnauthorizedException();
         }
-    }
-
-    @Transactional(readOnly = true)
-    public List<FeedByShopDto> readShopFeeds(FeedReadByShopDto dto) {
-        Profile profile = profileRepository.findByNickname(dto.getProfileNickname()).orElseThrow(ProfileNotFoundException::new);
-        ShopProfile shop = shopProfileRepository.findByNickname(dto.getShopNickname()).orElseThrow(ProfileNotFoundException::new);
-        List<Feed> feeds = feedRepository.findByOwnerAndType(shop, Feed.Type.NONE);
-        List<Scrap> scraps = scrapRepository.findByProfileAndFeedInOrderByFeedId(profile, feeds);
-        List<LikeFeed> likeFeeds = likeFeedRepository.findByProfileAndFeedInOrderByFeedId(profile, feeds);
-
-        int sIdx = 0;
-        int lIdx = 0;
-
-        List<FeedByShopDto> result = new ArrayList<>();
-        for(Feed feed : feeds){
-            boolean isScraped = false;
-            boolean isLiked = false;
-            if(!scraps.isEmpty() && scraps.get(sIdx) != null && scraps.get(sIdx).getId().equals(feed.getId())){
-                sIdx++;
-                isScraped = true;
-            }
-            if(!likeFeeds.isEmpty() && likeFeeds.get(lIdx) != null && likeFeeds.get(lIdx).getId().equals(feed.getId())){
-                lIdx++;
-                isLiked = true;
-            }
-
-            result.add(FeedByShopDto.builder()
-                    .writer(ProfileDto.from(feed.getWriter()))
-                    .shop(ShopProfileDto.from(shop))
-                    .feed(FeedDto.from(feed))
-                    .feedImages(ListUtils.applyFunctionToElements(feed.getFeedImages().stream().toList(), FeedImageDto::from))
-                    .hashtags(ListUtils.applyFunctionToElements(feed.getHashtags().stream().toList(), HashtagDto::from))
-                    .isScraped(isScraped)
-                    .isLiked(isLiked)
-                    .build());
-        }
-        return result;
     }
 }

@@ -4,21 +4,21 @@ import com.rebu.common.util.ListUtils;
 import com.rebu.feed.dto.FeedImageDto;
 import com.rebu.feed.dto.HashtagDto;
 import com.rebu.feed.review.dto.ReviewByProfileDto;
-
 import com.rebu.reviewkeyword.dto.ReviewKeywordDto;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Getter
 @Builder
 public class ReviewReadByProfileResponse {
-    private boolean isScraped;
-    private boolean isLiked;
+    private Boolean isScraped;
+    private Boolean isLiked;
     private Writer writer;
-    private Review review;
+    private Feed feed;
     private Shop shop;
 
     @Getter
@@ -30,15 +30,15 @@ public class ReviewReadByProfileResponse {
 
     @Getter
     @Builder
-    private static class Review {
+    private static class Feed {
         private Long feedId;
         private List<String> imageSrcs;
         private String content;
-        private Integer rating;
         private List<String> hashtags;
         private LocalDateTime createAt;
         private Long likeCnt;
         private Long commentCnt;
+        private Integer rating;
         private List<String> reviewKeywords;
     }
 
@@ -50,14 +50,14 @@ public class ReviewReadByProfileResponse {
     }
 
     public static ReviewReadByProfileResponse from(ReviewByProfileDto dto){
-        return ReviewReadByProfileResponse.builder()
-                .isScraped(dto.isScraped())
-                .isLiked(dto.isLiked())
+        ReviewReadByProfileResponse response =  ReviewReadByProfileResponse.builder()
+                .isScraped(dto.getIsScraped())
+                .isLiked(dto.getIsLiked())
                 .writer(Writer.builder()
                         .profileImageSrc(dto.getWriter().getImageSrc())
                         .nickname(dto.getWriter().getNickname())
                         .build())
-                .review(Review.builder()
+                .feed(Feed.builder()
                         .feedId(dto.getReview().getId())
                         .imageSrcs(ListUtils.applyFunctionToElements(dto.getFeedImages(), FeedImageDto::getSrc))
                         .content(dto.getReview().getContent())
@@ -73,5 +73,8 @@ public class ReviewReadByProfileResponse {
                         .shopNickname(dto.getShop().getNickname())
                         .build())
                 .build();
+        response.feed.imageSrcs.sort(Comparator.naturalOrder());
+        response.feed.hashtags.sort(Comparator.naturalOrder());
+        return response;
     }
 }

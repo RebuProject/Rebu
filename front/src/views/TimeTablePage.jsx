@@ -1,6 +1,11 @@
 import styled, { css } from "styled-components";
 import TimeTable from "../components/reservation/TimeTable";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { BASE_URL } from "../util/commonFunction";
+import { Navigate, useParams } from "react-router-dom";
+import ButtonSmall from "../components/common/ButtonSmall";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const ButtonLabelAndInputStyles = css`
   display: block;
@@ -19,6 +24,7 @@ const ButtonLabelAndInputStyles = css`
     width: 80px;
   }
 `;
+
 const ButtonBigContainer = styled.div`
   padding: 0.4rem;
   justify-self: start;
@@ -54,58 +60,58 @@ const ButtonLabel = styled.label`
   padding: 0.2rem;
   border-radius: 0.5rem;
 `;
+
 const ButtonContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: start;
 `;
 
-export default function TimeTablePage() {
-  const [selectedDesigner, setSelectedDesigner] = useState(null);
+const TimeTableWrapper = styled.div`
+  overflow-x: hidden;
+`;
 
-  const jsonData = [
-    {
-      imageSrc: "ajsdhfkljashdfksadv.png",
-      workingName: "유승",
-      nickname: "yuseung0429",
-      workingIntroduction: "최선을 다해 모시겠습니다.",
-      gender: "MALE",
-      reviewCnt: 15,
-      role: "원장",
-    },
-    {
-      imageSrc: "ajsdhfkljashdfksadv.png",
-      workingName: "지원",
-      nickname: "jiown",
-      workingIntroduction: "최선을 다해 모시겠습니다.",
-      gender: "FEMALE",
-      reviewCnt: 15,
-      role: "실장",
-    },
-    {
-      imageSrc: "ajsdhfkljashdfksadv.png",
-      workingName: "진서",
-      nickname: "jinseo",
-      workingIntroduction: "최선을 다해 모시겠습니다.",
-      gender: "FEMALE",
-      reviewCnt: 15,
-      role: "디자이너",
-    },
-    {
-      imageSrc: "ajsdhfkljashdfksadv.png",
-      workingName: "종덕",
-      nickname: "jongduck",
-      workingIntroduction: "최선을 다해 모시겠습니다.",
-      gender: "MALE",
-      reviewCnt: 15,
-      role: "디자이너",
-    },
-  ];
+export default function TimeTablePage() {
+  const [designers, setDesigners] = useState([]);
+  const [selectedDesigner, setSelectedDesigner] = useState(null);
+  const { nickname } = useParams();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    axios
+      .get(`${BASE_URL}/api/profiles/shops/${nickname}/employees`, {
+        headers: {
+          "Content-Type": "application/json",
+          access: `${localStorage.getItem("access")}`,
+        },
+      })
+      .then((response) => {
+        console.log(response);
+        setDesigners(response.data.body);
+        setSelectedDesigner(response.data.body[0].nickname);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }, []);
 
   return (
     <>
       <ButtonContainer>
-        {jsonData.map((item, index) => (
+        {nickname !== localStorage.getItem("nickname") &&
+          localStorage.getItem("type") === "COMMON" && (
+            <ButtonSmall
+              button={{
+                id: 1,
+                title: "예약하기",
+                onClick: () => {
+                  navigate(`/reservation/${nickname}`);
+                },
+                highlight: "true",
+              }}
+            />
+          )}
+        {designers.map((item, index) => (
           <ButtonBigContainer key={index}>
             <ButtonInput
               id={`radio+${index}`}
@@ -113,6 +119,7 @@ export default function TimeTablePage() {
                 setSelectedDesigner(item.nickname);
               }}
               name="radioGroup"
+              defaultChecked={index === 0} // Ensure the first item is checked by default
             />
             <ButtonLabel htmlFor={`radio+${index}`}>
               {item.workingName} {item.role}
@@ -120,7 +127,9 @@ export default function TimeTablePage() {
           </ButtonBigContainer>
         ))}
       </ButtonContainer>
-      <TimeTable designer={selectedDesigner}></TimeTable>
+      <TimeTableWrapper>
+        <TimeTable designer={selectedDesigner}></TimeTable>
+      </TimeTableWrapper>
     </>
   );
 }

@@ -52,7 +52,7 @@ public class Profile {
     private String phone;
 
     @Column(nullable = false)
-    private boolean isPrivate;
+    private Boolean isPrivate;
 
     @Enumerated(EnumType.STRING)
     private Status status;
@@ -65,7 +65,7 @@ public class Profile {
         introduction = newIntroduction;
     }
 
-    public void changeIsPrivate(boolean newIsPrivate) {
+    public void changeIsPrivate(Boolean newIsPrivate) {
         isPrivate = newIsPrivate;
     }
 
@@ -77,6 +77,10 @@ public class Profile {
         imageSrc = newImageSrc;
     }
 
+    public void updateRecentTime() {
+        recentTime = LocalDateTime.now();
+    }
+
     @PrePersist
     protected void onCreate() {
         recentTime = LocalDateTime.now();
@@ -85,11 +89,6 @@ public class Profile {
         if (type == null) {
             type = Type.COMMON;
         }
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        recentTime = LocalDateTime.now();
     }
 
     @Override

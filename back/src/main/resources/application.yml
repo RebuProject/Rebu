@@ -5,6 +5,11 @@ spring:
     include: secret
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 100
+      minimum-idle: 10
+      idle-timeout: 600000
+      max-lifetime: 1800000
   #  sql:
   #    init:
   #      data-locations: classpath:data.sql
@@ -12,26 +17,32 @@ spring:
   #      mode: always
   jpa:
     defer-datasource-initialization: true
+    open-in-view: false
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
-        show_sql: true
-        format_sql: true
-        highlight_sql: true
+  #      show_sql: true
+  #      format_sql: true
+  #      highlight_sql: true
+        leak-detection-threshold: 10000
         default_batch_fetch_size: 1000
-  data:
-    redis:
-      host: redis
-      port: 6379
   servlet:
     multipart:
       max-file-size: 50MB
-      max-request-size: 10MB
+      max-request-size: 50MB
       enabled: true
+  mustache:
+    servlet:
+      expose-request-attributes:
 
 feed:
   cnt_image_max_limit: 5
   cnt_hashtag_max_limit: 5
   cnt_review_keyword_max_limit: 5
   storage_base_url: "/feeds"
+
+server:
+  servlet:
+    session:
+      timeout: 15m

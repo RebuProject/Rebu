@@ -6,6 +6,7 @@ import { IoMdInformationCircleOutline } from "react-icons/io";
 import { ButtonStyles, ButtonHover } from "../common/ButtonLogin";
 import "../../views/Login.css";
 import { BASE_URL } from "../../views/Signup";
+import { LOCAL_URL } from "../../views/Login";
 
 const Container = styled.div`
   align-items: center;
@@ -93,6 +94,7 @@ const SignupForm1 = ({
 }) => {
   const nav = useNavigate();
   const [emailMsg, setEmailMsg] = useState(""); //pTag
+  const [emailRegexValid, setEmailRegexValid] = useState(false); //이메일형식
   const [isEmailValid, setIsEmailValid] = useState(false); //이메일중복
   const [isEmailVerified, setIsEmailVerified] = useState(false); //이메일인증 확인
   const [isChecking, setIsChecking] = useState(false);
@@ -194,14 +196,41 @@ const SignupForm1 = ({
     }
   };
 
+  //이메일 regex check
+  const validateEmailRegex = (email) => {
+    const emailRegex = /^[_a-z0-9-]+(\.[_a-z0-9-]+)*@(?:\w+\.)+\w+$/;
+    return emailRegex.test(email);
+  };
+
+  //
+
+  //
   const handleEmailChange = (e) => {
     const email = e.target.value;
     handleChange("email")(e);
+    if (validateEmailRegex(email)) {
+      setEmptyFieldsMsg("유효한 이메일입니다.");
+      setEmailRegexValid(true);
+    } else {
+      setEmptyFieldsMsg("rebu@gmail.com과 같은 이메일 형식으로 입력해주세요.");
+      setEmailRegexValid(false);
+    }
+
     setEmptyFieldsMsg((prev) => ({ ...prev, email: false }));
 
     // 디바운스 타이머 초기화
     if (debounceTimeout) {
       clearTimeout(debounceTimeout);
+    }
+
+    // 이메일 형식 검사
+    if (emailRegexValid === false) {
+      // 이메일 형식이 올바르지 않은 경우 처리 (예: 오류 메시지 표시)
+      setEmptyFieldsMsg((prev) => ({
+        ...prev,
+        email: "유효한 이메일 형식이 아닙니다.",
+      }));
+      return; // 중복 체크를 실행하지 않음
     }
 
     // 디바운스 설정 (예: 500ms 후 중복 체크 실행)
@@ -369,7 +398,7 @@ const SignupForm1 = ({
           <Msg isValid={isEmailValid}>
             {isChecking ? "확인 중..." : emailMsg}
           </Msg>
-          {emptyFieldsMsg.email && <Msg isValid={false}>내용을 입력하세요</Msg>}
+          {/* {emptyFieldsMsg.email && <Msg isValid={false}>내용을 입력하세요</Msg>} */}
 
           {/* 이메일인증번호확인 */}
           <Div>

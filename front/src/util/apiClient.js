@@ -1,5 +1,6 @@
 // src/apiClient.js
 import axios from "axios";
+import { BASE_URL } from "./commonFunction";
 
 // Axios 인스턴스 생성
 const apiClient = axios.create({
@@ -28,9 +29,10 @@ apiClient.interceptors.response.use(
         originalRequest._retry = true;
         try {
           return axios
-            .post("/api/auths/refresh", {}, { withCredentials: true })
+            .post(`${BASE_URL}/api/auths/refresh`, { withCredentials: true })
             .then((res) => {
-              const newAccessToken = res.data.access;
+              console.log(res);
+              const newAccessToken = res.headers["access"];
               localStorage.setItem("access", newAccessToken);
 
               // 새로운 토큰으로 헤더 업데이트

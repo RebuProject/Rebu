@@ -2,6 +2,7 @@ package com.rebu.reservation.service;
 
 import com.rebu.absence.entity.Absence;
 import com.rebu.absence.repository.AbsenceRepository;
+import com.rebu.alarm.service.AlarmService;
 import com.rebu.common.aop.annotation.Authorized;
 import com.rebu.common.util.ListUtils;
 import com.rebu.menu.entity.Menu;
@@ -46,7 +47,26 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final WorkingInfoRepository workingInfoRepository;
     private final AbsenceRepository absenceRepository;
+    private final AlarmService alarmService;
 
+    /**
+     * ReservationService :: readProfileReservations method
+     * 일반 프로필이 예약한 예약 정보를 조회
+     * @param dto 검색할 예약 정보
+     */
+    @Transactional(readOnly = true)
+    public List<ReservationByProfileDto> readProfileReservations(ReservationReadByProfileDto dto) {
+        Profile profile = profileRepository.findByNickname(dto.getNickname()).orElseThrow(ProfileNotFoundException::new);
+        List<ReservationAndReviewDto> reservationAndReviews = reservationRepository.findByProfileAndStartDateTimeBetweenUsingFetchJoinAll(profile, dto.getStartDate(), dto.getEndDate());
+        reservationAndReviews.sort((o1, o2) -> o2.getReservation().getStartDateTime().compareTo(o1.getReservation().getStartDateTime()));
+        return ListUtils.applyFunctionToElements(reservationAndReviews, ReservationByProfileDto::from);
+    }
+
+    /**
+     * ReservationService :: create method
+     * 예약 작성
+     * @param dto 작성할 예약 정보
+     */
     @Transactional
     @Authorized(allowed = {Type.COMMON})
     public void create(@Valid ReservationCreateDto dto){
@@ -84,8 +104,15 @@ public class ReservationService {
 
         Reservation reservation = dto.toEntity(profile, shop, employee, menu);
         reservationRepository.save(reservation);
+
+        alarmService.alarmReservation(reservation);
     }
 
+    /**
+     * ReservationService :: modifyReservationStatus method
+     * 예약 상태 수정
+     * @param dto 수정할 예약 정보
+     */
     @Transactional
     @Authorized(allowed = {Type.EMPLOYEE})
     public void modifyReservationStatus(@Valid ReservationStatusModifyDto dto) {
@@ -93,7 +120,6 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(dto.getReservationId()).orElseThrow(ReservationNotFoundException::new);
         if(!employee.equals(reservation.getEmployeeProfile()))
             throw new ProfileUnauthorizedException();
-
         switch(dto.getReservationStatus()){
             case ACCEPTED: checkModifyReservationStatusToAccepted(reservation); break;
             case REFUSED: checkModifyReservationStatusToRefused(reservation); break;
@@ -101,8 +127,14 @@ public class ReservationService {
             default: throw new ReservationStatusMismatchException();
         }
         reservation.changeReservationStatus(dto.getReservationStatus());
+        alarmService.alarmReservationResponse(reservation, reservation.getProfile(), reservation.getEmployeeProfile());
     }
 
+    /**
+     * ReservationService :: deleteReservationStatus method
+     * 예약 취소
+     * @param dto 취소할 예약 정보
+     */
     @Transactional
     @Authorized(allowed = {Type.COMMON})
     public void deleteReservationStatus(@Valid ReservationStatusDeleteDto dto) {
@@ -110,16 +142,11 @@ public class ReservationService {
         Profile profile = profileRepository.findByNickname(dto.getNickname()).orElseThrow(ProfileNotFoundException::new);
         if(!reservation.getProfile().equals(profile))
             throw new ProfileUnauthorizedException();
-        if(!(reservation.getReservationStatus() == Reservation.ReservationStatus.RECEIVED))
+        if(!(reservation.getReservationStatus() == Reservation.ReservationStatus.RECEIVED ||
+                reservation.getReservationStatus() == Reservation.ReservationStatus.ACCEPTED))
             throw new ReservationStatusNotChangeableException();
         reservation.changeReservationStatus(Reservation.ReservationStatus.CANCLED);
-    }
-
-    @Transactional(readOnly = true)
-    public List<ReservationByProfileDto> readProfileReservations(ReservationReadByProfileDto dto) {
-        Profile profile = profileRepository.findByNickname(dto.getNickname()).orElseThrow(ProfileNotFoundException::new);
-        List<Reservation> reservations = reservationRepository.findByProfileAndStartDateTimeBetweenUsingFetchJoinAll(profile, dto.getStartDate(), dto.getEndDate());
-        return ListUtils.applyFunctionToElements(reservations, ReservationByProfileDto::from);
+        alarmService.alarmReservationResponse(reservation, reservation.getEmployeeProfile(), reservation.getProfile());
     }
 
     private void checkModifyReservationStatusToAccepted(Reservation reservation) {
@@ -146,7 +173,7 @@ public class ReservationService {
     private void checkCreateReservationWorkingInfos(List<WorkingInfo> workingInfos, LocalTime startTime, LocalTime endTime, int day){
         for(WorkingInfo workingInfo : workingInfos){
             if(day == workingInfo.getId().getDay().ordinal()){
-                if(workingInfo.isHoliday())
+                if(workingInfo.getIsHoliday())
                     throw new ReservationNotAcceptableException();
                 if(startTime.isBefore(workingInfo.getOpenAt())||endTime.isAfter(workingInfo.getCloseAt()))
                     throw new ReservationNotAcceptableException();

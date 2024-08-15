@@ -11,6 +11,7 @@ import com.rebu.profile.entity.Profile;
 import com.rebu.profile.exception.MemberNotMatchException;
 import com.rebu.profile.exception.ProfileNotFoundException;
 import com.rebu.profile.repository.ProfileRepository;
+import com.rebu.security.dto.AuthProfileInfo;
 import com.rebu.security.dto.ProfileInfo;
 import com.rebu.security.util.JWTUtil;
 import com.rebu.storage.exception.FileUploadFailException;
@@ -50,17 +51,17 @@ public class ProfileService {
     }
 
     @Transactional(readOnly = true)
-    public Boolean checkNicknameDuplicated(CheckNicknameDuplDto checkNicknameDuplDto) {
-        return profileRepository.findByNickname(checkNicknameDuplDto.getNickname()).isPresent();
+    public Boolean checkNicknameDuplicated(CheckNicknameDupleDto checkNicknameDupleDto) {
+        return profileRepository.findByNickname(checkNicknameDupleDto.getNickname()).isPresent();
     }
 
     @Transactional(readOnly = true)
-    public Boolean checkPhoneDuplicated(CheckPhoneDuplDto checkPhoneDuplDto) {
-        return profileRepository.findByPhone(checkPhoneDuplDto.getPhone()).isPresent();
+    public Boolean checkPhoneDuplicated(CheckPhoneDupleDto checkPhoneDupleDto) {
+        return profileRepository.findByPhone(checkPhoneDupleDto.getPhone()).isPresent();
     }
 
     @Transactional
-    public void changeNickname(ChangeNicknameDto changeNicknameDto, HttpServletResponse response) {
+    public ProfileInfo changeNickname(ChangeNicknameDto changeNicknameDto, HttpServletResponse response) {
 
         Profile profile = profileRepository.findByNickname(changeNicknameDto.getOldNickname())
                 .orElseThrow(ProfileNotFoundException::new);
@@ -70,6 +71,12 @@ public class ProfileService {
         redisService.deleteData("Refresh:" + changeNicknameDto.getOldNickname());
 
         resetToken(changeNicknameDto.getNewNickname(), profile.getType().toString(), response);
+
+        return ProfileInfo.builder()
+                .imageSrc(profile.getImageSrc())
+                .nickname(changeNicknameDto.getNewNickname())
+                .type(profile.getType().toString())
+                .build();
     }
 
     @Transactional
@@ -85,7 +92,7 @@ public class ProfileService {
         Profile profile = profileRepository.findByNickname(changeIsPrivateDto.getNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
-        profile.changeIsPrivate(changeIsPrivateDto.isVisible());
+        profile.changeIsPrivate(changeIsPrivateDto.getIsPrivate());
     }
 
     @Transactional
@@ -98,7 +105,7 @@ public class ProfileService {
     }
 
     @Transactional
-    public void changePhoto(ChangeImgDto changeImgDto) {
+    public String changePhoto(ChangeImgDto changeImgDto) {
 
         Profile profile = profileRepository.findByNickname(changeImgDto.getNickname())
                 .orElseThrow(ProfileNotFoundException::new);
@@ -110,6 +117,7 @@ public class ProfileService {
         try {
             String path = storageService.uploadFile(profile.getId() + "." + extension , file.getBytes(), "/profiles");
             profile.changeImg(path);
+            return path;
         } catch (IOException e) {
             throw new FileUploadFailException();
         }
@@ -129,12 +137,13 @@ public class ProfileService {
         resetToken(profileToSwitch.getNickname(), profileToSwitch.getType().toString(), response);
 
         return ProfileInfo.builder()
+                .imageSrc(profileToSwitch.getImageSrc())
                 .nickname(profileToSwitch.getNickname())
                 .type(profileToSwitch.getType().toString())
                 .build();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<GetProfileListDto> getProfileList(String email) {
         Member member = memberRepository.findByEmailFetch(email)
                 .orElseThrow(MemberNotFoundException::new);
@@ -161,41 +170,79 @@ public class ProfileService {
         resetToken(targetProfile.getNickname(), targetProfile.getType().toString(), response);
 
         return ProfileInfo.builder()
+                .imageSrc(targetProfile.getImageSrc())
                 .nickname(targetProfile.getNickname())
                 .type(targetProfile.getType().toString())
                 .build();
     }
 
     @Transactional(readOnly = true)
-    public GetProfileResponse getProfile(GetProfileDto getProfileDto) {
+    public GetProfileResultDto getProfile(GetProfileDto getProfileDto) {
         Profile targetProfile = profileRepository.findByNickname(getProfileDto.getTargetNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
         Profile profile = profileRepository.findByNickname(getProfileDto.getNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
-        GetProfileResponse getProfileResponse = profileRepository.getCommonProfileResponseByProfileId(targetProfile.getId())
+        GetProfileResultDto result = profileRepository.getCommonProfileResponseByProfileId(targetProfile.getId())
                 .orElseThrow(ProfileNotFoundException::new);
 
 
         if (getProfileDto.getNickname().equals(getProfileDto.getTargetNickname())) {
-            getProfileResponse.setRelation(GetProfileResponse.Relation.OWN);
+            result.setRelation(GetProfileResultDto.Relation.OWN);
         } else if (followRepository.findByFollowerIdAndFollowingId(profile.getId(), targetProfile.getId()).isPresent()) {
-            getProfileResponse.setRelation(GetProfileResponse.Relation.FOLLOWING);
-            getProfileResponse.setFollowId(followRepository.findByFollowerIdAndFollowingId(profile.getId(), targetProfile.getId()).get().getId());
+            result.setRelation(GetProfileResultDto.Relation.FOLLOWING);
+            result.setFollowId(followRepository.findByFollowerIdAndFollowingId(profile.getId(), targetProfile.getId()).get().getId());
         } else {
-            getProfileResponse.setRelation(GetProfileResponse.Relation.NONE);
+            result.setRelation(GetProfileResultDto.Relation.NONE);
         }
 
-        return getProfileResponse;
+        return result;
     }
 
     @Transactional(readOnly = true)
-    public Slice<SearchProfileResponse> searchProfile(SearchProfileDto searchProfileDto) {
+    public Slice<SearchProfileResultDto> searchProfile(SearchProfileDto searchProfileDto) {
 
         Slice<Profile> profiles = profileRepository.searchProfileByKeyword(searchProfileDto.getKeyword(), searchProfileDto.getPageable());
 
-        return profiles.map(SearchProfileResponse::from);
+        return profiles.map(SearchProfileResultDto::from);
+    }
+
+    @Transactional
+    public void updateRecentTime(AuthProfileInfo authProfileInfo) {
+        Profile profile = profileRepository.findByNickname(authProfileInfo.getNickname())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        profile.updateRecentTime();
+    }
+
+    @Transactional(readOnly = true)
+    public GetProfileResultDto getMyProfile(AuthProfileInfo authProfileInfo) {
+
+        Profile myProfile = profileRepository.findByNickname(authProfileInfo.getNickname())
+                        .orElseThrow(ProfileNotFoundException::new);
+
+        GetProfileResultDto result = profileRepository.getCommonProfileResponseByProfileId(myProfile.getId())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        result.setRelation(GetProfileResultDto.Relation.OWN);
+
+        return result;
+    }
+
+    @Transactional(readOnly = true)
+    public GetProfileInfoResultDto getMyProfileInfo(AuthProfileInfo authProfileInfo) {
+        Profile myProfile = profileRepository.findByNickname(authProfileInfo.getNickname())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        return GetProfileInfoResultDto.builder()
+                .imageSrc(myProfile.getImageSrc())
+                .nickname(myProfile.getNickname())
+                .email(myProfile.getMember().getEmail())
+                .birth(myProfile.getMember().getBirth())
+                .phone(myProfile.getPhone())
+                .gender(myProfile.getMember().getGender().toString())
+                .build();
     }
 
     private void resetToken(String nickname, String type, HttpServletResponse response) {
@@ -211,6 +258,7 @@ public class ProfileService {
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(24*60*60);
         cookie.setHttpOnly(true);
+        cookie.setSecure(true);
         cookie.setPath("/");
 
         return cookie;

@@ -8,13 +8,14 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Getter
 @Builder
 public class FeedReadByShopResponse {
-    private boolean isScraped;
-    private boolean isLiked;
+    private Boolean isScraped;
+    private Boolean isLiked;
     private Writer writer;
     private Feed feed;
     private Shop shop;
@@ -46,9 +47,9 @@ public class FeedReadByShopResponse {
     }
 
     public static FeedReadByShopResponse from(FeedByShopDto dto){
-        return FeedReadByShopResponse.builder()
-                .isScraped(dto.isScraped())
-                .isLiked(dto.isLiked())
+        FeedReadByShopResponse response =  FeedReadByShopResponse.builder()
+                .isScraped(dto.getIsScraped())
+                .isLiked(dto.getIsLiked())
                 .writer(Writer.builder()
                         .profileImageSrc(dto.getWriter().getImageSrc())
                         .nickname(dto.getWriter().getNickname())
@@ -67,5 +68,8 @@ public class FeedReadByShopResponse {
                         .shopNickname(dto.getShop().getNickname())
                         .build())
                 .build();
+        response.feed.imageSrcs.sort(Comparator.naturalOrder());
+        response.feed.hashtags.sort(Comparator.naturalOrder());
+        return response;
     }
 }

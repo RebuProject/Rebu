@@ -1,17 +1,18 @@
 import styled from "styled-components";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ProfileSmall from "./ProfileSmall";
 import NavigationItem from "./NavigationItem";
 import { CgAddR } from "react-icons/cg";
 import { IoSearch } from "react-icons/io5";
 import { IoHome } from "react-icons/io5";
 import { RiCalendarScheduleLine } from "react-icons/ri";
-import img from "../../assets/images/cha.png";
 import { NavLink } from "react-router-dom";
-import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import ModalPortal from "../../util/ModalPortal";
 import SearchModal from "../Search/SearchModal";
+
+import { BASE_IMG_URL } from "../../util/commonFunction";
+import Img from "../../assets/images/img.webp";
 
 const Bar = styled.div`
   padding-top: 10px;
@@ -41,34 +42,20 @@ const SearchDiv = styled.div`
   transition: background-color 0.3s ease-in-out;
   border-radius: 1rem;
 
-  color: ${(props) =>
-    props.isModalOpen ? props.theme.primary : "rgb(85, 26, 139)"};
+  &.active {
+    color: ${(props) => props.theme.primary};
+  }
+
   background-color: ${(props) =>
     props.isModalOpen ? props.theme.body : "none"};
 `;
 
 const ICON_SIZE = 28;
 
-const ProfileNavItem = () => {
-  const navigate = useNavigate();
-  const nickname = localStorage.getItem("nickname");
-  const type = localStorage.getItem("type");
-  // console.log("navigationbar", nickname, type);
-  const handleProfileClick = () => {
-    navigate(`/profile/${nickname}/${type}`);
-  };
-
-  return (
-    <NavigationItem onClick={handleProfileClick}>
-      <ProfileSmall img={img} />
-    </NavigationItem>
-  );
-};
-
 //default
-export default function NavigationBar() {
+export default function NavigationBar({ nickname, type, profileImg }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const navigate = useNavigate();
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
@@ -89,22 +76,36 @@ export default function NavigationBar() {
             <IoSearch size={ICON_SIZE} />
           </NavigationItem>
         </SearchDiv>
-        <StyledNavLink isModalOpen={isModalOpen} to="/visited">
+        <StyledNavLink
+          isModalOpen={isModalOpen}
+          to={
+            localStorage.getItem("type") === "SHOP" ||
+            localStorage.getItem("type") === "EMPLOYEE"
+              ? "/postfeed"
+              : "/visited"
+          }
+        >
           <NavigationItem>
             <CgAddR size={ICON_SIZE} />
           </NavigationItem>
         </StyledNavLink>
-        <StyledNavLink to="/component">
+
+        <StyledNavLink to="/myreservation">
           <NavigationItem>
             <RiCalendarScheduleLine size={ICON_SIZE} />
           </NavigationItem>
         </StyledNavLink>
-        {/* <StyledNavLink to="/profile">
+        <StyledNavLink to={`/profile/${nickname}/${type}`}>
           <NavigationItem>
-            <ProfileSmall img={img}></ProfileSmall>
+            <ProfileSmall
+              img={
+                profileImg === null || profileImg === "null"
+                  ? Img
+                  : `${BASE_IMG_URL}/${profileImg}`
+              }
+            ></ProfileSmall>
           </NavigationItem>
-        </StyledNavLink> */}
-        <ProfileNavItem />
+        </StyledNavLink>
       </Bar>
     </>
   );

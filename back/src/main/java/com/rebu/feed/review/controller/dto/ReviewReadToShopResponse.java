@@ -9,15 +9,16 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Getter
 @Builder
 public class ReviewReadToShopResponse {
-    private boolean isScraped;
-    private boolean isLiked;
+    private Boolean isScraped;
+    private Boolean isLiked;
     private Writer writer;
-    private Review review;
+    private Feed feed;
     private Shop shop;
 
     @Getter
@@ -29,7 +30,7 @@ public class ReviewReadToShopResponse {
 
     @Getter
     @Builder
-    private static class Review {
+    private static class Feed {
         private Long feedId;
         private List<String> imageSrcs;
         private String content;
@@ -49,14 +50,14 @@ public class ReviewReadToShopResponse {
     }
 
     public static ReviewReadToShopResponse from(ReviewToShopDto dto){
-        return ReviewReadToShopResponse.builder()
-                .isScraped(dto.isScraped())
-                .isLiked(dto.isLiked())
+        ReviewReadToShopResponse response =  ReviewReadToShopResponse.builder()
+                .isScraped(dto.getIsScraped())
+                .isLiked(dto.getIsLiked())
                 .writer(Writer.builder()
                         .profileImageSrc(dto.getWriter().getImageSrc())
                         .nickname(dto.getWriter().getNickname())
                         .build())
-                .review(Review.builder()
+                .feed(Feed.builder()
                         .feedId(dto.getReview().getId())
                         .imageSrcs(ListUtils.applyFunctionToElements(dto.getFeedImages(), FeedImageDto::getSrc))
                         .content(dto.getReview().getContent())
@@ -72,5 +73,8 @@ public class ReviewReadToShopResponse {
                         .shopNickname(dto.getShop().getNickname())
                         .build())
                 .build();
+        response.feed.imageSrcs.sort(Comparator.naturalOrder());
+        response.feed.hashtags.sort(Comparator.naturalOrder());
+        return response;
     }
 }

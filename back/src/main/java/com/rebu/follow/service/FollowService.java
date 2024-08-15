@@ -1,5 +1,8 @@
 package com.rebu.follow.service;
 
+import com.rebu.alarm.service.AlarmService;
+import com.rebu.follow.controller.dto.GetFollowerResponse;
+import com.rebu.follow.controller.dto.GetFollowingResponse;
 import com.rebu.follow.dto.*;
 import com.rebu.follow.entity.Follow;
 import com.rebu.follow.exception.AlreadyFollowingException;
@@ -15,13 +18,13 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 @Service
 @RequiredArgsConstructor
 public class FollowService {
 
     private final ProfileRepository profileRepository;
     private final FollowRepository followRepository;
+    private final AlarmService alarmService;
 
     @Transactional
     public void follow(FollowDto followDto) {
@@ -40,6 +43,8 @@ public class FollowService {
         }
 
         followRepository.save(followDto.toEntity(sender, receiver));
+
+        alarmService.alarmFollow(receiver, sender);
     }
 
     @Transactional
@@ -59,32 +64,38 @@ public class FollowService {
 
     @Transactional(readOnly = true)
     public Slice<GetFollowingResponse> getFollowings(GetFollowingsTargetDto getFollowingsTargetDto) {
-        Profile profile = profileRepository.findByNickname(getFollowingsTargetDto.getTargetNickname())
+        Profile targetProfile = profileRepository.findByNickname(getFollowingsTargetDto.getTargetNickname())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        Profile myProfile = profileRepository.findByNickname(getFollowingsTargetDto.getNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
         if (!getFollowingsTargetDto.getNickname().equals(getFollowingsTargetDto.getTargetNickname())) {
-            if (profile.isPrivate()) {
+            if (targetProfile.getIsPrivate()) {
                 throw new ProfileCantAccessException();
             }
         }
 
-        Slice<Follow> followingList = followRepository.findByFollowerId(profile.getId(), getFollowingsTargetDto.getPageable());
+        Slice<FollowingDto> followingList = followRepository.findByFollowerId(targetProfile.getId(), myProfile.getId(), getFollowingsTargetDto.getPageable());
 
         return followingList.map(GetFollowingResponse::from);
     }
 
     @Transactional(readOnly = true)
     public Slice<GetFollowerResponse> getFollowers(GetFollowersTargetDto getFollowersTargetDto) {
-        Profile profile = profileRepository.findByNickname(getFollowersTargetDto.getTargetNickname())
+        Profile targetProfile = profileRepository.findByNickname(getFollowersTargetDto.getTargetNickname())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        Profile myProfile = profileRepository.findByNickname(getFollowersTargetDto.getNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
         if (!getFollowersTargetDto.getNickname().equals(getFollowersTargetDto.getTargetNickname())) {
-            if (profile.isPrivate()) {
+            if (targetProfile.getIsPrivate()) {
                 throw new ProfileCantAccessException();
             }
         }
 
-        Slice<Follow> followerList = followRepository.findByFollowingId(profile.getId(), getFollowersTargetDto.getPageable());
+        Slice<FollowerDto> followerList = followRepository.findByFollowingId(targetProfile.getId(), myProfile.getId(), getFollowersTargetDto.getPageable());
 
         return followerList.map(GetFollowerResponse::from);
     }

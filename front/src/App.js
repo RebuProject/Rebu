@@ -10,6 +10,8 @@ import NavigationRail from "./components/common/NavigationRail";
 import AppRoutes from "./routes/AppRoutes";
 import PrivateRoutes from "./routes/PrivateRoutes";
 import { isAuthenticated } from "./util/auths"; // isAuthenticated 함수 가져오기
+import apiClient from "./util/apiClient";
+import { BASE_URL } from "./util/commonFunction";
 import axios from "axios";
 
 const Grid = styled.div`
@@ -34,20 +36,36 @@ const Layout = styled.div`
 function App() {
   const [theme, setTheme] = useState("light");
   const [auth, setAuth] = useState(isAuthenticated());
+
+  const [nickname, setNickname] = useState(localStorage.getItem("nickname"));
+  const [type, setType] = useState(localStorage.getItem("type"));
+  const [imageSrc, setImageSrc] = useState(localStorage.getItem("imageSrc"));
+
   const isMobile = useMediaQuery({ maxWidth: 768 });
+
+  useEffect(() => {
+    // 컴포넌트가 언마운트될떄(페이지가 꺼지면) 엑세스토큰 제거
+    return () => {
+      localStorage.removeItem("access");
+    };
+  }, []);
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
   };
 
-  const handleLogin = () => {
+  const handleLogin = (nickname, type, imageSrc) => {
     setAuth(true);
+    setNickname(nickname);
+    setType(type);
+    setImageSrc(imageSrc);
   };
 
   const handleLogout = () => {
     setAuth(false);
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
+    setNickname(null);
+    setType(null);
+    setImageSrc(null);
   };
 
   return (
@@ -56,7 +74,23 @@ function App() {
         <GlobalStyles />
         <Grid>
           {/* 로그인 상태에 따라 NavigationBar 또는 NavigationRail을 렌더링 */}
-          {auth && (isMobile ? <NavigationBar /> : <NavigationRail />)}
+          {auth &&
+            (isMobile ? (
+              <NavigationBar
+                auth={auth}
+                nickname={nickname}
+                type={type}
+                profileImg={imageSrc}
+              />
+            ) : (
+              <NavigationRail
+                auth={auth}
+                nickname={nickname}
+                type={type}
+                profileImg={imageSrc}
+              />
+            ))}
+
           <Layout>
             <AppRoutes
               theme={theme}
@@ -68,6 +102,9 @@ function App() {
               theme={theme}
               toggleTheme={toggleTheme}
               handleLogout={handleLogout}
+              setNickname={setNickname}
+              setType={setType}
+              setImageSrc={setImageSrc}
             />
           </Layout>
         </Grid>

@@ -103,12 +103,18 @@ const Header = ({
   currentUser,
   loginUser,
   handleLogout,
+<<<<<<< HEAD
   setProfile
+=======
+  setNickname,
+  setType,
+  setImageSrc,
+>>>>>>> 7b0b644415649d961f9fe3a6ff58eda439eb1740
 }) => {
   const [LogoutModalOpen, setLogoutModalOpen] = useState(false);
   const [SecretModalOpen, setSecretModalOpen] = useState(false);
   const [ProfileChangeModalOpen, setProfileChangeModalOpen] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false); // 설정창
   const [isSettingActive, setIsSettingActive] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
@@ -142,9 +148,15 @@ const Header = ({
     setSecretModalOpen(false);
   };
 
-  const handleSettingClick = () => {
-    setShowDropdown(!showDropdown);
-    setIsSettingActive(!isSettingActive);
+  const handleSettingClick = (value) => {
+    //설정창 열기/닫기
+    if (value === false) {
+      setShowDropdown(false);
+      setIsSettingActive(false);
+    } else {
+      setShowDropdown(!showDropdown);
+      setIsSettingActive(!isSettingActive);
+    }
   };
 
   const handleOptionClick = (option) => {
@@ -231,6 +243,13 @@ const Header = ({
           <ProfileChangeModal
             ProfileChangeModalOpen={ProfileChangeModalOpen}
             closeModal={closeModal2}
+            closeHeaderModal={closeModal}
+            setLogoutModalOpen={setLogoutModalOpen}
+            setSecretModalOpen={setSecretModalOpen}
+            handleSettingClick={handleSettingClick} //프로필 전환 모달에서 설정창 닫기
+            setNickname={setNickname}
+            setType={setType}
+            setImageSrc={setImageSrc}
           />
         )}
       </DropdownMenu>

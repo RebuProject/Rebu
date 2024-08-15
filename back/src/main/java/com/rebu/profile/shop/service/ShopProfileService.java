@@ -13,7 +13,8 @@ import com.rebu.member.exception.MemberNotFoundException;
 import com.rebu.member.repository.MemberRepository;
 import com.rebu.menu.dto.MenuDto;
 import com.rebu.profile.dto.ChangeImgDto;
-import com.rebu.profile.employee.dto.EmployeeProfileDailyScheduleDto;
+import com.rebu.profile.employee.dto.EmployeeDailyScheduleDto;
+import com.rebu.profile.employee.dto.EmployeePeriodScheduleDto;
 import com.rebu.profile.employee.dto.EmployeeProfileDto;
 import com.rebu.profile.employee.entity.EmployeeProfile;
 import com.rebu.profile.employee.repository.EmployeeProfileRepository;
@@ -22,13 +23,19 @@ import com.rebu.profile.enums.Type;
 import com.rebu.profile.exception.ProfileNotFoundException;
 import com.rebu.profile.repository.ProfileRepository;
 import com.rebu.profile.service.ProfileService;
+import com.rebu.profile.shop.dto.ShopDailyScheduleWithEmployeesDailyScheduleDto;
 import com.rebu.profile.shop.dto.*;
 import com.rebu.profile.shop.entity.ShopProfile;
+import com.rebu.profile.shop.exception.NotShopEmployeeException;
 import com.rebu.profile.shop.repository.ShopProfileRepository;
 import com.rebu.reservation.dto.ReservationDto;
 import com.rebu.reservation.entity.Reservation;
 import com.rebu.reservation.repository.ReservationRepository;
+import com.rebu.security.dto.AuthProfileInfo;
+import com.rebu.security.dto.ProfileInfo;
 import com.rebu.security.util.JWTUtil;
+import com.rebu.shop_favorite.entity.ShopFavoriteId;
+import com.rebu.shop_favorite.repository.ShopFavoriteRepository;
 import com.rebu.workingInfo.dto.WorkingInfoDto;
 import com.rebu.workingInfo.entity.WorkingInfo;
 import com.rebu.workingInfo.enums.Days;
@@ -63,28 +70,37 @@ public class ShopProfileService {
     private final WorkingInfoRepository workingInfoRepository;
     private final AbsenceRepository absenceRepository;
     private final ReservationRepository reservationRepository;
+    private final ShopFavoriteRepository shopFavoriteRepository;
 
     @Transactional
-    public void generateProfile(GenerateShopProfileDto generateShopProfileDto, HttpServletResponse response) {
+    public ProfileInfo generateProfile(GenerateShopProfileDto generateShopProfileDto, HttpServletResponse response) {
 
         Member member = memberRepository.findByEmail(generateShopProfileDto.getEmail())
                 .orElseThrow(MemberNotFoundException::new);
 
         ConvertAddressDto convertAddressDto = convertAddressService.convert(generateShopProfileDto.getAddress());
 
-        shopProfileRepository.save(generateShopProfileDto.toEntity(member, convertAddressDto));
+        ShopProfile shopProfile = shopProfileRepository.save(generateShopProfileDto.toEntity(member, convertAddressDto));
 
         workingInfoService.create(generateShopProfileDto.getNickname());
+
+        String path = null;
 
         if (generateShopProfileDto.getImgFile() != null && !generateShopProfileDto.getImgFile().isEmpty()) {
             ChangeImgDto changeImgDto = new ChangeImgDto(generateShopProfileDto.getImgFile(), generateShopProfileDto.getNickname());
 
-            profileService.changePhoto(changeImgDto);
+            path = profileService.changePhoto(changeImgDto);
         }
 
         redisService.deleteData("Refresh:" + generateShopProfileDto.getNowNickname());
 
         resetToken(generateShopProfileDto.getNickname(), Type.SHOP.toString(), response);
+
+        return ProfileInfo.builder()
+                .imageSrc(path)
+                .nickname(shopProfile.getNickname())
+                .type(shopProfile.getType().toString())
+                .build();
     }
 
     @Transactional
@@ -92,7 +108,11 @@ public class ShopProfileService {
         ShopProfile shopProfile = shopProfileRepository.findByNickname(changeAddressDto.getNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
+        ConvertAddressDto convertAddressDto = convertAddressService.convert(changeAddressDto.getAddress());
+
         shopProfile.changeAddress(changeAddressDto.getAddress());
+
+        shopProfile.changeLatAndLng(convertAddressDto.getLat(), convertAddressDto.getLng());
     }
 
     @Transactional
@@ -112,14 +132,14 @@ public class ShopProfileService {
     }
 
     @Transactional(readOnly = true)
-    public List<GetShopEmployeeResponse> getShopEmployees(GetShopEmployeeDto getShopEmployeeDto) {
+    public List<GetShopEmployeeResultDto> getShopEmployees(GetShopEmployeeDto getShopEmployeeDto) {
         ShopProfile shopProfile = shopProfileRepository.findByNicknameFetch(getShopEmployeeDto.getTargetNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
-        List <GetShopEmployeeResponse> responseList = new ArrayList<>();
+        List <GetShopEmployeeResultDto> responseList = new ArrayList<>();
 
         for (EmployeeProfile employeeProfile : shopProfile.getEmployeeProfiles()) {
-            GetShopEmployeeResponse getShopEmployeeResponse = GetShopEmployeeResponse.builder()
+            GetShopEmployeeResultDto getShopEmployeeResultDto = GetShopEmployeeResultDto.builder()
                     .imageSrc(employeeProfile.getImageSrc())
                     .nickname(employeeProfile.getNickname())
                     .workingName(employeeProfile.getWorkingName())
@@ -127,33 +147,39 @@ public class ShopProfileService {
                     .role(employeeProfile.getRole())
                     .reviewCnt(reviewRepository.findAllByEmployeeProfileId(employeeProfile.getId()).size())
                     .build();
-            responseList.add(getShopEmployeeResponse);
+            responseList.add(getShopEmployeeResultDto);
         }
 
         return responseList;
     }
 
     @Transactional(readOnly = true)
-    public GetShopProfileResponse getShopProfile(GetShopProfileDto getShopProfileDto) {
+    public GetShopProfileResultDto getShopProfile(GetShopProfileDto getShopProfileDto) {
         ShopProfile targetProfile = shopProfileRepository.findByNickname(getShopProfileDto.getTargetNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
-        Profile profile = profileRepository.findByNickname(getShopProfileDto.getNickname())
+        Profile myProfile = profileRepository.findByNickname(getShopProfileDto.getNickname())
                 .orElseThrow(ProfileNotFoundException::new);
 
-        GetShopProfileResponse getShopProfileResponse = shopProfileRepository.getShopProfileResponseByProfileId(targetProfile.getId())
+        GetShopProfileResultDto getShopProfileResultDto = shopProfileRepository.getShopProfileResponseByProfileId(targetProfile.getId())
                 .orElseThrow(ProfileNotFoundException::new);
 
         if (targetProfile.getNickname().equals(getShopProfileDto.getNickname())) {
-            getShopProfileResponse.setRelation(GetShopProfileResponse.Relation.ONW);
-        } else if (followRepository.findByFollowerIdAndFollowingId(profile.getId(), targetProfile.getId()).isPresent()) {
-            getShopProfileResponse.setRelation(GetShopProfileResponse.Relation.FOLLOWING);
-            getShopProfileResponse.setFollowId(followRepository.findByFollowerIdAndFollowingId(profile.getId(), targetProfile.getId()).get().getId());
+            getShopProfileResultDto.setRelation(GetShopProfileResultDto.Relation.OWN);
+        } else if (followRepository.findByFollowerIdAndFollowingId(myProfile.getId(), targetProfile.getId()).isPresent()) {
+            getShopProfileResultDto.setRelation(GetShopProfileResultDto.Relation.FOLLOWING);
+            getShopProfileResultDto.setFollowId(followRepository.findByFollowerIdAndFollowingId(myProfile.getId(), targetProfile.getId()).get().getId());
         } else {
-            getShopProfileResponse.setRelation(GetShopProfileResponse.Relation.NONE);
+            getShopProfileResultDto.setRelation(GetShopProfileResultDto.Relation.NONE);
         }
 
-        return getShopProfileResponse;
+        if (myProfile.getType() == Type.COMMON) {
+            if (shopFavoriteRepository.findById(new ShopFavoriteId(myProfile, targetProfile)).isPresent()) {
+                getShopProfileResultDto.setIsFavorite(true);
+            }
+        }
+
+        return getShopProfileResultDto;
     }
 
     @Transactional
@@ -168,10 +194,11 @@ public class ShopProfileService {
     }
 
     @Transactional(readOnly = true)
-    public ShopProfileDailyScheduleDto readShopProfileDailySchedule(ShopProfileReadDailyScheduleDto dto) {
+    public ShopDailyScheduleWithEmployeesDailyScheduleDto readShopDailySchedule(ShopReadDailyScheduleDto dto) {
         ShopProfile shop = shopProfileRepository.findByNicknameFetch(dto.getNickname()).orElseThrow(ProfileNotFoundException::new);
         List<EmployeeProfile> employees = shop.getEmployeeProfiles();
         Days day = Days.values()[dto.getDate().getDayOfWeek().getValue()-1];
+
         WorkingInfo shopWorkingInfo = workingInfoRepository.findByProfileAndDay(shop, day);
         List<Absence> shopAbsences = absenceRepository.findByProfileAndDate(shop, dto.getDate());
 
@@ -179,36 +206,136 @@ public class ShopProfileService {
         List<WorkingInfo> employeesWorkingInfo = workingInfoRepository.findByProfileInAndDay(profiles, day);
         List<Absence> employeesAbsences = absenceRepository.findByProfileInAndDate(profiles, dto.getDate());
         List<Reservation> employeesReservations = reservationRepository.findByProfileInAndDateUsingFetchJoinMenuAndEmployeeProfile(profiles, dto.getDate());
-        Map<Profile, EmployeeProfileDailyScheduleDto> map = new HashMap<>();
+        Map<Profile, EmployeeDailyScheduleDto> map = new HashMap<>();
 
         for(EmployeeProfile profile : employees){
-            EmployeeProfileDailyScheduleDto obj = new EmployeeProfileDailyScheduleDto();
+            EmployeeDailyScheduleDto obj = new EmployeeDailyScheduleDto();
             obj.setEmployeeProfile(EmployeeProfileDto.from(profile));
             map.put(profile, obj);
         }
 
         for(WorkingInfo workingInfo : employeesWorkingInfo){
-            EmployeeProfileDailyScheduleDto obj = map.get(workingInfo.getProfile());
+            EmployeeDailyScheduleDto obj = map.get(workingInfo.getProfile());
             obj.setWorkingInfo(WorkingInfoDto.from(workingInfo));
         }
 
         for(Absence absence : employeesAbsences){
-            EmployeeProfileDailyScheduleDto obj = map.get(absence.getProfile());
+            EmployeeDailyScheduleDto obj = map.get(absence.getProfile());
             obj.getAbsences().add(AbsenceDto.from(absence));
         }
 
         for(Reservation reservation : employeesReservations){
-            EmployeeProfileDailyScheduleDto obj = map.get(reservation.getProfile());
+            EmployeeDailyScheduleDto obj = map.get(reservation.getEmployeeProfile());
             obj.getReservations().add(ReservationDto.from(reservation));
             obj.getMenus().add(MenuDto.from(reservation.getMenu()));
         }
 
-        return ShopProfileDailyScheduleDto.builder()
+        List<EmployeeDailyScheduleDto> employeeDtos = new ArrayList<>(map.values());
+
+        ShopDailyScheduleDto shopDto = ShopDailyScheduleDto.builder()
                 .reservationInterval(shop.getReservationInterval())
-                .shopWorkingInfo(WorkingInfoDto.from(shopWorkingInfo))
-                .shopAbsences(ListUtils.applyFunctionToElements(shopAbsences, AbsenceDto::from))
-                .employeesProfileDailySchedule(new ArrayList<>(map.values()))
+                .absences(ListUtils.applyFunctionToElements(shopAbsences, AbsenceDto::from))
+                .workingInfo(WorkingInfoDto.from(shopWorkingInfo))
                 .build();
+
+        return ShopDailyScheduleWithEmployeesDailyScheduleDto.of(shopDto, employeeDtos);
+    }
+
+    @Transactional(readOnly = true)
+    public ShopPeriodScheduleWithEmployeesPeriodScheduleDto readShopPeriodSchedule(ShopReadPeriodScheduleDto dto) {
+        ShopProfile shop = shopProfileRepository.findByNicknameFetch(dto.getNickname()).orElseThrow(ProfileNotFoundException::new);
+        List<EmployeeProfile> employees = shop.getEmployeeProfiles();
+
+        List<WorkingInfo> shopWorkingInfos = workingInfoRepository.findByProfile(shop);
+        List<Absence> shopAbsences = absenceRepository.findByProfileAndDateRange(shop, dto.getStartDate().atStartOfDay(), dto.getEndDate().atStartOfDay());
+
+        List<Profile> profiles = new ArrayList<>(employees);
+        List<WorkingInfo> employeesWorkingInfos = workingInfoRepository.findByProfileIn(profiles);
+        List<Absence> employeesAbsences = absenceRepository.findByProfileInAndDateRange(profiles, dto.getStartDate().atStartOfDay(), dto.getEndDate().atStartOfDay());
+        List<Reservation> employeesReservations = reservationRepository.findByEmployeeProfileInAndStartDateTimeBetweenUsingFetchJoinMenu(profiles, dto.getStartDate(), dto.getEndDate());
+        Map<Profile, EmployeePeriodScheduleDto> map = new HashMap<>();
+
+        for(EmployeeProfile profile : employees){
+            EmployeePeriodScheduleDto obj = new EmployeePeriodScheduleDto();
+            obj.setEmployeeProfile(EmployeeProfileDto.from(profile));
+            map.put(profile, obj);
+        }
+
+        for(WorkingInfo workingInfo : employeesWorkingInfos){
+            EmployeePeriodScheduleDto obj = map.get(workingInfo.getProfile());
+            obj.getWorkingInfos().add(WorkingInfoDto.from(workingInfo));
+        }
+
+        for(Absence absence : employeesAbsences){
+            EmployeePeriodScheduleDto obj = map.get(absence.getProfile());
+            obj.getAbsences().add(AbsenceDto.from(absence));
+        }
+
+        for(Reservation reservation : employeesReservations){
+            EmployeePeriodScheduleDto obj = map.get(reservation.getEmployeeProfile());
+            obj.getReservations().add(ReservationDto.from(reservation));
+            obj.getMenus().add(MenuDto.from(reservation.getMenu()));
+        }
+
+        List<EmployeePeriodScheduleDto> employeeDtos = new ArrayList<>(map.values());
+
+        ShopPeriodScheduleDto shopDto = ShopPeriodScheduleDto.builder()
+                .reservationInterval(shop.getReservationInterval())
+                .absences(ListUtils.applyFunctionToElements(shopAbsences, AbsenceDto::from))
+                .workingInfos(ListUtils.applyFunctionToElements(shopWorkingInfos, WorkingInfoDto::from))
+                .build();
+
+        return ShopPeriodScheduleWithEmployeesPeriodScheduleDto.of(shopDto, employeeDtos);
+    }
+
+    @Transactional(readOnly = true)
+    public GetShopProfileResultDto getMyProfile(AuthProfileInfo authProfileInfo) {
+        ShopProfile myShopProfile = shopProfileRepository.findByNickname(authProfileInfo.getNickname())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        GetShopProfileResultDto result = shopProfileRepository.getShopProfileResponseByProfileId(myShopProfile.getId())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        result.setRelation(GetShopProfileResultDto.Relation.OWN);
+
+        return result;
+    }
+
+    @Transactional(readOnly = true)
+    public GetShopProfileInfoResultDto getMyProfileInfo(AuthProfileInfo authProfileInfo) {
+        ShopProfile myShopProfile = shopProfileRepository.findByNickname(authProfileInfo.getNickname())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        return GetShopProfileInfoResultDto.builder()
+                .imageSrc(myShopProfile.getImageSrc())
+                .licenseNum(myShopProfile.getLicenseNum())
+                .name(myShopProfile.getName())
+                .phone(myShopProfile.getPhone())
+                .address(myShopProfile.getAddress())
+                .build();
+    }
+
+    @Transactional
+    public void deleteEmployee(DeleteEmployeeDto deleteEmployeeDto) {
+        EmployeeProfile employeeProfile = employeeProfileRepository.findByNickname(deleteEmployeeDto.getEmployeeNickname())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        employeeProfile.changeShop(null);
+    }
+
+    @Transactional
+    public void updateEmployeeRole(UpdateEmployeeRoleDto updateEmployeeRoleDto) {
+        EmployeeProfile employeeProfile = employeeProfileRepository.findByNickname(updateEmployeeRoleDto.getEmployeeNickname())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        ShopProfile shopProfile = shopProfileRepository.findByNickname(updateEmployeeRoleDto.getShopNickname())
+                .orElseThrow(ProfileNotFoundException::new);
+
+        if (!employeeProfile.getShop().getId().equals(shopProfile.getId())) {
+            throw new NotShopEmployeeException();
+        }
+
+        employeeProfile.changeRole(updateEmployeeRoleDto.getRole());
     }
 
     private void resetToken(String nickname, String type, HttpServletResponse response) {
@@ -228,5 +355,6 @@ public class ShopProfileService {
 
         return cookie;
     }
+
 
 }

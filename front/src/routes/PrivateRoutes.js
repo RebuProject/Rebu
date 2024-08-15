@@ -1,5 +1,4 @@
-// src/routes/PrivateRoutes.js
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import ProtectedRoute from "../components/common/ProtectedRoute";
 import MyProfile from "../views/MyProfile";
@@ -21,7 +20,14 @@ import PostFeedPage from "../views/PostFeedPage";
 import ReviewKeywordStat from "../components/review/ReviewKeywordStat";
 import Main from "../views/Main";
 
-const PrivateRoutes = ({ theme, toggleTheme, handleLogout }) => (
+const PrivateRoutes = ({
+  theme,
+  toggleTheme,
+  handleLogout,
+  setNickname,
+  setType,
+  setImageSrc,
+}) => (
   <Routes>
     <Route
       path="/personal-info"
@@ -42,6 +48,9 @@ const PrivateRoutes = ({ theme, toggleTheme, handleLogout }) => (
               theme={theme}
               toggleTheme={toggleTheme}
               handleLogout={handleLogout}
+              setNickname={setNickname}
+              setType={setType}
+              setImageSrc={setImageSrc}
             />
           )}
         />
@@ -79,12 +88,12 @@ const PrivateRoutes = ({ theme, toggleTheme, handleLogout }) => (
       }
     />
     <Route
-      path="/timetable"
+      path="/profile/:nickname/SHOP/timetable"
       element={<ProtectedRoute element={TimeTablePage} />}
     />
     <Route path="/menutab" element={<ProtectedRoute element={MenuTab} />} />
     <Route
-      path="/designertab"
+      path="/reservation/:nickname"
       element={<ProtectedRoute element={DesignerTab} />}
     />
     <Route

@@ -1,7 +1,7 @@
 import * as React from "react";
 import Paper from "@mui/material/Paper";
 import { styled } from "@mui/material/styles";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import moment from "moment";
 import { ViewState } from "@devexpress/dx-react-scheduler";
 import {
@@ -11,11 +11,12 @@ import {
   Toolbar,
   DateNavigator,
 } from "@devexpress/dx-react-scheduler-material-ui";
-
 import "./TimeTable.css";
-
 import "moment/locale/ko"; // 한글 로케일을 가져옵니다.
-import Reservation from "../review/ReservationInfo";
+
+import { BASE_URL } from "../../util/commonFunction";
+import { useParams } from "react-router-dom";
+import axios from "axios";
 
 moment.locale("kr"); // 한글 로케일 설정
 
@@ -54,12 +55,9 @@ const TimeScaleLayout = ({ style, ...restProps }) => (
 
 const currentDate = `${year}-${month}-${day}`;
 
-function addEndDateTime(jsonData) {
-  // 복사본을 생성하여 원본 데이터는 변경하지 않도록 합니다.
-  const updatedData = JSON.parse(JSON.stringify(jsonData));
-
+function addEndDateTime(updatedData) {
   // 예약 배열을 가져옵니다.
-  updatedData.reservation = updatedData.reservation.map((reservation) => {
+  updatedData = updatedData.map((reservation) => {
     const { startDateTime, timeTaken } = reservation;
 
     // startDateTime을 Date 객체로 변환합니다.
@@ -104,22 +102,41 @@ const jsonData = {
   ],
 };
 
-const ShopStartTime = 8;
-const ShopEndTime = 20;
+const ShopStartTime = 9;
+const ShopEndTime = 18;
 
 export default function TimeTable({ designer }) {
   const [date, setDate] = useState(currentDate);
+  const [reservationData, setReservationData] = useState([]);
+  const [shopStartTime, setShopStartTime] = useState();
+  const [shopEndTime, setShopEndTime] = useState();
 
-  // 함수 호출 및 결과 확인
-  const updatedJsonData = addEndDateTime(jsonData);
-  console.log(updatedJsonData);
+  useEffect(() => {
+    if (designer) {
+      axios
+        .get(`${BASE_URL}/api/profiles/employees/${designer}/period-schedule`, {
+          headers: {
+            "Content-Type": "application/json",
+            access: `${localStorage.getItem("access")}`,
+          },
+          params: {
+            "start-date": "2023-08-01",
+            "end-date": "2025-08-30",
+          },
+        })
+        .then((response) => {
+          console.log(response);
+          setReservationData(addEndDateTime(response.data.body.reservations));
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+  }, [designer]);
 
   return (
     <Paper>
-      <Scheduler
-        data={updatedJsonData && updatedJsonData.reservation}
-        locale={"kr-KR"}
-      >
+      <Scheduler data={addEndDateTime(reservationData)} locale={"kr-KR"}>
         <ViewState currentDate={date} onCurrentDateChange={setDate} />
         <WeekView
           startDayHour={ShopStartTime}

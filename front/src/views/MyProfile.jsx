@@ -3,12 +3,15 @@ import axios from "axios";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { useLocation, useParams } from "react-router-dom";
-import { BASE_URL } from "./Signup";
 import {
   getCommonProfile,
   getEmployeeProfile,
   getShopProfile,
+  getCommonMyProfile,
+  getEmployeeMyProfile,
+  getShopMyProfile,
 } from "../features/common/userSlice";
+
 import TabComponent from "../components/MyProfile/MyProfileTab";
 import ProfileImage from "../components/MyProfile/MyProfileImage";
 import ProfileInfo from "../components/MyProfile/MyProfileInfo";
@@ -16,11 +19,12 @@ import Header from "../components/MyProfile/MyProfileHeader";
 import ReviewGrid from "../components/MyProfile/ReviewGrid";
 import ScrapGrid from "../components/MyProfile/ScrapGrid";
 import LikesCard from "../components/MyProfile/LikesCard";
-import TimeTable from "../components/reservation/TimeTable";
+import TimeTable from "../views/TimeTablePage";
 import DesignerGrid from "../components/reservation/DesignerDisplay";
 import ShopTabComponent from "../components/storeProfile/StoreProfileTab";
 import ShopProfileInfo from "../components/storeProfile/StoreProfileInfo";
 import Login from "./Login";
+import { BASE_URL } from "./Signup";
 
 const Wrapper = styled.div`
   background-color: ${(props) =>
@@ -30,31 +34,30 @@ const Wrapper = styled.div`
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  /* max-width: 768px; */
-  margin-bottom: 20px;
+  max-width: 768px;
+  margin-bottom: 70px;
 `;
 
 const ProfileContainer = styled.div`
-  /* max-width: 768px; */
+  max-width: 768px;
   width: 100%;
 `;
 
 const StickyTabContainer = styled.div`
-  position: flex;
-  /* position: ${(props) => (props.isSticky ? "sticky" : "relative")}; */
+  position: ${(props) => (props.isSticky ? "sticky" : "relative")};
   top: ${(props) =>
     props.isSticky ? "0" : "auto"}; // 화면 상단에 고정되도록 설정
   left: 0;
   right: 0;
   width: 100%;
-  /* max-width: 768px; */
+  max-width: 768px;
   transition: all 0.5s ease-in-out;
   background-color: ${(props) =>
     props.theme.value === "light" ? "#ffffff" : props.theme.body};
 `;
 
 const GridContainer = styled.div`
-  /* max-width: 768px; */
+  max-width: 768px;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -70,7 +73,14 @@ const IntroduceBox = styled.div`
   height: 30%;
 `;
 
-const ProfilePage = ({ theme, toggleTheme, handleLogout }) => {
+const ProfilePage = ({
+  theme,
+  toggleTheme,
+  handleLogout,
+  setNickname,
+  setType,
+  setImageSrc,
+}) => {
   const location = useLocation();
   const updatedUser = location.state?.user;
   const updatedProfile = location.state?.profile;
@@ -90,112 +100,92 @@ const ProfilePage = ({ theme, toggleTheme, handleLogout }) => {
   const [loginUser, setLoginUser] = useState([]);
 
   // Redux 상태에서 필요한 정보 가져오기
+<<<<<<< HEAD
   const loginNickname = localStorage.getItem('nickname')
   const loginType = localStorage.getItem('type')
+=======
+  const loginNickname = localStorage.getItem("nickname");
+  const loginType = localStorage.getItem("type");
+
+  const { imageSrc } = useSelector((state) => state.auth);
+>>>>>>> 7b0b644415649d961f9fe3a6ff58eda439eb1740
   const { nickname, type } = useParams(); // URL 파라미터에서 nickname과 type을 추출
+  const { myProfile = "no" } = location.state || {}; // location.state에서 myProfile를 추출 - 없으면 "no"로 설정
   const [profile, setProfile] = useState([]); //profile 조회
   const [error, setError] = useState(null);
 
+<<<<<<< HEAD
   // 다른사람 프로필 조회시 필요한 정보
   // const [tempNickname, setTempNickname] = useState(nickname);
   // const [tempType, setTempType] = useState(type);
   
+=======
+  console.log("MyProfile호출!", nickname, type, imageSrc);
+>>>>>>> 7b0b644415649d961f9fe3a6ff58eda439eb1740
 
   // 타입별 프로필 조회
   useEffect(() => {
-    if (type === "COMMON") {
-      const access = localStorage.getItem("access");
-      axios
-        .get(`${BASE_URL}/api/profiles/${nickname}`, {
-          headers: {
-            access: access,
-            "Content-Type": "application/json",
-          },
-        })
-        .then((response) => {
-          console.log(response.data.body);
-          setProfile(response.data.body);
-        })
-        .catch((err) => {
-          console.log("사용자 프로필 데이터를 찾지 못했습니다");
-        });
-    } else if (type === "SHOP") {
-      const access = localStorage.getItem("access");
-      axios
-        .get(`${BASE_URL}/api/profiles/shops/${nickname}`, {
-          headers: {
-            access: access,
-            "Content-Type": "application/json",
-          },
-        })
-        .then((response) => {
-          console.log(response.data.body);
-          setProfile(response.data.body);
-        })
-        .catch((err) => {
-          console.log("매장 프로필 데이터를 찾지 못했습니다");
-        });
-    } else if (type === "EMPLOYEE") {
-      const access = localStorage.getItem("access");
-      axios
-        .get(`${BASE_URL}/api/profiles/employees/${nickname}`, {
-          headers: {
-            access: access,
-            "Content-Type": "application/json",
-          },
-        })
-        .then((response) => {
-          console.log(response.data.body);
-          setProfile(response.data.body);
-        })
-        .catch((err) => {
-          console.log("직원 프로필 데이터를 찾지 못했습니다");
-        });
-    }
+    const fetchProfile = async () => {
+      try {
+        let response;
+        switch (myProfile) {
+          case "yes": // 본인의 프로필을 조회하는 경우
+            switch (type) {
+              case "COMMON":
+                response = await getCommonMyProfile();
+                break;
+              case "EMPLOYEE":
+                response = await getEmployeeMyProfile();
+                break;
+              case "SHOP":
+                response = await getShopMyProfile();
+                break;
+              default:
+                throw new Error("Invalid profile type");
+            }
+            break; // 'own' case 종료
+          case "no": // 다른 사람의 프로필을 조회하는 경우
+            switch (type) {
+              case "COMMON":
+                response = await getCommonProfile(nickname);
+                break;
+              case "EMPLOYEE":
+                response = await getEmployeeProfile(nickname);
+                break;
+              case "SHOP":
+                response = await getShopProfile(nickname);
+                break;
+              default:
+                throw new Error("Invalid profile type");
+            }
+            break; //'others' case 종료
+
+          default:
+            throw new Error("Invalid owner type");
+        }
+
+        if (response && response.success) {
+          setProfile(response.data);
+          console.log("success", profile);
+        } else {
+          console.log("Failed to load profile");
+          setError("Failed to load profile");
+        }
+      } catch (err) {
+        console.log(err);
+        setError("An error occurred while fetching the profile");
+      }
+    };
+
+    fetchProfile();
   }, [nickname, type]);
+  if (error) {
+    console.log(error);
+  }
 
-  // 타입별 프로필 정보 조회
-  // useEffect(() => {
-  //   const fetchProfile = async () => {
-  //     try {
-  //       let response;
-
-  //       switch (type) {
-  //         case "COMMON":
-  //           response = await getCommonProfile(nickname);
-  //           break;
-  //         case "EMPLOYEE":
-  //           response = await getEmployeeProfile(nickname);
-  //           break;
-  //         case "SHOP":
-  //           response = await getShopProfile(nickname);
-  //           break;
-  //         default:
-  //           throw new Error("Invalid profile type");
-  //       }
-
-  //       if (response.success) {
-  //         setProfile(response.data);
-  //         console.log("success", profile);
-  //       } else {
-  //         console.log("Failed to load profile");
-  //         setError("Failed to load profile");
-  //       }
-  //     } catch (err) {
-  //       setError("An error occurred while fetching the profile");
-  //     }
-  //   };
-
-  //   fetchProfile();
-  // }, [nickname, type]);
-  
-  // if (error) {
-  //   console.log(error);
-  // }
-
-  // if (!profile) {
-  //   console.log("Loading...");
-  // }
+  if (!profile) {
+    console.log("Loading...");
+  }
 
   // 타입별 리뷰 전체 조회
   useEffect(() => {
@@ -265,31 +255,30 @@ const ProfilePage = ({ theme, toggleTheme, handleLogout }) => {
     }
   });
 
-
   // 스크랩 조회
   useEffect(() => {
-    if (type !== 'SHOP') {
-      const access = localStorage.getItem('access');
-      axios.get(`${BASE_URL}/api/feeds`, {
-        params: {
-          scrapedBy: nickname
-        },
-        headers : {
-          "access" : access,
-          "Content-Type": "application/json"
-        }
-      })
-      .then(response => {
-        console.log("스크랩 데이터를 조회했습니다")
-        console.log(response.data.body)
-        setScrapData(response.data.body);
-      })
-      .catch(err => {
-        console.log('스크랩 데이터를 찾지 못했습니다');
-      })
+    if (type !== "SHOP") {
+      const access = localStorage.getItem("access");
+      axios
+        .get(`${BASE_URL}/api/feeds`, {
+          params: {
+            scrapedBy: nickname,
+          },
+          headers: {
+            access: access,
+            "Content-Type": "application/json",
+          },
+        })
+        .then((response) => {
+          console.log("스크랩 데이터를 조회했습니다");
+          console.log(response);
+          setScrapData(response.data.body);
+        })
+        .catch((err) => {
+          console.log("스크랩 데이터를 찾지 못했습니다");
+        });
     }
   }, [profile]);
-
 
   // 매장, 직원 피드(post) 조회
   useEffect(() => {
@@ -357,38 +346,32 @@ const ProfilePage = ({ theme, toggleTheme, handleLogout }) => {
     }
   };
 
-  useEffect(() => {
-    // 스크롤 이벤트 리스너 추가
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      // 스크롤 이벤트 리스너 제거
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []); // 의존성 배열이 비어 있어 처음 마운트될 때만 실행됨
-
-
   //타입별 탭 구분
-useEffect(() => {
-  if (type === "COMMON") {
-    setTabTitle([
-    { name: "Review", content: "Review", count: profile?.reviewCnt},
-    { name: "Scrap", content: "Scrap", count: profile?.scrapCnt},
-    { name: "Likes", content: "Likes", count: profile?.favoritesCnt}
-  ])
-} else if (type === "SHOP") {
-    setTabTitle([
-    { name: "Post", content: "Post", count: profile?.feedCnt},
-    { name: "Review", content: "Review", count: profile?.reviewCnt},
-    { name: "Reservation", content: "Reservation", count: profile?.reservationCnt},
-  ])
-} else if (type === "EMPLOYEE") {
-  setTabTitle([
-    { name: "Post", content: "Post", count: profile?.feedCnt },
-    { name: "Review", content: "Review", count: profile?.reviewCnt},
-    { name: "Scrap", content: "Scrap", count: profile?.scrapCnt},
-  ])
-};
-}, [profile]);
+  useEffect(() => {
+    if (type === "COMMON") {
+      setTabTitle([
+        { name: "Review", content: "Review", count: profile?.reviewCnt },
+        { name: "Scrap", content: "Scrap", count: profile?.scrapCnt },
+        { name: "Likes", content: "Likes", count: profile?.favoritesCnt },
+      ]);
+    } else if (type === "SHOP") {
+      setTabTitle([
+        { name: "Post", content: "Post", count: profile?.feedCnt },
+        { name: "Review", content: "Review", count: profile?.reviewCnt },
+        {
+          name: "Reservation",
+          content: "Reservation",
+          count: profile?.reservationCnt,
+        },
+      ]);
+    } else if (type === "EMPLOYEE") {
+      setTabTitle([
+        { name: "Post", content: "Post", count: profile?.feedCnt },
+        { name: "Review", content: "Review", count: profile?.reviewCnt },
+        { name: "Scrap", content: "Scrap", count: profile?.scrapCnt },
+      ]);
+    }
+  }, [profile]);
 
   const tabName = ["예약현황", "디자이너"];
 
@@ -414,6 +397,7 @@ useEffect(() => {
           Card={scrapdata}
           currentUser={profile}
           loginUser={loginNickname}
+          type={type}
         />
       );
     } else if (content === "Likes") {
@@ -423,7 +407,11 @@ useEffect(() => {
             <LikesCard key={item.id} Card={item} loginUser={loginNickname} />
           ))}
           {likeCard == false && (
+<<<<<<< HEAD
             <h3 style={{color: "#b475f3", fontSize: "18px"}}>
+=======
+            <h3 style={{ color: "#b475f3", fontSize: "18px" }}>
+>>>>>>> 7b0b644415649d961f9fe3a6ff58eda439eb1740
               좋아요한 가게가 없습니다
             </h3>
           )}
@@ -467,6 +455,12 @@ useEffect(() => {
           loginUser={loginNickname}
           handleLogout={handleLogout}
           setProfile={setProfile}
+<<<<<<< HEAD
+=======
+          setNickname={setNickname}
+          setType={setType}
+          setImageSrc={setImageSrc}
+>>>>>>> 7b0b644415649d961f9fe3a6ff58eda439eb1740
         />
         <ProfileContainer>
           <IntroduceBox>

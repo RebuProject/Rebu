@@ -271,6 +271,7 @@ const PostComment = ({ information, posts, setPosts, currentUser, index, feedId 
   // 댓글 등록
   const handleAddComment = (index) => {
     const access = localStorage.getItem('access');
+    const tempId = 1
 
     const newComment = {
       commentId: currentUser.id,
@@ -302,7 +303,7 @@ const PostComment = ({ information, posts, setPosts, currentUser, index, feedId 
       // setNewComments(updatedNewComments);
       setComments((prevComments) =>
         prevComments.map((comment) =>
-          comment.commentId === tempId
+          comment.commentId === index
             ? { ...comment, commentId: response.data.body.commentId }
             : comment
         )

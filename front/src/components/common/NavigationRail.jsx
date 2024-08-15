@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Img from "../../assets/images/img.webp";
 import { CgAddR } from "react-icons/cg";
@@ -9,7 +9,8 @@ import ProfileMedium from "./ProfileMedium";
 import ModalPortal from "../../util/ModalPortal";
 import SearchModal from "../Search/SearchModal";
 import { NavLink, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { BASE_IMG_URL, BASE_URL } from "../../util/commonFunction";
+import apiClient from "../../util/apiClient";
 
 const GridContainer = styled.div`
   display: grid;
@@ -59,36 +60,21 @@ const SearchDiv = styled.div`
   border-radius: 1rem;
 
   color: ${(props) =>
-    props.isModalOpen ? props.theme.primary : "rgb(85, 26, 139)"};
+    props.theme.value === "dark" ? "white" : "rgb(85, 26, 139)"};
   background-color: ${(props) =>
     props.isModalOpen ? props.theme.body : "none"};
 `;
 
-const ProfileNavLink = styled(NavLink)``;
+const ProfileDiv = styled.div`
+  cursor: pointer;
+`;
 
 const ICON_SIZE = 36;
 
-const ProfileNavItem = () => {
-  const navigate = useNavigate();
-
-  const nickname = localStorage.getItem("nickname");
-  const type = localStorage.getItem("type");
-
-  const handleProfileClick = () => {
-    // console.log(`/profile/${nickname}/${type}`);
-    navigate(`/profile/${nickname}/${type}`);
-  };
-
-  return (
-    <div onClick={handleProfileClick}>
-      <ProfileMedium img={Img} time={0} />
-    </div>
-  );
-};
-
-export default function NavigationRail() {
+export default function NavigationRail({ nickname, type, profileImg }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const navigate = useNavigate();
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
@@ -109,12 +95,20 @@ export default function NavigationRail() {
             <IoSearch size={ICON_SIZE} />
           </NavigationItem>
         </SearchDiv>
-        <StyledNavLink isModalOpen={isModalOpen} to="/visited">
+        <StyledNavLink
+          isModalOpen={isModalOpen}
+          to={
+            localStorage.getItem("type") === "SHOP" ||
+            localStorage.getItem("type") === "EMPLOYEE"
+              ? "/postfeed"
+              : "/visited"
+          }
+        >
           <NavigationItem>
             <CgAddR size={ICON_SIZE} />
           </NavigationItem>
         </StyledNavLink>
-        <StyledNavLink isModalOpen={isModalOpen} to="/component">
+        <StyledNavLink isModalOpen={isModalOpen} to="/myreservation">
           <NavigationItem>
             <RiCalendarScheduleLine size={ICON_SIZE} />
           </NavigationItem>
@@ -123,10 +117,18 @@ export default function NavigationRail() {
         <div></div>
         <div></div>
         <div></div>
-        {/* <ProfileNavLink to="/profile">
-          <ProfileMedium img={Img} time={0} />
-        </ProfileNavLink>{" "} */}
-        <ProfileNavItem />
+        <ProfileDiv onClick={() => navigate(`/profile/${nickname}/${type}`)}>
+          <NavigationItem>
+            <ProfileMedium
+              img={
+                profileImg === null || profileImg === "null"
+                  ? Img
+                  : `${BASE_IMG_URL}/${profileImg}`
+              }
+              time={0}
+            />
+          </NavigationItem>
+        </ProfileDiv>
       </Rail>
     </GridContainer>
   );

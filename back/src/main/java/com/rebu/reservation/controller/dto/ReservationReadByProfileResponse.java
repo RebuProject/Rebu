@@ -10,11 +10,10 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class ReservationReadByProfileResponse {
-
     private Long id;
     private LocalDateTime startDateTime;
     private Reservation.ReservationStatus reservationStatus;
-
+    private Boolean isReviewed;
     private EmployeeProfile employee;
     private ShopProfile shop;
     private MenuProfile menu;
@@ -44,10 +43,12 @@ public class ReservationReadByProfileResponse {
     };
 
     public static ReservationReadByProfileResponse from(ReservationByProfileDto dto){
+
         return ReservationReadByProfileResponse.builder()
                 .id(dto.getReservationDto().getId())
                 .startDateTime(dto.getReservationDto().getStartDateTime())
                 .reservationStatus(dto.getReservationDto().getReservationStatus())
+                .isReviewed(dto.getReviewDto() != null)
                 .employee(EmployeeProfile.builder()
                         .nickname(dto.getEmployeeProfileDto().getNickname())
                         .workingName(dto.getEmployeeProfileDto().getWorkingName())

@@ -10,8 +10,6 @@ import ModalPortal from "../../util/ModalPortal";
 import { useNavigate, useParams } from "react-router-dom";
 import { BASE_URL } from "../../util/commonFunction";
 import axios from "axios";
-import apiClient from "../../util/apiClient";
-import nullImg from "../../assets/images/img.webp";
 
 const UpperTabWrapper = styled.div`
   display: flex;
@@ -80,7 +78,8 @@ const ReviewContainer = styled.span`
 `;
 
 const DesignerPhoto = styled.img`
-  width: 100%;
+  width: 125px;
+  height: 125px;
   max-width: 150px;
   border-radius: 50rem;
 `;
@@ -130,8 +129,13 @@ export default function DesignerDisplay() {
   // const nickname = localStorage.getItem("nickname");
 
   useEffect(() => {
-    apiClient
-      .get(`${BASE_URL}/api/profiles/shops/${nickname}/employees`)
+    axios
+      .get(`${BASE_URL}/api/profiles/shops/${nickname}/employees`, {
+        headers: {
+          "Content-Type": "application/json",
+          access: `${localStorage.getItem("access")}`,
+        },
+      })
       .then((response) => {
         console.log(response);
         setDesigners(response.data.body);
@@ -239,9 +243,8 @@ export default function DesignerDisplay() {
                 시술 보기
               </MenuLink>
               <ReviewContainer
-                onClick={() => 
-                  navigate(`/profile/${item.nickname}/EMPLOYEE`)
-                }>
+                onClick={() => navigate(`/profile/${item.nickname}/EMPLOYEE`)}
+              >
                 방문자 리뷰 {item.reviewCnt}개
               </ReviewContainer>
             </DesignerContent>

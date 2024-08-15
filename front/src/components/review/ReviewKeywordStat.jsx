@@ -120,8 +120,6 @@ export default function ReviewKeywordStat({ reviewNum, nickname }) {
   const [data, setData] = useState([]);
 
   const BASE_URL = "https://www.rebu.kro.kr";
-  console.log(data)
-  
   useEffect(() => {
     axios
       .get(`${BASE_URL}/api/review-keywords/count?nickname=${nickname}`, {
@@ -167,7 +165,9 @@ export default function ReviewKeywordStat({ reviewNum, nickname }) {
       {data && data.length > 0 ? (
         data.map((item) => (
           <StatBar key={item.content}>
-            <StatIcon src={process.env.PUBLIC_URL + "/keyword/" + item.imgURL} />
+            <StatIcon
+              src={process.env.PUBLIC_URL + "/keyword/" + item.imgURL}
+            />
             <KeywordText>{item.keyword}</KeywordText>
             <StatNum>{item.count}</StatNum>
             <InsideBar percent={item.percent}></InsideBar>
