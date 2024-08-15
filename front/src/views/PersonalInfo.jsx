@@ -11,7 +11,7 @@ import { PersonalInfoEmployee } from "../components/MyProfile/PersonalInfoEmploy
 import { PersonalInfoShop } from "../components/MyProfile/PersonalInfoShop";
 import { BASE_IMG_URL } from "../util/commonFunction";
 import { useSelector } from "react-redux";
-
+const profileImageSrc = "/img.webp";
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -187,6 +187,7 @@ export const PersonalInfo = () => {
   const [profileImg, setProfileImg] = useState(
     useSelector((state) => state.auth.imageSrc)
   );
+  console.log("프로필이미지", imageSrc, profileImg);
 
   const handleBackClick = () => {
     //뒤로가기 버튼
@@ -218,14 +219,23 @@ export const PersonalInfo = () => {
         <HeaderText>개인정보 확인</HeaderText>
       </Header>
       <ProfileImageWrapper>
-        <ProfileImage
+        {/* <ProfileImage
           src={
             profileImg === null || profileImg === "null"
               ? defaultImg
               : profileImg
           }
           alt="Profile"
-        ></ProfileImage>
+        ></ProfileImage> */}
+
+        <ProfileImage
+          src={
+            imageSrc
+              ? `https://www.rebu.kro.kr/data${imageSrc}`
+              : profileImageSrc
+          }
+          alt="Profile"
+        />
 
         <ImgUpload
           onClick={() => document.getElementById("fileInput").click()}

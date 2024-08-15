@@ -387,3 +387,34 @@ export const verifyPassword = async (nickname, password) => {
 };
 
 
+// 비밀번호 변경 API
+export const updatePassword = async (password) => {
+  const access = localStorage.getItem("access");
+  try {
+    // Send the collected data to the server
+    const response = await axios.patch(
+      `${BASE_URL}/api/members/${email}/password`,
+      { 'password': password },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'access': access,
+        },
+      }
+    );
+    console.log("비밀번호 재설정:", response);
+    if (response.data.code === "1B02") {
+      //비밀번호 변경 성공 코드
+      // Handle successful password reset (e.g., redirect to login page)
+      alert("비밀번호 변경 성공");
+      console.log("비밀번호 변경 성공", password);
+      navigate("/main");
+    } else {
+      alert("비밀번호 변경 실패. 다시 시도해주세요.");
+      console.log("비밀번호 변경 실패: ", response.data.code);
+    }
+  } catch (error) {
+    console.error("Password reset error:", error);
+    // Handle password reset error
+  }
+}
