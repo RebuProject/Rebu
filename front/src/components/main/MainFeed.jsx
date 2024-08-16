@@ -346,6 +346,8 @@ const PostDetail = ({
   const dropdownRefs = useRef([]);
   console.log(posts);
 
+
+  
   // 전체 피드 조회
   useEffect(() => {
     const access = localStorage.getItem("access");

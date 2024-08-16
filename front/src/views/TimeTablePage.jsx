@@ -59,12 +59,14 @@ const ButtonLabel = styled.label`
   border: 1px solid #666666;
   padding: 0.2rem;
   border-radius: 0.5rem;
+  
 `;
 
 const ButtonContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: start;
+  align-items: center;
 `;
 
 const TimeTableWrapper = styled.div`

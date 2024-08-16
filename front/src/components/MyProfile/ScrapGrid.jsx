@@ -45,7 +45,7 @@ const Photo = styled.img`
   object-fit: cover;
 `;
 
-function GridComponent({ Card, currentUser, loginUser }) {
+function GridComponent({ Card, currentUser, loginUser, type }) {
   const [layouts, setLayouts] = useState({ lg: [], md: [] });
   const containerRef = useRef(null);
   const [rowHeight, setRowHeight] = useState(150);
@@ -94,7 +94,7 @@ function GridComponent({ Card, currentUser, loginUser }) {
 
   return (
     <>
-      {isPrivate ? (
+      {isPrivate && currentUser.nickname !== loginUser && type !== "EMPLOYEE"? (
         <PrivateContainer>
           <LockImg />
           <LockText>비공개 항목입니다</LockText>

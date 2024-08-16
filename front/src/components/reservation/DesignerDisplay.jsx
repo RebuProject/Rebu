@@ -9,6 +9,7 @@ import AlertDeleteDesigner from "./AlertDeleteDesigner";
 import ModalPortal from "../../util/ModalPortal";
 import { useNavigate, useParams } from "react-router-dom";
 import { BASE_URL } from "../../util/commonFunction";
+import Header from "../common/Header";
 import axios from "axios";
 
 const UpperTabWrapper = styled.div`

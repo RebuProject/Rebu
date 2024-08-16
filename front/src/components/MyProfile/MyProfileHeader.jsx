@@ -103,13 +103,10 @@ const Header = ({
   currentUser,
   loginUser,
   handleLogout,
-<<<<<<< HEAD
-  setProfile
-=======
+  setProfile,
   setNickname,
   setType,
   setImageSrc,
->>>>>>> 7b0b644415649d961f9fe3a6ff58eda439eb1740
 }) => {
   const [LogoutModalOpen, setLogoutModalOpen] = useState(false);
   const [SecretModalOpen, setSecretModalOpen] = useState(false);

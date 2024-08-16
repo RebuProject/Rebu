@@ -135,6 +135,7 @@ const Rating = styled.div`
 `;
 
 const Ratingtext = styled.span`
+  font-size: 15px;
   color: ${(props) =>
     props.theme.value === "light" ? "#777777" : "#ffffff"};
 `;
@@ -146,23 +147,11 @@ const ButtonWrapper = styled.div`
 `;
 
 
-export default function VisitedCard({ Card, loginUser }) {
+export default function VisitedCard({ Card, loginUser, rating }) {
   const navigate = useNavigate();
-  const [shopdata, setShopData] = useState([]);
-
-  useEffect(() => {
-    fetch('/mockdata/shopdata.json')
-      .then(res => res.json())
-      .then((data) => {
-        setShopData(data.body);
-      })      
-  }, []);
 
   const handleShopNameClick = (nickname) => {
-    const shopProfile = shopdata.find(shop => shop.nickname === nickname);
-    if (shopProfile) {
-      navigate('/store-profile', { state: { shop: shopProfile, user: loginUser } });
-    }
+    navigate(`/profile/${nickname}/SHOP`);
   };
 
   const button = {
@@ -175,7 +164,7 @@ export default function VisitedCard({ Card, loginUser }) {
     <Wrapper>
       <GridContainer>
         <PhotoSection>
-          <Photo src={Card.imageSrc} />
+          <Photo src={"https://www.rebu.kro.kr/data/" + Card.imageSrc} />
         </PhotoSection>
         <Content>
           <TitleWrapper>
@@ -185,7 +174,7 @@ export default function VisitedCard({ Card, loginUser }) {
             </TitleText>
             <Rating>
               <FaRegStar />&nbsp;
-              <Ratingtext>{Card.ratingAvg}</Ratingtext>
+              <Ratingtext>{rating}</Ratingtext>
             </Rating>
           </TitleWrapper>
           <IntroWrapper>{Card.introduction}</IntroWrapper>

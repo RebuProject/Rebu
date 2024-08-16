@@ -168,12 +168,9 @@ const InfoComponent = ({ currentUser, loginUser, rating }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newIntroduce, setNewIntroduce] = useState(currentUser.introduction);
   const [tempIntroduce, setTempIntroduce] = useState(currentUser.introduction);
-  const [isLikes, setIsLikes] = useState(currentUser.isfavorite);
+  const [isLikes, setIsLikes] = useState(currentUser.isFavorite);
+  console.log(currentUser)
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 7b0b644415649d961f9fe3a6ff58eda439eb1740
   useEffect(() => {
     setNewIntroduce(currentUser.introduction);
     setTempIntroduce(currentUser.introduction);
@@ -245,14 +242,9 @@ const InfoComponent = ({ currentUser, loginUser, rating }) => {
 
       const headers = {
         "Content-Type": "application/json",
-<<<<<<< HEAD
-        "access" : access
-      }
-=======
         access: access,
       };
 
->>>>>>> 7b0b644415649d961f9fe3a6ff58eda439eb1740
       // PATCH 요청 보내기
       const response = await axios.patch(
         url,
@@ -262,15 +254,6 @@ const InfoComponent = ({ currentUser, loginUser, rating }) => {
         { headers }
       );
 
-<<<<<<< HEAD
-        console.log('소개글이 성공적으로 수정되었습니다:', response.data);
-      } catch (error) {
-        console.error('소개글 수정에 실패했습니다:', error);
-      }
-      setNewIntroduce(tempIntroduce)
-      closeModal();
-    };
-=======
       // 성공 시 추가로 처리할 작업이 있다면 여기에 작성
       console.log("소개글이 성공적으로 수정되었습니다:", response.data);
     } catch (error) {
@@ -280,7 +263,6 @@ const InfoComponent = ({ currentUser, loginUser, rating }) => {
     setNewIntroduce(tempIntroduce);
     closeModal();
   };
->>>>>>> 7b0b644415649d961f9fe3a6ff58eda439eb1740
 
   return (
     <InfoBox>

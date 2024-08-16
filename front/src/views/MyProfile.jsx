@@ -23,6 +23,7 @@ import TimeTable from "../views/TimeTablePage";
 import DesignerGrid from "../components/reservation/DesignerDisplay";
 import ShopTabComponent from "../components/storeProfile/StoreProfileTab";
 import ShopProfileInfo from "../components/storeProfile/StoreProfileInfo";
+import MenuDisplay from "../components/reservation/MenuDisPlay";
 import Login from "./Login";
 import { BASE_URL } from "./Signup";
 
@@ -100,28 +101,16 @@ const ProfilePage = ({
   const [loginUser, setLoginUser] = useState([]);
 
   // Redux 상태에서 필요한 정보 가져오기
-<<<<<<< HEAD
-  const loginNickname = localStorage.getItem('nickname')
-  const loginType = localStorage.getItem('type')
-=======
   const loginNickname = localStorage.getItem("nickname");
   const loginType = localStorage.getItem("type");
 
   const { imageSrc } = useSelector((state) => state.auth);
->>>>>>> 7b0b644415649d961f9fe3a6ff58eda439eb1740
   const { nickname, type } = useParams(); // URL 파라미터에서 nickname과 type을 추출
   const { myProfile = "no" } = location.state || {}; // location.state에서 myProfile를 추출 - 없으면 "no"로 설정
   const [profile, setProfile] = useState([]); //profile 조회
   const [error, setError] = useState(null);
 
-<<<<<<< HEAD
-  // 다른사람 프로필 조회시 필요한 정보
-  // const [tempNickname, setTempNickname] = useState(nickname);
-  // const [tempType, setTempType] = useState(type);
-  
-=======
   console.log("MyProfile호출!", nickname, type, imageSrc);
->>>>>>> 7b0b644415649d961f9fe3a6ff58eda439eb1740
 
   // 타입별 프로필 조회
   useEffect(() => {
@@ -403,15 +392,11 @@ const ProfilePage = ({
     } else if (content === "Likes") {
       return (
         <>
-          {likeCard.map((item) => (
-            <LikesCard key={item.id} Card={item} loginUser={loginNickname} />
+          {likeCard?.map((item) => (
+            <LikesCard key={item.id} Card={item} loginUser={loginNickname} rating={ratingAvg}/>
           ))}
           {likeCard == false && (
-<<<<<<< HEAD
-            <h3 style={{color: "#b475f3", fontSize: "18px"}}>
-=======
             <h3 style={{ color: "#b475f3", fontSize: "18px" }}>
->>>>>>> 7b0b644415649d961f9fe3a6ff58eda439eb1740
               좋아요한 가게가 없습니다
             </h3>
           )}
@@ -431,7 +416,7 @@ const ProfilePage = ({
       );
     } else if (content === "Reservation") {
       return activeSubTab === "예약현황" ? <TimeTable /> : <DesignerGrid />;
-    }
+    } 
   };
 
   const handleSubTabChange = (tab) => {
@@ -455,12 +440,9 @@ const ProfilePage = ({
           loginUser={loginNickname}
           handleLogout={handleLogout}
           setProfile={setProfile}
-<<<<<<< HEAD
-=======
           setNickname={setNickname}
           setType={setType}
           setImageSrc={setImageSrc}
->>>>>>> 7b0b644415649d961f9fe3a6ff58eda439eb1740
         />
         <ProfileContainer>
           <IntroduceBox>

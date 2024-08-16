@@ -168,6 +168,9 @@ const NotificationModal = ({ closeModal, loginUser }) => {
           {alarm.alarmType === "FOLLOW" && (
             <span><strong>{alarm.senderNickname}</strong>님이 회원님을 팔로우하기 시작했습니다.</span>
           )}
+          {alarm.alarmType === "RESERVATION_RESPONSE" && (
+            <span><strong>{alarm.senderNickname}</strong>님이 예약을 취소하였습니다.</span>
+          )}
           </NotificationItem>
           // <NotificationItem key={index}>
           //   <NotificationTime>{notification.time}</NotificationTime>

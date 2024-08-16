@@ -85,7 +85,7 @@ const LogoText = styled.div`
   bottom: 57%;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 70px;
+  font-size: 60px;
   font-weight: bold;
   color: #be88f4;
   -webkit-text-stroke: 1px #be88f4; /* 검은색 테두리 추가 */

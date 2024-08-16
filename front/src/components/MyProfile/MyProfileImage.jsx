@@ -165,7 +165,7 @@ const CloseButton = styled.button`
 
 const FollowButton = styled.button`
   margin-top: 10px;
-  width: ${(props) => (props.following === "FOLLOWING" ? "120px" : "90px")};
+  width: ${(props) => (props.following === "FOLLOWING" ? "100px" : "100px")};
   height: 40px;
   background-color: ${(props) =>
     props.following === "FOLLOWING" ? "#f4ebfd" : "#b475f3"};
