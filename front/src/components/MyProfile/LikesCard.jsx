@@ -93,9 +93,7 @@ const TitleText = styled.div`
   }
 `;
 
-const ShopName = styled.span`
-  
-`;
+const ShopName = styled.span``;
 
 const IntroWrapper = styled.div`
   padding-top: 10px;
@@ -136,8 +134,7 @@ const Rating = styled.div`
 
 const Ratingtext = styled.span`
   font-size: 15px;
-  color: ${(props) =>
-    props.theme.value === "light" ? "#777777" : "#ffffff"};
+  color: ${(props) => (props.theme.value === "light" ? "#777777" : "#ffffff")};
 `;
 
 const ButtonWrapper = styled.div`
@@ -145,7 +142,6 @@ const ButtonWrapper = styled.div`
   justify-content: flex-end;
   padding-top: 0.5rem;
 `;
-
 
 export default function VisitedCard({ Card, loginUser, rating }) {
   const navigate = useNavigate();
@@ -155,11 +151,13 @@ export default function VisitedCard({ Card, loginUser, rating }) {
   };
 
   const button = {
-    onClick: () => {navigate("/designertab")},
+    onClick: () => {
+      navigate(`/reservation/${Card.nickname}`);
+    },
     title: "예약하기",
     highlight: true,
   };
-  
+
   return (
     <Wrapper>
       <GridContainer>
@@ -173,7 +171,8 @@ export default function VisitedCard({ Card, loginUser, rating }) {
               <HiOutlineChevronRight></HiOutlineChevronRight>
             </TitleText>
             <Rating>
-              <FaRegStar />&nbsp;
+              <FaRegStar />
+              &nbsp;
               <Ratingtext>{rating}</Ratingtext>
             </Rating>
           </TitleWrapper>
@@ -181,28 +180,23 @@ export default function VisitedCard({ Card, loginUser, rating }) {
         </Content>
       </GridContainer>
       <IntroContainer>
-        
-            <TabItem>
-              <Count>{Card.feedCnt}</Count>
-              <TabName>Post</TabName>
-            </TabItem>
-            <TabItem>
-              <Count>{Card.reviewCnt}</Count>
-              <TabName>Reviews</TabName>
-            </TabItem>
-            <TabItem>
-              <Count>{Card.reservationCnt}</Count>
-              <TabName>Reservaion</TabName>
-            </TabItem>
-          
-       
-     
-            <ButtonWrapper>
-              <ButtonSmall button={button}></ButtonSmall>
-            </ButtonWrapper>
-       
+        <TabItem>
+          <Count>{Card.feedCnt}</Count>
+          <TabName>Post</TabName>
+        </TabItem>
+        <TabItem>
+          <Count>{Card.reviewCnt}</Count>
+          <TabName>Reviews</TabName>
+        </TabItem>
+        <TabItem>
+          <Count>{Card.reservationCnt}</Count>
+          <TabName>Reservaion</TabName>
+        </TabItem>
+
+        <ButtonWrapper>
+          <ButtonSmall button={button}></ButtonSmall>
+        </ButtonWrapper>
       </IntroContainer>
-      
     </Wrapper>
   );
 }

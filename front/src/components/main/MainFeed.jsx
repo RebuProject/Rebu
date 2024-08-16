@@ -339,43 +339,51 @@ const PostDetail = ({
   const [isCommnetActive, setIsCommentActive] = useState(
     Array(information?.length).fill(false)
   );
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState(
+    information.map((post) => ({ ...post, currentIndex: 0 }))
+  );
   const [expandedComments, setExpandedComments] = useState(
     Array(information?.length).fill(false)
   );
   const dropdownRefs = useRef([]);
   console.log(posts);
 
+  function getFeed() {
+    const access = localStorage.getItem("access");
+    axios
+      .get(`${BASE_URL}/api/feeds`, {
+        params: {
+          lat: currentLocation.latitude,
+          lng: currentLocation.longitude,
+          distance: distance,
+          category: category,
+          period: period,
+          sortedLike: sortedLike,
+        },
+        headers: {
+          access: access,
+          "Content-Type": "application/json",
+        },
+      })
+      .then((response) => {
+        console.log(response);
+        console.log("피드 데이터를 조회했습니다");
+        console.log(response.data.body);
+        setFeed(response.data.body);
+      })
+      .catch((err) => {
+        console.log("피드 데이터를 찾지 못했습니다");
+      });
+  }
 
-  
   // 전체 피드 조회
   useEffect(() => {
-    const access = localStorage.getItem("access");
-    if (currentLocation.longitude) {
-      axios
-        .get(`${BASE_URL}/api/feeds`, {
-          params: {
-            lat: currentLocation.latitude,
-            lng: currentLocation.longitude,
-            distance: distance,
-            category: category,
-            period: period,
-            sortedLike: sortedLike,
-          },
-          headers: {
-            access: access,
-            "Content-Type": "application/json",
-          },
-        })
-        .then((response) => {
-          console.log(response);
-          console.log("피드 데이터를 조회했습니다");
-          console.log(response.data.body);
-          setFeed(response.data.body);
-        })
-        .catch((err) => {
-          console.log("피드 데이터를 찾지 못했습니다");
-        });
+    if (!currentLocation.longitude) {
+      setTimeout(() => {
+        getFeed();
+      }, 350);
+    } else {
+      getFeed();
     }
   }, [currentLocation, feedKey]);
 
@@ -603,7 +611,7 @@ const PostDetail = ({
                   </IconBox>
                 ) : (
                   <IconBox onClick={() => handleScrapToggle(index)}>
-                    {item.feed.isScraped ? <FaBookmark /> : <FaRegBookmark />}
+                    {item.isScraped ? <FaBookmark /> : <FaRegBookmark />}
                   </IconBox>
                 )}
                 <DropdownMenu
@@ -702,7 +710,7 @@ const PostDetail = ({
                 <Rating>
                   <FaRegStar />
                   &nbsp;
-                  <RatingText>{item.feed.rating}</RatingText>
+                  <RatingText>{item.feed.rating / 2}</RatingText>
                 </Rating>
               ) : null}
             </PostActions>

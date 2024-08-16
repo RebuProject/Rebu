@@ -169,7 +169,7 @@ const InfoComponent = ({ currentUser, loginUser, rating }) => {
   const [newIntroduce, setNewIntroduce] = useState(currentUser.introduction);
   const [tempIntroduce, setTempIntroduce] = useState(currentUser.introduction);
   const [isLikes, setIsLikes] = useState(currentUser.isFavorite);
-  console.log(currentUser)
+  console.log(currentUser);
 
   useEffect(() => {
     setNewIntroduce(currentUser.introduction);
@@ -232,7 +232,6 @@ const InfoComponent = ({ currentUser, loginUser, rating }) => {
         });
     }
   }, [isLikes, currentUser.nickname]);
-
 
   const saveIntroduce = async () => {
     try {

@@ -73,6 +73,9 @@ const TimeTableWrapper = styled.div`
   overflow-x: hidden;
 `;
 
+const ButtonWrapper = styled.div`
+  position: relative;
+`;
 export default function TimeTablePage() {
   const [designers, setDesigners] = useState([]);
   const [selectedDesigner, setSelectedDesigner] = useState(null);
@@ -100,19 +103,21 @@ export default function TimeTablePage() {
   return (
     <>
       <ButtonContainer>
-        {nickname !== localStorage.getItem("nickname") &&
-          localStorage.getItem("type") === "COMMON" && (
-            <ButtonSmall
-              button={{
-                id: 1,
-                title: "예약하기",
-                onClick: () => {
-                  navigate(`/reservation/${nickname}`);
-                },
-                highlight: "true",
-              }}
-            />
-          )}
+        <ButtonWrapper>
+          {nickname !== localStorage.getItem("nickname") &&
+            localStorage.getItem("type") === "COMMON" && (
+              <ButtonSmall
+                button={{
+                  id: 1,
+                  title: "예약하기",
+                  onClick: () => {
+                    navigate(`/reservation/${nickname}`);
+                  },
+                  highlight: "true",
+                }}
+              />
+            )}
+        </ButtonWrapper>
         {designers.map((item, index) => (
           <ButtonBigContainer key={index}>
             <ButtonInput

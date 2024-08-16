@@ -11,6 +11,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { BASE_URL } from "../../util/commonFunction";
 import Header from "../common/Header";
 import axios from "axios";
+import Header from "../common/Header";
 
 const UpperTabWrapper = styled.div`
   display: flex;
@@ -127,7 +128,6 @@ export default function DesignerDisplay() {
 
   //매장 프로필의 닉네임
   const { nickname, type } = useParams();
-  // const nickname = localStorage.getItem("nickname");
 
   useEffect(() => {
     axios
@@ -176,7 +176,9 @@ export default function DesignerDisplay() {
 
   function handleAddDesigner() {
     setIsModalOpen(true);
-    setModalContent(<InviteDesigner setIsModalOpen={setIsModalOpen} />);
+    setModalContent(
+      <InviteDesigner shopNickname={nickname} setIsModalOpen={setIsModalOpen} />
+    );
   }
 
   function handleDeleteDesigner() {
@@ -203,6 +205,7 @@ export default function DesignerDisplay() {
           {modalContent}
         </ModalNoBackNoExit>
       </ModalPortal>
+      <Header title={"시술 메뉴"} />
       <UpperTabWrapper>
         <Switch isMan={isMale === "MALE"} toggleHandler={toggleHandler} />
         {(localStorage.getItem("type") === "DESIGNER" ||

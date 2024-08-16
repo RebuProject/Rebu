@@ -5,7 +5,12 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { AiTwotonePlusCircle } from "react-icons/ai";
 import { updateProfileImage } from "../features/common/userSlice";
 import { PersonalInfoCommon } from "../components/MyProfile/PersonalInfoCommon";
+import defaultImg from "../assets/images/img.webp";
 // import { useSelector } from "react-redux";
+import { PersonalInfoEmployee } from "../components/MyProfile/PersonalInfoEmployee";
+import { PersonalInfoShop } from "../components/MyProfile/PersonalInfoShop";
+import { BASE_IMG_URL } from "../util/commonFunction";
+import { useSelector } from "react-redux";
 
 export const Container = styled.div`
   display: flex;
@@ -179,7 +184,9 @@ export const PersonalInfo = () => {
   const type = localStorage.getItem("type");
   const imageSrc = localStorage.getItem("imageSrc");
   console.log("imageSrc", imageSrc);
-  const [profileImg, setProfileImg] = useState(imageSrc);
+  const [profileImg, setProfileImg] = useState(
+    useSelector((state) => state.auth.imageSrc)
+  );
 
   const handleBackClick = () => {
     //뒤로가기 버튼
@@ -211,11 +218,15 @@ export const PersonalInfo = () => {
         <HeaderText>개인정보 확인</HeaderText>
       </Header>
       <ProfileImageWrapper>
-        {/* <ProfileImage src={profileImg} alt="Profile" /> */}
         <ProfileImage
-          src={profileImg ? profileImg : "/img.webp"}
+          src={
+            profileImg === null || profileImg === "null"
+              ? defaultImg
+              : profileImg
+          }
           alt="Profile"
-        />
+        ></ProfileImage>
+
         <ImgUpload
           onClick={() => document.getElementById("fileInput").click()}
         />
@@ -237,7 +248,11 @@ export const PersonalInfo = () => {
         </UserRole>
       </UserInfo>
       {/* type이 "COMMON"일 때만 PersonalInfoCommon을 렌더링 */}
-      {type === "COMMON" && <PersonalInfoCommon />}{" "}
+      <div>
+        {type === "COMMON" && <PersonalInfoCommon />}{" "}
+        {type === "EMPLOYEE" && <PersonalInfoEmployee />}{" "}
+        {type === "SHOP" && <PersonalInfoShop />}
+      </div>
     </Container>
   );
 };

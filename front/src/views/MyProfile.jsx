@@ -238,7 +238,7 @@ const ProfilePage = ({
       );
       const averageRating =
         reviewdata.length > 0
-          ? (totalRating / reviewdata.length).toFixed(1)
+          ? (totalRating / reviewdata.length / 2).toFixed(1)
           : 0;
       setRatingAvg(averageRating);
     }
@@ -393,7 +393,12 @@ const ProfilePage = ({
       return (
         <>
           {likeCard?.map((item) => (
-            <LikesCard key={item.id} Card={item} loginUser={loginNickname} rating={ratingAvg}/>
+            <LikesCard
+              key={item.id}
+              Card={item}
+              loginUser={loginNickname}
+              rating={ratingAvg}
+            />
           ))}
           {likeCard == false && (
             <h3 style={{ color: "#b475f3", fontSize: "18px" }}>

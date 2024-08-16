@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import styled from "styled-components";
 import { Responsive, WidthProvider } from "react-grid-layout";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 import PostDetail from "../post/PostDetail";
 import { CiLock } from "react-icons/ci";
 
@@ -28,7 +28,7 @@ const PrivateContainer = styled.div`
   flex-direction: column;
   align-items: center;
   margin-top: 60px;
-`
+`;
 
 const LockImg = styled(CiLock)`
   width: 120px;
@@ -101,36 +101,49 @@ function GridComponent({ Card, currentUser, loginUser, type }) {
         </PrivateContainer>
       ) : (
         <>
-        {Card == false && (
-          <h3 style={{color: "#b475f3", fontSize: "18px"}}>
-            스크랩한 게시글이 없습니다
-          </h3>
-        )}
-        {selectedPhotos ? (
-          <PostDetail information={selectedPhotos} currentUser={currentUser} loginUser={loginUser} type={type} />
-        ) : (
-          <GridContainer ref={containerRef}>
-            <ResponsiveGridLayout
-              layouts={layouts}
-              breakpoints={{ lg: 768, md: 425 }}
-              cols={{ lg: 3, md: 3 }}
-              rowHeight={rowHeight}
-              width={containerRef.current ? containerRef.current.clientWidth : 768}
-              isDraggable={false}
-              isResizable={false}
-            >
-              {Card.map((item, index) => (
-                <GridItem
-                  key={`photo-${index}`}
-                  data-grid={layouts.lg[index]}
-                  onClick={() => handlePhotoClick(index)}
-                >
-                <Photo src={"https://www.rebu.kro.kr/data/" + item.feed?.imageSrcs[0]} alt={`uploaded-${index}`} />
-                </GridItem>
-              ))}
-            </ResponsiveGridLayout>
-          </GridContainer>
-        )}
+          {Card == false && (
+            <h3 style={{ color: "#b475f3", fontSize: "18px" }}>
+              스크랩한 게시글이 없습니다
+            </h3>
+          )}
+          {selectedPhotos ? (
+            <PostDetail
+              information={selectedPhotos}
+              currentUser={currentUser}
+              loginUser={loginUser}
+              type={type}
+            />
+          ) : (
+            <GridContainer ref={containerRef}>
+              <ResponsiveGridLayout
+                layouts={layouts}
+                breakpoints={{ lg: 768, md: 425 }}
+                cols={{ lg: 3, md: 3 }}
+                rowHeight={rowHeight}
+                width={
+                  containerRef.current ? containerRef.current.clientWidth : 768
+                }
+                isDraggable={false}
+                isResizable={false}
+              >
+                {Card.map((item, index) => (
+                  <GridItem
+                    key={`photo-${index}`}
+                    data-grid={layouts.lg[index]}
+                    onClick={() => handlePhotoClick(index)}
+                  >
+                    <Photo
+                      src={
+                        "https://www.rebu.kro.kr/data/" +
+                        item.feed?.imageSrcs[0]
+                      }
+                      alt={`uploaded-${index}`}
+                    />
+                  </GridItem>
+                ))}
+              </ResponsiveGridLayout>
+            </GridContainer>
+          )}
         </>
       )}
     </>

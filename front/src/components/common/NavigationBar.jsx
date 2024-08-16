@@ -42,10 +42,8 @@ const SearchDiv = styled.div`
   transition: background-color 0.3s ease-in-out;
   border-radius: 1rem;
 
-  &.active {
-    color: ${(props) => props.theme.primary};
-  }
-
+  color: ${(props) =>
+    props.theme.value === "dark" ? "white" : "rgb(85, 26, 139)"};
   background-color: ${(props) =>
     props.isModalOpen ? props.theme.body : "none"};
 `;
@@ -95,7 +93,13 @@ export default function NavigationBar({ nickname, type, profileImg }) {
             <RiCalendarScheduleLine size={ICON_SIZE} />
           </NavigationItem>
         </StyledNavLink>
-        <StyledNavLink to={`/profile/${nickname}/${type}`}>
+        {/* <StyledNavLink to={`/profile/${nickname}/${type}`}> */}
+        <StyledNavLink
+          to={{
+            pathname: `/profile/${nickname}/${type}`,
+            state: { myProfile: "yes" }, // isMyProfile=yes 전달
+          }}
+        >
           <NavigationItem>
             <ProfileSmall
               img={
