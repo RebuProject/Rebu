@@ -222,7 +222,7 @@ export const PersonalInfo = () => {
           src={
             profileImg === null || profileImg === "null"
               ? defaultImg
-              : profileImg
+              : "https://www.rebu.kro.kr/data/" + profileImg
           }
           alt="Profile"
         ></ProfileImage>
