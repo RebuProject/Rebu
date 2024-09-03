@@ -20,7 +20,7 @@ REBU는 리뷰/예약 기반 SNS 플랫폼으로 고객은 리뷰를 직관적�
 
 |         <img src="https://github.com/yuseung0429.png" width="150">          |   <img src="https://github.com/hyeon8571.png" width="150">   |    <img src="https://github.com/Kimjongdeok11.png" width="150">     | <img src="https://github.com/altys31.png" width="150">  |   <img src="https://github.com/dbe0717.png" width="150">    |       <img src="https://github.com/Roh-Jinseo.png" width="150">       |
 | :----------------------------------------------------------------------: | :---------------------------------------------------------: | :---------------------------------------------------------------: | :---------------------------------------------------: | :-----------------------------------------------------------: | :-----------------------------------------------------------------: |
-| [이유승<br>@yuseung0429](https://github.com/yuseung0429)<br/>`BE`<br/>`Leader` | [원승현<br>@hyeon8571](https://github.com/hyeon8571)<br/>`BE` | [김종덕<br>@Kimjongdeok11](https://github.com/Kimjongdeok11)<br/>`BE` | [양규현<br>@altys31](https://github.com/altys31)<br/>`FE` `FE Tech Leader` | [윤지원<br>@dbe0717](https://github.com/dbe0717)<br/>`FE` | [노진서<br>@Roh-Jinseo](https://github.com/Roh-Jinseo)<br/>`FE` |
+| [이유승<br>@yuseung0429](https://github.com/yuseung0429)<br/>`BE`<br/>`Leader` | [원승현<br>@hyeon8571](https://github.com/hyeon8571)<br/>`BE` | [김종덕<br>@Kimjongdeok11](https://github.com/Kimjongdeok11)<br/>`BE` | [양규현<br>@altys31](https://github.com/altys31)<br/>`FE` <br/>`FE Tech Leader` | [윤지원<br>@dbe0717](https://github.com/dbe0717)<br/>`FE` | [노진서<br>@Roh-Jinseo](https://github.com/Roh-Jinseo)<br/>`FE` |
 
 <br>
 
