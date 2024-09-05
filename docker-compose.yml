@@ -1,7 +1,7 @@
 services:
-  mysql:
+  rebu_mysql:
     image: mysql
-    container_name: mysql_container
+    container_name: rebu_mysql_container
     environment:
       - MYSQL_DATABASE=rebu
       - MYSQL_ROOT_HOST=%
@@ -10,35 +10,35 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - /home/ubuntu/data/db/mysql:/var/lib/mysql
+      - ~/rebu/database/mysql:/var/lib/mysql
     networks:
       - internal_network
-  
-  redis:
+
+  rebu_redis:
     image: redis
-    container_name: redis_container
+    container_name: rebu_redis_container
     ports:
       - "6379:6379"
     networks:
       - internal_network
 
-  spring:
+  rebu_spring:
     build: ./back
     restart: always
     ports:
       - "8080:8080"
     depends_on:
-      - mysql
-      - redis
-    container_name: spring_container
+      - rebu_mysql
+      - rebu_redis
+    container_name: rebu_spring_container
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/rebu?useSSL=false&serverTimezone=UTC&useLegacyDatetimeCode=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_URL: jdbc:mysql://rebu_mysql:3306/rebu?useSSL=false&serverTimezone=UTC&useLegacyDatetimeCode=false&allowPublicKeyRetrieval=true
     networks:
       - internal_network
-      
-  jenkins:
+
+  rebu_jenkins:
     image: jenkins/jenkins:jdk17
-    container_name: jenkins-container
+    container_name: rebu_jenkins-container
     restart: always
     ports:
       - "7070:7070"
@@ -46,9 +46,9 @@ services:
     environment:
       - JENKINS_OPTS=--httpPort=7070 --prefix=/jenkins
     volumes:
-      - /home/ubuntu/data/jenkins:/var/jenkins_home
+      - ~/rebu/deploy/jenkins:/var/jenkins_home
     networks:
       - internal_network
-      
+
 networks:
   internal_network:
