@@ -7,6 +7,7 @@ import com.rebu.auth.sevice.LicenseNumAuthService;
 import com.rebu.auth.sevice.MailAuthService;
 import com.rebu.auth.sevice.PasswordAuthService;
 import com.rebu.auth.sevice.PhoneAuthService;
+import com.rebu.common.constants.RedisSessionConstants;
 import com.rebu.common.controller.dto.ApiResponse;
 import com.rebu.security.dto.AuthProfileInfo;
 import jakarta.servlet.http.HttpSession;
@@ -34,7 +35,7 @@ public class AuthController {
                                             @Valid @RequestBody PasswordSendRequest passwordSendRequest,
                                             HttpSession session) {
         passwordAuthService.verifyPassword(passwordSendRequest.toDto(authDto.getNickname(), authDto.getPassword()));
-        session.setAttribute("AuthPassword:" + passwordSendRequest.getPurpose(), authDto.getNickname());
+        session.setAttribute(RedisSessionConstants.AUTH_PASSWORD + passwordSendRequest.getPurpose(), authDto.getNickname());
         return ResponseEntity.ok(new ApiResponse<>("1A00", null));
     }
 
@@ -48,7 +49,7 @@ public class AuthController {
     public ResponseEntity<?> verifyMail(@Valid @RequestBody MailAuthDto mailAuthDto,
                                         HttpSession session) {
         mailAuthService.verifyEmailCode(mailAuthDto);
-        session.setAttribute("AuthEmail:" + mailAuthDto.getPurpose(), mailAuthDto.getEmail());
+        session.setAttribute(RedisSessionConstants.AUTH_EMAIL + mailAuthDto.getPurpose(), mailAuthDto.getEmail());
         return ResponseEntity.ok(new ApiResponse<>("1A02", null));
     }
 
@@ -62,7 +63,7 @@ public class AuthController {
     public ResponseEntity<?> verifyMessage(@Valid @RequestBody PhoneAuthDto phoneAuthDto,
                                            HttpSession session) {
         phoneAuthService.verifyMessageCode(phoneAuthDto);
-        session.setAttribute("AuthPhone:" + phoneAuthDto.getPurpose(), phoneAuthDto.getPhone());
+        session.setAttribute(RedisSessionConstants.AUTH_PHONE + phoneAuthDto.getPurpose(), phoneAuthDto.getPhone());
         return ResponseEntity.ok(new ApiResponse<>("1A04", null));
     }
 
@@ -71,7 +72,7 @@ public class AuthController {
                                               @Valid @RequestBody LicenseNumSendRequest licenseNumSendRequest,
                                               HttpSession session) {
         LicenseNumSendResponse result = licenseNumAuthService.verifyLicenceNum(licenseNumSendRequest.toDto(authProfileInfo.getNickname()));
-        session.setAttribute("AuthLicenseNum:" + licenseNumSendRequest.getPurpose(), licenseNumSendRequest.getLicenseNum());
+        session.setAttribute(RedisSessionConstants.AUTH_LICENSE_NUM + licenseNumSendRequest.getPurpose(), licenseNumSendRequest.getLicenseNum());
         return ResponseEntity.ok(new ApiResponse<>("1A05", result));
     }
 
