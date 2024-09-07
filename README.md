@@ -1,4 +1,4 @@
-# <img width="30" align="center" src="https://github.com/user-attachments/assets/4fd4dc80-de87-439a-a297-4a32bbdd3f4c"> REBU
+# <img width="30" align="center" src="https://github.com/user-attachments/assets/f8d234d5-cfe0-4502-82fe-9faef94534b9"> REBU
 
 <p align="center">
   <img width="100%" src="https://github.com/user-attachments/assets/d0b26443-1d1c-4ced-bda8-52e356b50b40" alt="Description">
@@ -90,9 +90,9 @@ REBU는 리뷰/예약 기반 SNS 플랫폼으로 고객은 리뷰를 직관적�
 <br>
 
 
-## <img align="center" width="50" src="https://github.com/user-attachments/assets/471435b6-e345-414d-b6eb-2fb11de1eb8f"> 시스템 아키텍처
+## <img align="center" width="50" src="https://github.com/user-attachments/assets/ef4495a4-3cfc-4b93-9857-2968d6fb395c"> 시스템 아키텍처
 <p align="center">
-  <img width="80%" src="https://github.com/user-attachments/assets/123c0ae6-44ea-4abe-aa29-078e3b1e2e84"> 
+  <img width="80%" src="https://github.com/user-attachments/assets/7942911b-1f57-432e-bf19-367bc1a71084"> 
 </p>
 
 - **Jenkins**: CI/CD 구축
